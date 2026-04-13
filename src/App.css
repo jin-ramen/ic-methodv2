@@ -1,11 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=GFS+Didot&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=GFS+Didot&display=swap');
 
 @theme {
   --font-didot: "GFS Didot", serif;
-  --animate-bg-intro: fadeIn 0.8s ease-out forwards, slideDown 0.6s ease-in 4s forwards;
-  --animate-shape-intro: shapeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-text-intro: textIn 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --font-cormorant: "Cormorant Garamond", serif;
+  --font-playfair: "Playfair Display", serif;
+
+  --color-wood-bg: #1C1210;
+  --color-wood-primary: #4A2E1F;
+  --color-wood-accent: #6B432E;
+  --color-wood-dark: #3A2015;
+  --color-wood-text: #FFEDE8;
+  --color-wood-light: #D4B59E;
+  --animate-bg-intro: fadeIn 1s ease-out forwards, slideDown 1s ease-in 4s forwards;
+  --animate-shape-intro: shapeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-text-intro: textIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
   @keyframes textIn {
     0%   { opacity: 0; transform: translateY(100px); }
