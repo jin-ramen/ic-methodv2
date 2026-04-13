@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=GFS+Didot&display=swap');
+
+@theme {
+  --font-didot: "GFS Didot", serif;
+  --animate-bg-intro: fadeIn 0.8s ease-out forwards, slideDown 0.6s ease-in 4s forwards;
+  --animate-shape-intro: shapeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-text-intro: textIn 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes textIn {
+    0%   { opacity: 0; transform: translateY(100px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes shapeIn {
+    0%   { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 0.85; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(60px); }
+  }
+}
