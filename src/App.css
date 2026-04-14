@@ -1,6 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=GFS+Didot&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import "tailwindcss";
 
+.wood-texture {
+  background: url('/wood-grain.svg') center top / 400px 800px repeat;
+  background-attachment: fixed;
+}
+
+@layer ultilities {
+  .hamburger-toggle {
+    @apply [&>div]:h-0 [&>div]:bg-white [&>div]:before:translate-y-0 [&>div]:before:rotate-45 [&>div]:after:translate-y-0 [&>div]:after:-rotate-45;
+  }
+
+  .insta-icon {
+    fill: black;
+    transition: fill 0.3s ease;
+  }
+  a:hover .insta-icon {
+    fill: url(#instaGrad);
+  }
+
+  .rednote-icon {
+    fill: black;
+    transition: fill 0.3s ease;
+  }
+  a:hover .rednote-icon {
+    fill: #ff2842;
+  }
+}
+
 @theme {
   --font-didot: "GFS Didot", serif;
   --font-cormorant: "Cormorant Garamond", serif;
@@ -11,10 +38,12 @@
   --color-wood-accent: #6B432E;
   --color-wood-dark: #3A2015;
   --color-wood-text: #FFEDE8;
-  --color-wood-light: #D4B59E;
+  --color-wood-light: #e3ddcf;
+
   --animate-bg-intro: fadeIn 1s ease-out forwards, slideDown 1s ease-in 4s forwards;
   --animate-shape-intro: shapeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-text-intro: textIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fadeIn 0.5s ease-in forwards;
 
   @keyframes textIn {
     0%   { opacity: 0; transform: translateY(100px); }

@@ -1,8 +1,15 @@
-function IntroAnimation() {
+import { useState, useEffect } from 'react'
+
+function IntroAnimation({ onComplete }: { onComplete: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 5500);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
   return (
     <div className="fixed inset-0 z-50 w-screen h-screen bg-wood-bg animate-bg-intro overflow-hidden">
       {/* Simplified symmetric reformer shape — right side */}
-      <div className="animate-shape-intro [animation-delay:1000ms] absolute w-[130vh] h-[100vh] top-1/2 left-[40%] -translate-y-1/2 opacity-0 flex items-center">
+      <div className="animate-shape-intro [animation-delay:1000ms] absolute w-[70vh] h-[100vw] top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 rotate-90 md:w-[60vw] md:h-[100vw] md:top-1/2 md:left-[40%] md:-translate-y-1/2 md:translate-x-0 md:rotate-0 opacity-0 flex items-center">
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 650 500" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Frame — outer rectangle */}
           <rect x="30" y="30" width="590" height="440" rx="12" stroke="var(--color-wood-primary)" strokeWidth="6" />
@@ -28,14 +35,14 @@ function IntroAnimation() {
           <rect x="580" y="220" width="25" height="60" rx="6" fill="var(--color-wood-dark)" />
         </svg>
         {/* Text inside the reformer */}
-        <p className="animate-text-intro [animation-delay:1750ms] font-cormorant text-wood-text text-2xl italic tracking-widest opacity-0 z-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <p className="animate-text-intro [animation-delay:1750ms] font-cormorant text-wood-text text-2xl italic tracking-widest opacity-0 z-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 md:rotate-0">
           PILATES&nbsp;&bull;&nbsp;BARRE
         </p>
       </div>
 
       {/* Title text on the left side */}
-      <div className="absolute top-1/2 left-[5%] -translate-y-1/2">
-        <h1 className="font-cormorant animate-text-intro [animation-delay:1750ms] text-wood-text text-4xl opacity-0">
+      <div className="absolute top-[12%] left-1/2 -translate-x-1/2 md:top-1/2 md:left-[10%] md:-translate-y-1/2 md:translate-x-0">
+        <h1 className="font-cormorant animate-text-intro [animation-delay:1750ms] text-wood-text text-2xl opacity-0">
           IC METHOD.
         </h1>
       </div>
@@ -44,9 +51,15 @@ function IntroAnimation() {
 }
 
 export default function Landing() {
+  const [showIntro, setShowIntro] = useState(1)
   return (
     <>
-      <IntroAnimation />
+      {showIntro ? <IntroAnimation onComplete={ () => setShowIntro(0) } /> : null}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45vw] md:w-[30vw] lg:w-[20vw]">
+        <p className="opacity-0 animate-text-intro [animation-delay:5500ms] text-[clamp(0.9rem,1.3vw,1.3rem)] text-center font-playfair">
+          In a vast ocean where dreams roar louder than cannon fire, One Piece follows Monkey D. Luffy, a rubber-bodied boy chasing the legendary treasure of Gol D. Roger. With his crew by his side, each island becomes a tale of laughter, loss, and unbreakable bonds, as Luffy sails not just to become Pirate King, but to live freely in a world without limits.
+        </p>
+      </div>
     </>
   )
 }
