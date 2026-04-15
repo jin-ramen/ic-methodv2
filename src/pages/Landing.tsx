@@ -53,17 +53,17 @@ function IntroAnimation({ onComplete }: { onComplete: () => void }) {
 }
 
 export default function Landing() {
-  const [showIntro, setShowIntro] = useState(1)
+  const [showIntro, setShowIntro] = useState(() => sessionStorage.getItem('introSeen') ? 0 : 1)
   
 
   return (
-    <>
-      {showIntro ? <IntroAnimation onComplete={ () => setShowIntro(0) } /> : null}
+    <div className="relative landing-page">
+      {showIntro ? <IntroAnimation onComplete={ () => { sessionStorage.setItem('introSeen', '1'); setShowIntro(0) } } /> : null}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45vw] md:w-[30vw] lg:w-[20vw]">
-        <p className="opacity-0 animate-text-intro [animation-delay:5500ms] text-[clamp(0.9rem,1.3vw,1.3rem)] text-center font-playfair text-wood-dark">
+        <p className={`opacity-0 animate-text-intro text-[clamp(0.9rem,1.3vw,1.3rem)] text-center font-playfair text-wood-dark ${showIntro ? '[animation-delay:5500ms]' : '[animation-delay:0ms]'}`}>
           In a vast ocean where dreams roar louder than cannon fire, One Piece follows Monkey D. Luffy, a rubber-bodied boy chasing the legendary treasure of Gol D. Roger. With his crew by his side, each island becomes a tale of laughter, loss, and unbreakable bonds, as Luffy sails not just to become Pirate King, but to live freely in a world without limits.
         </p>
       </div>
-    </>
+    </div>
   )
 }
