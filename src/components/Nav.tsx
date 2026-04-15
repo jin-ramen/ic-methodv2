@@ -20,19 +20,19 @@ export default function Nav() {
     }, []);     
 
     return (
-        <nav className="relative z-50 flex justify-between items-center px-5 py-5 md:block md:fixed md:inset-0 opacity-0 animate-fade-in [animation-delay:5000ms]">
+        <>
             {/* Logo */}
-            <div className="z-50 md:absolute md:bottom-10 md:right-10 text-wood-accent">
+            <div className="z-50 absolute top-5 left-5 md:top-auto md:left-auto md:bottom-10 md:right-10 text-wood-accent">
                 <p>Logo</p>
             </div>
             {/* Name */}
-            <div className="z-50 md:absolute md:top-10 md:left-10">
+            <div className="z-50 absolute top-5 left-[50%] -translate-x-1/2 md:translate-x-0 md:top-10 md:left-10">
                 <h1 className="font-cormorant text-3xl md:text-4xl text-wood-accent">
                     IC Method.
                 </h1>
             </div>
             {/* Meny Bar */}
-            <div id="toggleMenu" onClick={handleClick} className={`p:4 md:hidden z-50 ${isOpen ? 'hamburger-toggle' : ''}`}>
+            <div id="toggleMenu" onClick={handleClick} className={`p:4 absolute top-9 right-5 md:hidden z-50 ${isOpen ? 'hamburger-toggle' : ''}`}>
                 <div className="w-4 h-0.5 rounded-full bg-wood-accent
                                     before:content-[''] before:absolute before:w-4 before:h-0.5 before:rounded-full before:-translate-y-1.5 before:bg-wood-accent
                                     before:transition-all before:duration-150
@@ -81,6 +81,6 @@ export default function Nav() {
                     </svg>
                 </a>
             </div>
-      </nav>
+        </>
     )
 }
