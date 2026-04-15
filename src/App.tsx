@@ -7,7 +7,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-wood-light">
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Header />
         <Routes>
           <Route path="/" element={<Landing />} />

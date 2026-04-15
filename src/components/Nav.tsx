@@ -42,7 +42,7 @@ export default function Nav() {
             </div>
             {/* Links (Mobile View) */}
             <div className={`fixed inset-0 z-40 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="flex flex-col wood-texture items-center justify-center h-full gap-5">
+                <div className="flex flex-col bg-wood-light items-center justify-center h-full gap-5">
                     <Link to="/" className={`font-didot text-wood-accent text-xl tracking-widest transition-all duration-500 ease-in-out md:opacity-100 ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>About</Link>
                     <Link to="/people" className={`font-didot text-wood-accent text-xl tracking-widest transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>People</Link>
                     <Link to="/studio" className={`font-didot text-wood-accent text-xl tracking-widest transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>Studio</Link>

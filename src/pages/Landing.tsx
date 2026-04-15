@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react'
 function IntroAnimation({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onComplete, 5500);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer)
+    };
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 w-screen h-screen bg-wood-bg animate-bg-intro overflow-hidden">
+    <div className="fixed inset-0 z-50  bg-wood-bg animate-bg-intro overflow-hidden">
       {/* Simplified symmetric reformer shape — right side */}
       <div className="animate-shape-intro [animation-delay:1000ms] absolute w-[70vh] h-[100vw] top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 rotate-90 md:w-[60vw] md:h-[100vw] md:top-1/2 md:left-[40%] md:-translate-y-1/2 md:translate-x-0 md:rotate-0 opacity-0 flex items-center">
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 650 500" fill="none" xmlns="http://www.w3.org/2000/svg">

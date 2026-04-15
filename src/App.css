@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=GFS+Didot&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import "tailwindcss";
 
+html, body {
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
 .wood-texture {
   background: url('/wood-grain.svg') center top / 400px 800px repeat;
   background-attachment: fixed;
