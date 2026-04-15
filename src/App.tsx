@@ -1,13 +1,15 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Header from './components/Nav'
+import Nav from './components/Nav'
+import Waves from './components/Waves'
 import Landing from './pages/Landing'
 
 function App() {
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <Header />
+      <Nav />
+      <Waves />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/people" element={<Landing />} />
