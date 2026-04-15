@@ -26,6 +26,16 @@ html, body {
   a:hover .rednote-icon {
     fill: #ff2842;
   }
+
+  .arc-breathe {
+    animation: breathe 8s ease-in-out infinite, drift 20s ease-in-out infinite;
+  }
+  .arc-breathe-slow {
+    animation: breathe 10s ease-in-out infinite 2s, driftReverse 25s ease-in-out infinite;
+  }
+  .arc-breathe-fast {
+    animation: breathe 6s ease-in-out infinite 4s, drift 18s ease-in-out infinite 3s;
+  }
 }
 
 @theme {
@@ -44,24 +54,50 @@ html, body {
   --animate-shape-intro: shapeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-text-intro: textIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-fade-in: fadeIn 0.5s ease-in forwards;
-
-  @keyframes textIn {
-    0%   { opacity: 0; transform: translateY(100px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeIn {
-    0%   { opacity: 0; }
-    100% { opacity: 1; }
-  }
-
-  @keyframes shapeIn {
-    0%   { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 0.85; transform: translateY(0); }
-  }
-
-  @keyframes slideDown {
-    0%   { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(60px); }
-  }
+  --animate-breathe: breathe 8s ease-in-out infinite;
+  --animate-breatheslow: breathe 10s ease-in-out infinite;
+  --animate-breathefast: breathe 6s ease-in-out infinite;
 }
+
+@keyframes textIn {
+  0%   { opacity: 0; transform: translateY(100px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes shapeIn {
+  0%   { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 0.85; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(60px); }
+}
+
+@keyframes breathe {
+  0%   { opacity: 0.15; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 0.15; }
+}
+
+@keyframes drift {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(8px, -5px); }
+  50%  { transform: translate(-3px, -10px); }
+  75%  { transform: translate(-8px, -3px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+@keyframes driftReverse {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(-6px, 4px); }
+  50%  { transform: translate(5px, 8px); }
+  75%  { transform: translate(7px, -4px); }
+  100% { transform: translate(0px, 0px); }
+}
+
