@@ -51,7 +51,7 @@ html, body {
   --color-wood-light: #e3ddcf;
 
   --animate-bg-intro: fadeIn 1s ease-out forwards, slideDown 1s ease-in 4s forwards;
-  --animate-shape-intro: shapeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-shape-intro: shapeIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-text-intro: textIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-fade-in: fadeIn 0.5s ease-in forwards;
   --animate-breathe: breathe 8s ease-in-out infinite;

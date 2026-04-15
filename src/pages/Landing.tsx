@@ -54,9 +54,9 @@ function IntroAnimation({ onComplete }: { onComplete: () => void }) {
 
 export default function Landing() {
   const [showIntro, setShowIntro] = useState(1)
-  const layer1 = useRef<SVGSVGElement>(null)
-  const layer2 = useRef<SVGSVGElement>(null)
-  const layer3 = useRef<SVGSVGElement>(null)
+  const layer1 = useRef<HTMLDivElement>(null)
+  const layer2 = useRef<HTMLDivElement>(null)
+  const layer3 = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Mouse response (desktop)
@@ -89,33 +89,39 @@ export default function Landing() {
     <>
       {showIntro ? <IntroAnimation onComplete={ () => setShowIntro(0) } /> : null}
       {/* Background arcs — 3 layers for parallax depth */}
-      <svg ref={layer1} className="fixed inset-0 w-full h-full pointer-events-none transition-transform duration-300 ease-out" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M -10,85 Q 30,20 110,50"
-          fill="none"
-          stroke="var(--color-wood-accent)"
-          strokeWidth="0.3"
-          className="arc-breathe"
-        />
-      </svg>
-      <svg ref={layer2} className="fixed inset-0 w-full h-full pointer-events-none transition-transform duration-300 ease-out" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M -10,60 Q 50,10 110,70"
-          fill="none"
-          stroke="var(--color-wood-primary)"
-          strokeWidth="0.2"
-          className="arc-breathe-slow"
-        />
-      </svg>
-      <svg ref={layer3} className="fixed inset-0 w-full h-full pointer-events-none transition-transform duration-300 ease-out" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M -10,40 Q 70,90 110,25"
-          fill="none"
-          stroke="var(--color-wood-accent)"
-          strokeWidth="0.15"
-          className="arc-breathe-fast"
-        />
-      </svg>
+      <div ref={layer1} className="fixed inset-0 pointer-events-none transition-transform duration-300 ease-out">
+        <svg className="opacity-0 animate-shape-intro [animation-delay:5250ms] w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M -10,85 Q 30,20 110,50"
+            fill="none"
+            stroke="var(--color-wood-accent)"
+            strokeWidth="0.3"
+            className="arc-breathe"
+          />
+        </svg>
+      </div>
+      <div ref={layer2} className="fixed inset-0 pointer-events-none transition-transform duration-300 ease-out">
+        <svg className="opacity-0 animate-shape-intro [animation-delay:5250ms] w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M -10,60 Q 50,10 110,70"
+            fill="none"
+            stroke="var(--color-wood-primary)"
+            strokeWidth="0.2"
+            className="arc-breathe-slow"
+          />
+        </svg>
+      </div>
+      <div ref={layer3} className="fixed inset-0 pointer-events-none transition-transform duration-300 ease-out">
+        <svg className="opacity-0 animate-shape-intro [animation-delay:5250ms] w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M -10,40 Q 70,90 110,25"
+            fill="none"
+            stroke="var(--color-wood-accent)"
+            strokeWidth="0.15"
+            className="arc-breathe-fast"
+          />
+        </svg>
+      </div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45vw] md:w-[30vw] lg:w-[20vw]">
         <p className="opacity-0 animate-text-intro [animation-delay:5500ms] text-[clamp(0.9rem,1.3vw,1.3rem)] text-center font-playfair">
           In a vast ocean where dreams roar louder than cannon fire, One Piece follows Monkey D. Luffy, a rubber-bodied boy chasing the legendary treasure of Gol D. Roger. With his crew by his side, each island becomes a tale of laughter, loss, and unbreakable bonds, as Luffy sails not just to become Pirate King, but to live freely in a world without limits.

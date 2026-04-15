@@ -21,9 +21,9 @@ export default function Nav() {
 
     return (
         <nav className="fixed inset-0 opacity-0 z-50 animate-text-intro [animation-delay:5000ms]">
-            {/* Logo */}
-            <div className="z-50 absolute top-5 left-5 md:fixed md:top-auto md:left-auto md:bottom-10 md:right-10 text-wood-accent">
-                <p>Logo</p>
+            {/* Address */}
+            <div className="font-didot z-50 absolute bottom-5 right-5 text-right text-[clamp(0.8rem,1.3vw,1.2rem)] md:fixed md:top-auto md:left-auto md:bottom-10 md:right-10 text-wood-accent">
+                <p><span className="md:inline">Level 1/434 Burwood Rd,</span><br className="md:hidden" /><span className="md:inline"> Hawthorn VIC 3122</span></p>
             </div>
             {/* Name */}
             <div className="z-50 absolute top-5 left-[50%] -translate-x-1/2 md:translate-x-0 md:top-10 md:left-10">
@@ -55,7 +55,7 @@ export default function Nav() {
                     <Link to="/studio" className="font-didot text-wood-accent text-x">Studio</Link>
             </div>
             {/* Links (Socials) */}
-            <div className="flex absolute bottom-5 left-5 md:bottom-10 md:left-10 flex-row gap-6">
+            <div className="flex z-50 absolute bottom-5 left-5 md:bottom-10 md:left-10 flex-row gap-6">
                 <a href="https://www.instagram.com/icmethod_official/" target="_blank" className="group">
                     <svg className="w-6 h-6" viewBox="3 3 26 26" xmlns="http://www.w3.org/2000/svg">
                         <defs>
