@@ -22,7 +22,7 @@ export default function Nav() {
     return (
         <nav className="fixed inset-0 opacity-0 z-50 animate-text-intro [animation-delay:5000ms]">
             {/* Logo */}
-            <div className="z-50 absolute top-5 left-5 md:top-auto md:left-auto md:bottom-10 md:right-10 text-wood-accent">
+            <div className="z-50 absolute top-5 left-5 md:fixed md:top-auto md:left-auto md:bottom-10 md:right-10 text-wood-accent">
                 <p>Logo</p>
             </div>
             {/* Name */}
