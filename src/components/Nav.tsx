@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-export function Header() {
+export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -25,7 +25,7 @@ export function Header() {
 
     return (
         <>
-            <header className="relative z-50 opacity-0 animate-text-intro [animation-delay:5000ms] px-5 py-5 md:px-10 md:py-10">
+            <header className={`relative z-50 px-5 py-5 md:px-10 md:py-10 ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
                 <div className="flex items-center justify-between">
                     {/* Name */}
                     <h1 className="font-cormorant text-3xl md:text-4xl text-wood-accent">
@@ -60,9 +60,9 @@ export function Header() {
     )
 }
 
-export function Footer() {
+export function Footer({ shouldAnimate }: { shouldAnimate: boolean }) {
     return (
-        <footer className="relative z-50 opacity-0 animate-text-intro [animation-delay:5000ms] px-5 py-5 md:px-10 md:py-10 flex justify-between items-end">
+        <footer className={`relative z-50 px-5 py-5 md:px-10 md:py-10 flex justify-between items-end ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
             {/* Socials */}
             <div className="flex flex-row gap-6">
                 <a href="https://www.instagram.com/icmethod_official/" target="_blank" className="group">

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export default function Background() {
+export default function Background({ shouldAnimate }: { shouldAnimate: boolean }) {
     const layer1 = useRef<HTMLDivElement>(null)
     const layer2 = useRef<HTMLDivElement>(null)
     const layer3 = useRef<HTMLDivElement>(null)
@@ -35,7 +35,7 @@ export default function Background() {
     return (
         <>
             <div ref={layer1} className="fixed inset-0 pointer-events-none transition-transform duration-300 ease-out">
-                <svg className="opacity-0 animate-shape-intro [animation-delay:5250ms] w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <svg className={`w-full h-full ${shouldAnimate ? 'opacity-0 animate-shape-intro [animation-delay:5250ms]' : ''}`} viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M -10,40 Q 40,30 110,60"
                         fill="none"
@@ -46,7 +46,7 @@ export default function Background() {
                 </svg>
             </div>
             <div ref={layer2} className="fixed inset-0 pointer-events-none transition-transform duration-300 ease-out">
-                <svg className="opacity-0 animate-shape-intro [animation-delay:5250ms] w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <svg className={`w-full h-full ${shouldAnimate ? 'opacity-0 animate-shape-intro [animation-delay:5250ms]' : ''}`} viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M -10,50 Q 50,10 110,40"
                         fill="none"
@@ -57,7 +57,7 @@ export default function Background() {
                 </svg>
             </div>
             <div ref={layer3} className="fixed inset-0 pointer-events-none transition-transform duration-300 ease-out">
-                <svg className="opacity-0 animate-shape-intro [animation-delay:5250ms] w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <svg className={`w-full h-full ${shouldAnimate ? 'opacity-0 animate-shape-intro [animation-delay:5250ms]' : ''}`} viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M -10,60 Q 70,90 110,45"
                         fill="none"
