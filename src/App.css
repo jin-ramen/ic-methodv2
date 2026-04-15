@@ -12,7 +12,7 @@ html, body {
   }
 
   .insta-icon {
-    fill: black;
+    fill: var(--color-wood-accent);
     transition: fill 0.3s ease;
   }
   a:hover .insta-icon {
@@ -20,7 +20,7 @@ html, body {
   }
 
   .rednote-icon {
-    fill: black;
+    fill: var(--color-wood-accent);
     transition: fill 0.3s ease;
   }
   a:hover .rednote-icon {
