@@ -1,5 +1,5 @@
 import './App.css'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Header, Footer } from './components/Nav'
 import Waves from './components/Waves'
@@ -7,12 +7,13 @@ import Landing from './pages/Landing'
 import People from './pages/People'
 
 function App() {
-  const shouldAnimate = useRef(!sessionStorage.getItem('introSeen')).current
-  const [showIntro, setShowIntro] = useState(shouldAnimate ? 1 : 0)
+  const [shouldAnimate, setShouldAnimate] = useState(
+    !sessionStorage.getItem('introSeen')
+  )
 
   const handleIntroComplete = () => {
     sessionStorage.setItem('introSeen', '1')
-    setShowIntro(0)
+    setShouldAnimate(false)
   }
 
   return (
@@ -22,7 +23,7 @@ function App() {
         <Waves shouldAnimate={shouldAnimate} />
         <main className="flex-1 flex flex-col">
           <Routes>
-            <Route path="/" element={<Landing showIntro={showIntro} onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate} />} />
+            <Route path="/" element={<Landing onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate} />} />
             <Route path="/people" element={<People />} />
           </Routes>
         </main>

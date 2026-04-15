@@ -62,7 +62,7 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
 
 export function Footer({ shouldAnimate }: { shouldAnimate: boolean }) {
     return (
-        <footer className={`relative z-50 px-5 py-5 md:px-10 md:py-10 flex justify-between items-end ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
+        <footer className={`relative z-40 px-5 py-5 md:px-10 md:py-10 flex justify-between items-end ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
             {/* Socials */}
             <div className="flex flex-row gap-6">
                 <a href="https://www.instagram.com/icmethod_official/" target="_blank" className="group">

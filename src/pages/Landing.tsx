@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 function IntroAnimation({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
-    const timer = setTimeout(onComplete, 5500);
+    const timer = setTimeout(onComplete, 8000);
     return () => {
       clearTimeout(timer)
     };
