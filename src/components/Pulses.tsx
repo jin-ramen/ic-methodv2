@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export default function Background({ shouldAnimate }: { shouldAnimate: boolean }) {
+export default function Pulse({ shouldAnimate }: { shouldAnimate: boolean }) {
     const layer1 = useRef<HTMLDivElement>(null)
     const layer2 = useRef<HTMLDivElement>(null)
     const layer3 = useRef<HTMLDivElement>(null)

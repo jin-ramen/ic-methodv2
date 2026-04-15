@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 
-function IntroAnimation({ onComplete }: { onComplete: () => void }) {
+function IntroAnimation({ onIntroComplete }: { onIntroComplete: () => void }) {
   useEffect(() => {
-    const timer = setTimeout(onComplete, 8000);
+    const timer = setTimeout(onIntroComplete, 8000);
     return () => {
       clearTimeout(timer)
     };
-  }, [onComplete]);
+  }, [onIntroComplete]);
 
   return (
     <div className="fixed inset-0 z-50  bg-wood-bg animate-bg-intro overflow-hidden">
@@ -62,7 +62,7 @@ export default function Landing({ shouldAnimate, onIntroComplete }: { shouldAnim
 
   return (
     <div className="flex-1 flex items-center justify-center">
-      {shouldAnimate ? <IntroAnimation onComplete={onIntroComplete} /> : null}
+      {shouldAnimate && <IntroAnimation onIntroComplete={onIntroComplete} />}
       <div className="w-[45vw] md:w-[30vw] lg:w-[20vw]">
         <p className={`opacity-0 animate-text-intro text-[clamp(0.9rem,1.3vw,1.3rem)] text-center font-playfair text-wood-dark ${shouldAnimate ? '[animation-delay:5500ms]' : '[animation-delay:0ms]'}`}>
           In a vast ocean where dreams roar louder than cannon fire, One Piece follows Monkey D. Luffy, a rubber-bodied boy chasing the legendary treasure of Gol D. Roger. With his crew by his side, each island becomes a tale of laughter, loss, and unbreakable bonds, as Luffy sails not just to become Pirate King, but to live freely in a world without limits.
