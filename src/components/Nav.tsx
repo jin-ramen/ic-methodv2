@@ -19,6 +19,10 @@ export function Header() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    useEffect(() => {
+        document.body.style.overflow = isOpen ? 'hidden' : ''
+    }, [isOpen]);
+
     return (
         <>
             <header className="relative z-50 opacity-0 animate-text-intro [animation-delay:5000ms] px-5 py-5 md:px-10 md:py-10">
