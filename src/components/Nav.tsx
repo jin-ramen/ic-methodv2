@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function Nav() {
+export function Header() {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -9,37 +9,41 @@ export default function Nav() {
         setIsOpen(!isOpen);
     };
 
-    useEffect(() => {                                                                                                                                                                                                               
+    useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth >= 768) {                                                                                                                                                                                         
-                setIsOpen(false);                                                                                                                                                                                                 
-            }                                                                                                                                                                                                                       
+            if (window.innerWidth >= 768) {
+                setIsOpen(false);
+            }
         };
-        window.addEventListener('resize', handleResize);                                                                                                                                                                            
+        window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, []);     
+    }, []);
 
     return (
-        <nav className="fixed inset-0 opacity-0 z-50 animate-text-intro [animation-delay:5000ms]">
-            {/* Address */}
-            <div className="font-didot z-50 absolute bottom-4 right-5 text-right text-[clamp(0.8rem,1.3vw,1.2rem)] md:fixed md:top-auto md:left-auto md:bottom-10 md:right-10 text-wood-accent">
-                <p><span className="md:inline ">434 Burwood Rd,</span><br className="md:hidden" /><span className="md:inline"> Hawthorn VIC 3122</span></p>
-            </div>
-            {/* Name */}
-            <div className="z-50 absolute top-5 left-[50%] -translate-x-1/2 md:translate-x-0 md:top-10 md:left-10">
-                <h1 className="font-cormorant text-3xl md:text-4xl text-wood-accent">
-                    IC Method.
-                </h1>
-            </div>
-            {/* Meny Bar */}
-            <div id="toggleMenu" onClick={handleClick} className={`p-4 absolute top-5.5 right-1 md:hidden z-50 ${isOpen ? 'hamburger-toggle' : ''}`}>
-                <div className="w-4 h-0.5 rounded-full bg-wood-accent
-                                    before:content-[''] before:absolute before:w-4 before:h-0.5 before:rounded-full before:-translate-y-1.5 before:bg-wood-accent
-                                    before:transition-all before:duration-150
-                                    after:content-[''] after:absolute after:w-4 after:h-0.5 after:rounded-full after:translate-y-1.5 after:bg-wood-accent
-                                    after:transition-all after:duration-150">
+        <>
+            <header className="relative z-50 opacity-0 animate-text-intro [animation-delay:5000ms] px-5 py-5 md:px-10 md:py-10">
+                <div className="flex items-center justify-between">
+                    {/* Name */}
+                    <h1 className="font-cormorant text-3xl md:text-4xl text-wood-accent">
+                        IC Method.
+                    </h1>
+                    {/* Links (Desktop View) */}
+                    <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 flex-row items-center gap-12">
+                            <Link to="/" className="font-didot text-wood-accent text-x">About</Link>
+                            <Link to="/people" className="font-didot text-wood-accent text-x">People</Link>
+                            <Link to="/studio" className="font-didot text-wood-accent text-x">Studio</Link>
+                    </div>
+                    {/* Hamburger Bar */}
+                    <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ${isOpen ? 'hamburger-toggle' : ''}`}>
+                        <div className="relative w-4 h-0.5 rounded-full bg-wood-accent
+                                            before:content-[''] before:absolute before:w-4 before:h-0.5 before:rounded-full before:-translate-y-1.5 before:bg-wood-accent
+                                            before:transition-all before:duration-150
+                                            after:content-[''] after:absolute after:w-4 after:h-0.5 after:rounded-full after:translate-y-1.5 after:bg-wood-accent
+                                            after:transition-all after:duration-150">
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </header>
             {/* Links (Mobile View) */}
             <div className={`fixed inset-0 z-40 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 <div className="flex flex-col bg-wood-light items-center justify-center h-full gap-5">
@@ -48,14 +52,15 @@ export default function Nav() {
                     <Link to="/studio" onClick={() => setIsOpen(false)} className={`font-didot text-wood-accent text-xl tracking-widest transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>Studio</Link>
                 </div>
             </div>
-            {/* Links (Desktop View) */}
-            <div className="hidden md:flex md:absolute md:top-15 md:left-0 md:right-0 md:justify-center flex-row items-center gap-12">
-                    <Link to="/" className="font-didot text-wood-accent text-x">About</Link>
-                    <Link to="/people" className="font-didot text-wood-accent text-x">People</Link>
-                    <Link to="/studio" className="font-didot text-wood-accent text-x">Studio</Link>
-            </div>
-            {/* Links (Socials) */}
-            <div className="flex z-50 absolute bottom-5 left-5 md:bottom-10 md:left-10 flex-row gap-6">
+        </>
+    )
+}
+
+export function Footer() {
+    return (
+        <footer className="relative z-50 opacity-0 animate-text-intro [animation-delay:5000ms] px-5 py-5 md:px-10 md:py-10 flex justify-between items-end">
+            {/* Socials */}
+            <div className="flex flex-row gap-6">
                 <a href="https://www.instagram.com/icmethod_official/" target="_blank" className="group">
                     <svg className="w-6 h-6" viewBox="3 3 26 26" xmlns="http://www.w3.org/2000/svg">
                         <defs>
@@ -81,6 +86,10 @@ export default function Nav() {
                     </svg>
                 </a>
             </div>
-        </nav>
+            {/* Address */}
+            <div className="font-didot text-right text-[clamp(0.8rem,1.3vw,1.2rem)] text-wood-accent">
+                <p><span className="md:inline ">434 Burwood Rd,</span><br className="md:hidden" /><span className="md:inline"> Hawthorn VIC 3122</span></p>
+            </div>
+        </footer>
     )
 }
