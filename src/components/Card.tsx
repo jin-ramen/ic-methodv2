@@ -39,13 +39,13 @@ export default function Card({ img, name, role, bio, isHidden, onOpen, onClose }
             </div>
 
             {isOpen && createPortal(
-                <div className={`fixed inset-10 z-30 flex items-center justify-center ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`} onClick={handleClose}>
+                <div className={`fixed inset-0 z-60 p-10 flex items-center justify-center ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`} onClick={handleClose}>
                     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-10 max-w-4xl w-full">
-                        <img className="card w-50 md:w-60 aspect[4/5] object-cover rounded-md shrink-0" src={img} alt="profile-picture" />
+                        <img className="card w-40 md:w-60 aspect[4/5] object-cover shrink-0" src={img} alt="profile-picture" />
                         <div className="flex flex-col">
-                            <p className="font-cormorant text-lg text-wood-dark font-bold">{name}</p>
-                            <p className="font-cormorant text-lg text-wood-dark font-bold">{role}</p>
-                            <p className="font-cormorant pt-6 text-md text-wood-accent">{bio}</p>
+                            <p className="font-cormorant text-md md:text-lg text-wood-dark font-bold">{name}</p>
+                            <p className="font-cormorant text-md md:text-lg text-wood-dark font-bold">{role}</p>
+                            <p className="font-cormorant pt-6 text-sm md:text-md text-wood-accent">{bio}</p>
                         </div>
                     </div>
                 </div>,
