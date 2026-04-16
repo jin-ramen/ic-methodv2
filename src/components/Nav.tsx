@@ -28,9 +28,9 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
             <header className={`relative z-50 px-5 py-5 md:px-10 md:py-10 ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
                 <div className="flex items-center justify-between">
                     {/* Name */}
-                    <h1 className="font-cormorant text-3xl md:text-4xl text-wood-accent">
+                    <Link to="/" className="font-cormorant text-3xl md:text-4xl text-wood-accent">
                         IC Method.
-                    </h1>
+                    </Link>
                     {/* Links (Desktop View) */}
                     <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 flex-row items-center gap-12">
                             <Link to="/" className="font-didot text-wood-accent text-x">About</Link>
