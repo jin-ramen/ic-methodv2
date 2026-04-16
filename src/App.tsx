@@ -5,6 +5,7 @@ import { Header, Footer } from './components/Nav'
 import Pulses from './components/Pulses'
 import Landing from './pages/Landing'
 import People from './pages/People'
+import Studio from './pages/Studio'
 
 function App() {
   const [shouldAnimate, setShouldAnimate] = useState(() => {
@@ -25,6 +26,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Landing onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate} />} />
             <Route path="/people" element={<People />} />
+            <Route path="/studio" element={<Studio />} />
           </Routes>
         </main>
         <Footer shouldAnimate={shouldAnimate} />

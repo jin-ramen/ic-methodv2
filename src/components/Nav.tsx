@@ -25,7 +25,7 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
 
     return (
         <>
-            <header className={`relative z-50 px-5 py-5 md:px-10 md:py-10 ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
+            <header className={`relative z-50 px-5 py-5 md:px-10 md:py-10 pb-10 ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
                 <div className="flex items-center justify-between">
                     {/* Name */}
                     <Link to="/" className="font-cormorant text-3xl md:text-4xl text-wood-accent">
@@ -62,7 +62,7 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
 
 export function Footer({ shouldAnimate }: { shouldAnimate: boolean }) {
     return (
-        <footer className={`relative z-40 px-5 py-5 md:px-10 md:py-10 flex justify-between items-end ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
+        <footer className={`relative z-40 px-5 py-5 md:px-10 md:py-10 pt-10 flex justify-between items-end ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
             {/* Socials */}
             <div className="flex flex-row gap-6">
                 <a href="https://www.instagram.com/icmethod_official/" target="_blank" className="group">

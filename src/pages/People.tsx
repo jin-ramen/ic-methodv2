@@ -15,7 +15,7 @@ export default function People() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     return (
-        <div className="z-30 grid grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-15 px-8 lg:px-50 pt-8 pb-8">
+        <div className="z-30 grid grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-15 px-8 lg:px-50">
             {team.map((member, index) => (
                 <div
                     key={index}
