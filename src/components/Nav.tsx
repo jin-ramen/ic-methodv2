@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
 
     const [isOpen, setIsOpen] = useState(false);
+    const { pathname } = useLocation();
 
     const handleClick = () => {
         setIsOpen(!isOpen);
@@ -33,9 +34,9 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
                     </Link>
                     {/* Links (Desktop View) */}
                     <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 flex-row items-center gap-12">
-                            <Link to="/" className="font-didot text-wood-accent text-x">About</Link>
-                            <Link to="/people" className="font-didot text-wood-accent text-x">People</Link>
-                            <Link to="/studio" className="font-didot text-wood-accent text-x">Studio</Link>
+                            <Link to="/" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>About</Link>
+                            <Link to="/people" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/people' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>People</Link>
+                            <Link to="/studio" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/studio' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>Studio</Link>
                     </div>
                     {/* Hamburger Bar */}
                     <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ${isOpen ? 'hamburger-toggle' : ''}`}>
@@ -51,9 +52,9 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
             {/* Links (Mobile View) */}
             <div className={`fixed inset-0 z-40 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 <div className="flex flex-col bg-wood-light items-center justify-center h-full gap-5">
-                    <Link to="/" onClick={() => setIsOpen(false)} className={`font-didot text-wood-accent text-xl tracking-widest transition-all duration-500 ease-in-out md:opacity-100 ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>About</Link>
-                    <Link to="/people" onClick={() => setIsOpen(false)} className={`font-didot text-wood-accent text-xl tracking-widest transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>People</Link>
-                    <Link to="/studio" onClick={() => setIsOpen(false)} className={`font-didot text-wood-accent text-xl tracking-widest transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>Studio</Link>
+                    <Link to="/" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark md:opacity-100 ${pathname === '/' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>About</Link>
+                    <Link to="/people" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/people' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>People</Link>
+                    <Link to="/studio" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/studio' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>Studio</Link>
                 </div>
             </div>
         </>

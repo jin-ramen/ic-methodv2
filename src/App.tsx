@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Header, Footer } from './components/Nav'
 import Pulses from './components/Pulses'
-import Landing from './pages/Landing'
+import About from './pages/About'
 import People from './pages/People'
 import Studio from './pages/Studio'
 
@@ -24,7 +24,7 @@ function App() {
         <Pulses shouldAnimate={shouldAnimate} />
         <main className="flex-1 flex flex-col">
           <Routes>
-            <Route path="/" element={<Landing onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate} />} />
+            <Route path="/" element={<About onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate} />} />
             <Route path="/people" element={<People />} />
             <Route path="/studio" element={<Studio />} />
           </Routes>

@@ -52,7 +52,7 @@ function IntroAnimation({ onIntroComplete }: { onIntroComplete: () => void }) {
   )
 }
 
-export default function Landing({ shouldAnimate, onIntroComplete }: { shouldAnimate: boolean; onIntroComplete: () => void }) {
+export default function About({ shouldAnimate, onIntroComplete }: { shouldAnimate: boolean; onIntroComplete: () => void }) {
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'

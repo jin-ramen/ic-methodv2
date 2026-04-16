@@ -1,23 +1,121 @@
-import flower_dark from "../assets/flower_window_dark.jpg"
-import flower_light from "../assets/flower_window_sun.jpg"
+import { useEffect, useRef, useState } from "react"
+import corner from "../assets/corner.jpg"
+import flower from "../assets/flower.jpg"
+import mirror from "../assets/mirror.jpg"
+import flower2 from "../assets/window.jpg"
+
+function FadeInImage({ src, alt, onHover }: { src: string; alt: string; onHover: (text: string | null) => void }) {
+    const ref = useRef<HTMLDivElement>(null)
+    const [visible, setVisible] = useState(false)
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setVisible(true)
+                    observer.disconnect()
+                }
+            },
+            { threshold: 0.2 }
+        )
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <div
+            ref={ref}
+            className={`h-screen flex items-center justify-center transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0'}`}
+        >
+            <img
+                className="max-h-[70vh] max-w-[80vw] object-contain cursor-pointer"
+                src={src}
+                alt={alt}
+                onMouseEnter={() => onHover(alt)}
+                onMouseLeave={() => onHover(null)}
+            />
+        </div>
+    )
+}
+
+function OpeningHours() {
+    const ref = useRef<HTMLDivElement>(null)
+    const [visible, setVisible] = useState(false)
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setVisible(true)
+                    observer.disconnect()
+                }
+            },
+            { threshold: 0.2 }
+        )
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <div
+            ref={ref}
+            className={`h-screen flex items-center justify-center transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0'}`}
+        >
+            <div className="relative flex flex-col items-center">
+                {/* Decorative line */}
+                <div className={`w-px bg-wood-accent/30 transition-all duration-1000 delay-200 ${visible ? 'h-20' : 'h-0'}`} />
+
+                <div className="my-12 flex flex-col items-center gap-4">
+                    <p className={`font-cormorant text-wood-accent/50 text-xs tracking-[0.5em] uppercase transition-all duration-700 delay-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+                        Every day
+                    </p>
+
+                    <div className="flex items-center gap-5">
+                        <span className={`font-cormorant text-wood-accent text-4xl md:text-5xl tracking-wider transition-all duration-700 delay-700 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}>
+                            9
+                        </span>
+                        <span className={`w-12 h-px bg-wood-accent/40 transition-all duration-700 delay-900 ${visible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`} />
+                        <span className={`font-cormorant text-wood-accent text-4xl md:text-5xl tracking-wider transition-all duration-700 delay-1100 ${visible ? 'opacity-100 -translate-x-0' : 'opacity-0 -translate-x-4'}`}>
+                            7
+                        </span>
+                    </div>
+
+                    <p className={`font-playfair text-wood-dark text-xs tracking-[0.4em] italic transition-all duration-700 delay-1300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+                        am &mdash; pm
+                    </p>
+                </div>
+
+                {/* Decorative line */}
+                <div className={`w-px bg-wood-accent/30 transition-all duration-1000 delay-1500 ${visible ? 'h-20' : 'h-0'}`} />
+            </div>
+        </div>
+    )
+}
 
 export default function Studio() {
+    const [hoveredText, setHoveredText] = useState<string | null>(null)
+
     const photos = [
-        { img: flower_dark },
-        { img: flower_light },
+        { img: corner, alt: "Corner with a plant" },
+        { img: flower, alt: "Flower window in sunlight" },
+        { img: mirror, alt: "Flower window in sunlight" },
+        { img: flower2, alt: "Flower window in sunlight" },
     ]
 
     return (
-        <div className='grid grid-cols-1 lg:grid-cols-2 w-full overflow-x-hidden z-20 px-5 lg:px-30 gap-5 lg:gap-10'>
+        <div className='overflow-x-hidden z-20 -mt-20'>
             {photos.map((photo, index) => (
-                <div
-                    key={index}
-                    className="opacity-0 animate-text-intro fill-both w-full aspect-[3/4] md:aspect-[4/5] xl:aspect-square overflow-hidden"
-                    style={{ animationDelay: `${index * 0.2}s` }}
-                >
-                    <img className="w-full h-full object-cover scale-125 sm:scale-110 xl:scale-100 transition-transform duration-300" src={photo.img} />
-                </div>
+                <FadeInImage key={index} src={photo.img} alt={photo.alt} onHover={setHoveredText} />
             ))}
+            {/* Opening Hours */}
+            <OpeningHours />
+            <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 font-playfair text-wood-dark text-sm tracking-widest transition-opacity duration-300 ${hoveredText ? 'opacity-100' : 'opacity-0'}`}>
+                {hoveredText}
+            </div>
         </div>
     )
 }
