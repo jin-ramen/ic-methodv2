@@ -21,8 +21,8 @@ function App() {
     setShouldAnimate(false); // This triggers a re-render and hides it everywhere
   };
 
-  const { data: team, error: error_people } = useFetch<PeopleType []>('/api/people');
-  const { data: photos, error: error_studio } = useFetch<StudioType []>('/api/studio');
+  const { data: team, error: errorPeopple } = useFetch<PeopleType []>('/api/people');
+  const { data: photos, error: errorStudio } = useFetch<StudioType []>('/api/studio');
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
@@ -32,8 +32,8 @@ function App() {
         <main className="flex-1 flex flex-col">
           <Routes>
             <Route path="/" element={<About onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate} />} />
-            <Route path="/people" element={<People data={ team } error={ error_people } />} />
-            <Route path="/studio" element={<Studio data={ photos } error={ error_studio } />} />
+            <Route path="/people" element={<People data={ team } error={ errorPeopple } />} />
+            <Route path="/studio" element={<Studio data={ photos } error={ errorStudio } />} />
           </Routes>
         </main>
         <Footer shouldAnimate={shouldAnimate} />
