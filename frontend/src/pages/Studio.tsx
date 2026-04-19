@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useFetch } from '../utils/useFetch'
-import type { Studio } from '../types/studio'
+import type { StudioType } from '../types/studio'
 
 function FadeInImage({ src, alt, onHover }: { src: string; alt: string; onHover: (text: string | null) => void }) {
     const ref = useRef<HTMLDivElement>(null)
@@ -94,10 +94,13 @@ function OpeningHours() {
     )
 }
 
-export default function Studio() {
-    const [hoveredText, setHoveredText] = useState<string | null>(null)
+type StudioProps = {
+  data: StudioType[] | null
+  error: string | null
+}
 
-    const { data: photos, error } = useFetch<Studio []>('/api/studio')
+export default function Studio({ data: photos, error }: StudioProps) {
+    const [hoveredText, setHoveredText] = useState<string | null>(null)
 
     if (error) {
         return (

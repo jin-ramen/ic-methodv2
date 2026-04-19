@@ -74,7 +74,7 @@ async def get_studio():
 
 app.include_router(api)
 
-app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+# app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
 @app.get("/{full_path:path}")
 async def spa_fallback(full_path: str):

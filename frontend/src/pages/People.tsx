@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import Card from "../components/Card"
-import type { People } from '../types/people'
-import { useFetch } from '../utils/useFetch';
+import type { PeopleType } from '../types/people'
 
-export default function People() {
+type PeopleProps = {
+  data: PeopleType[] | null
+  error: string | null
+}
+
+export default function People({ data: team, error }: PeopleProps) {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-    const { data: team, error } = useFetch<People []>('/api/people');
 
     if (error) {
         return (
