@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import { useFetch } from '../utils/useFetch'
 import type { StudioType } from '../types/studio'
 
 function FadeInImage({ src, alt, onHover }: { src: string; alt: string; onHover: (text: string | null) => void }) {
