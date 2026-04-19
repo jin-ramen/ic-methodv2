@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from notion_client import Client
 from dotenv import load_dotenv
 import os
@@ -21,15 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from pathlib import Path
-
 DIST = Path(__file__).parent / "frontend" / "dist"
-
-app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
-
-@app.get("/{full_path:path}")
-async def spa_fallback(full_path: str):
-    return FileResponse(DIST / "index.html")
 
 def get_text(prop):
     if not prop:
@@ -79,3 +73,9 @@ async def get_studio():
         raise HTTPException(status_code=500, detail=str(e))
 
 app.include_router(api)
+
+app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+
+@app.get("/{full_path:path}")
+async def spa_fallback(full_path: str):
+    return FileResponse(DIST / "index.html")

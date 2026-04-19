@@ -14,7 +14,7 @@ export function useFetch<T>(path: string): FetchState<T> {
 
         const load = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}${path}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}${path}`, {
                     signal: controller.signal,
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
