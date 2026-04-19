@@ -31,7 +31,7 @@ export default function Card({ img, name, role, bio, isHidden, onOpen, onClose }
     return (
         <div className={`transition-opacity duration-300 ${isHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             <div onClick={handleOpen} className="overflow-hidden card w-full">
-                <img className="w-full h-[64vw] md:h-80 object-cover" src={img} alt="profile-picture" />
+                <img className="w-full aspect-[2/3] object-cover" src={img} alt="profile-picture" />
             </div>
             <div className="mt-3 xl:flex xl:justify-between">
                 <p className="font-cormorant font-bold text-sm md:text-lg text-wood-dark">{name}</p>
