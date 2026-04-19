@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from notion_client import Client
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
 load_dotenv()
 
@@ -11,6 +12,7 @@ PEOPLE_DB_ID = os.getenv("PEOPLE_DB_ID")
 STUDIO_DB_ID = os.getenv("STUDIO_DB_ID")
 
 app = FastAPI()
+api = APIRouter(prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,9 +21,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def root(): 
-    return {"message": "Hello"}
+from pathlib import Path
+
+DIST = Path(__file__).parent / "frontend" / "dist"
+
+app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+
+@app.get("/{full_path:path}")
+async def spa_fallback(full_path: str):
+    return FileResponse(DIST / "index.html")
 
 def get_text(prop):
     if not prop:
@@ -32,8 +40,8 @@ def get_text(prop):
         return "".join([t["plain_text"] for t in prop["rich_text"]])
     return ""
 
-@app.get("/people")
-def get_people():
+@api.get("/people")
+async def get_people():
     try:
         db = notion.databases.retrieve(database_id=PEOPLE_DB_ID)
         data_source_id = db["data_sources"][0]["id"]
@@ -52,8 +60,8 @@ def get_people():
     except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/studio")
-def get_studio(): 
+@api.get("/studio")
+async def get_studio(): 
     try: 
         db = notion.databases.retrieve(database_id=STUDIO_DB_ID) # get database
         data_source_id = db["data_sources"][0]["id"] # get 
@@ -70,3 +78,4 @@ def get_studio():
     except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
+app.include_router(api)

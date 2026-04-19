@@ -6,7 +6,7 @@ import { useFetch } from '../utils/useFetch';
 export default function People() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-    const { data: team, error } = useFetch<People []>('/people');
+    const { data: team, error } = useFetch<People []>('/api/people');
 
     if (error) {
         return (

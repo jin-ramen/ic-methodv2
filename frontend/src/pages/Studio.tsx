@@ -97,7 +97,7 @@ function OpeningHours() {
 export default function Studio() {
     const [hoveredText, setHoveredText] = useState<string | null>(null)
 
-    const { data: photos, error } = useFetch<Studio []>('/studio')
+    const { data: photos, error } = useFetch<Studio []>('/api/studio')
 
     if (error) {
         return (

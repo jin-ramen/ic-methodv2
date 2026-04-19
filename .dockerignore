@@ -1,0 +1,22 @@
+# Python
+**/__pycache__
+**/*.pyc
+**/.venv
+**/venv
+
+# Frontend
+**/node_modules
+**/dist
+
+# Env files — secrets come from fly secrets, not baked into image
+**/.env
+**/.env.local
+
+# Git + editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Fly
+fly.toml
