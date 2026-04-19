@@ -16,11 +16,11 @@ function App() {
   const { data: photos, error: errorStudio } = useFetch<StudioType []>('/api/studio');
 
   const [shouldAnimate, setShouldAnimate] = useState(() => {
-    return !sessionStorage.getItem('introSeen');
+    return !localStorage.getItem('introSeen');
   });
 
   const handleIntroComplete = () => {
-    sessionStorage.setItem('introSeen', '1');
+    localStorage.setItem('introSeen', '1');
     setShouldAnimate(false); // This triggers a re-render and hides it everywhere
   };
 

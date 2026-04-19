@@ -5,7 +5,6 @@ function IntroAnimation({ onIntroComplete }: { onIntroComplete: () => void }) {
     const timer = setTimeout(onIntroComplete, 8000);
     return () => {
       clearTimeout(timer);
-      onIntroComplete();
     };
   }, [onIntroComplete]);
 
