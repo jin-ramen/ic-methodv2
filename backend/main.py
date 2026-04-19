@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from notion_client import Client
 from dotenv import load_dotenv
 import os
@@ -10,6 +11,13 @@ PEOPLE_DB_ID = os.getenv("PEOPLE_DB_ID")
 STUDIO_DB_ID = os.getenv("STUDIO_DB_ID")
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root(): 

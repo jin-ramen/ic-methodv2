@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import corner from "../assets/corner.jpg"
-import flower from "../assets/flower.jpg"
-import mirror from "../assets/mirror.jpg"
-import flower2 from "../assets/window.jpg"
+import { useFetch } from '../utils/useFetch'
+import type { Studio } from '../types/studio'
 
 function FadeInImage({ src, alt, onHover }: { src: string; alt: string; onHover: (text: string | null) => void }) {
     const ref = useRef<HTMLDivElement>(null)
@@ -99,17 +97,30 @@ function OpeningHours() {
 export default function Studio() {
     const [hoveredText, setHoveredText] = useState<string | null>(null)
 
-    const photos = [
-        { img: corner, alt: "Corner with a plant" },
-        { img: flower, alt: "Flower window in sunlight" },
-        { img: mirror, alt: "Flower window in sunlight" },
-        { img: flower2, alt: "Flower window in sunlight" },
-    ]
+    const { data: photos, error } = useFetch<Studio []>('/studio')
+
+    if (error) {
+        return (
+            <div className="px-8 lg:px-50 text-red-600">
+                Couldn't load the photos: {error}
+            </div>
+        );
+    }
+
+    if (!photos) {
+        return (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-15 px-8 lg:px-50">
+                {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="h-64 rounded-xl bg-gray-200 animate-pulse" />
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className='overflow-x-hidden z-20 -mt-20'>
             {photos.map((photo, index) => (
-                <FadeInImage key={index} src={photo.img} alt={photo.alt} onHover={setHoveredText} />
+                <FadeInImage key={index} src={photo.img} alt={photo.title} onHover={setHoveredText} />
             ))}
             {/* Opening Hours */}
             <OpeningHours />

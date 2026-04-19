@@ -1,18 +1,30 @@
 import { useState } from 'react'
 import Card from "../components/Card"
-import luffy from "../assets/luffy.jpg"
+import type { People } from '../types/people'
+import { useFetch } from '../utils/useFetch';
 
 export default function People() {
-    const team = [
-        {  name: "Ivy Chen", role: "Founder & Pilates Instructor", img: luffy, bio: "In a vast ocean where dreams roar louder than cannon fire, One Piece follows Monkey D. Luffy, a rubber-bodied boy chasing the legendary treasure of Gol D. Roger. With his crew by his side, each island becomes a tale of laughter, loss, and unbreakable bonds, as Luffy sails not just to become Pirate King, but to live freely in a world without limits." },
-        {  name: "Bob", role: "Pilates Instructor", img: luffy, bio: "Bob specializes in reformer Pilates." },
-        {  name: "Bob", role: "Pilates Instructor", img: luffy, bio: "Bob specializes in reformer Pilates." },
-        {  name: "Bob", role: "Pilates Instructor", img: luffy, bio: "Bob specializes in reformer Pilates." },
-        {  name: "Bob", role: "Pilates Instructor", img: luffy, bio: "Bob specializes in reformer Pilates." },
-        {  name: "Bob", role: "Pilates Instructor", img: luffy, bio: "Bob specializes in reformer Pilates." },
-    ]
-
     const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const { data: team, error } = useFetch<People []>('/people');
+
+    if (error) {
+        return (
+            <div className="px-8 lg:px-50 text-red-600">
+                Couldn't load the team: {error}
+            </div>
+        );
+    }
+
+    if (!team) {
+        return (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-15 px-8 lg:px-50">
+                {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="h-64 rounded-xl bg-gray-200 animate-pulse" />
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="z-30 grid grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-15 px-8 lg:px-50">
