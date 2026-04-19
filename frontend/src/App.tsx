@@ -12,6 +12,9 @@ import { useFetch } from './utils/useFetch';
 
 
 function App() {
+  const { data: team, error: errorPeopple } = useFetch<PeopleType []>('/api/people');
+  const { data: photos, error: errorStudio } = useFetch<StudioType []>('/api/studio');
+
   const [shouldAnimate, setShouldAnimate] = useState(() => {
     return !sessionStorage.getItem('introSeen');
   });
@@ -20,9 +23,6 @@ function App() {
     sessionStorage.setItem('introSeen', '1');
     setShouldAnimate(false); // This triggers a re-render and hides it everywhere
   };
-
-  const { data: team, error: errorPeopple } = useFetch<PeopleType []>('/api/people');
-  const { data: photos, error: errorStudio } = useFetch<StudioType []>('/api/studio');
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>

@@ -4,7 +4,8 @@ function IntroAnimation({ onIntroComplete }: { onIntroComplete: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onIntroComplete, 8000);
     return () => {
-      clearTimeout(timer)
+      clearTimeout(timer);
+      onIntroComplete();
     };
   }, [onIntroComplete]);
 
