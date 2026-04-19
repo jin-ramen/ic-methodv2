@@ -6,7 +6,7 @@ function IntroAnimation({ onIntroComplete }: { onIntroComplete: () => void }) {
     return () => {
       clearTimeout(timer)
     };
-  }, [onIntroComplete]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50  bg-wood-bg animate-bg-intro overflow-hidden">
