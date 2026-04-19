@@ -30,6 +30,8 @@ function FadeInImage({ src, alt, onHover }: { src: string; alt: string; onHover:
                 className="max-h-[70vh] max-w-[80vw] object-contain cursor-pointer"
                 src={src}
                 alt={alt}
+                loading="lazy"
+                decoding="async"
                 onMouseEnter={() => onHover(alt)}
                 onMouseLeave={() => onHover(null)}
             />
