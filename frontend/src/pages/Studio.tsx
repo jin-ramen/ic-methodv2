@@ -128,7 +128,7 @@ export default function Studio({ data: photos, error }: StudioProps) {
             ))}
             {/* Opening Hours */}
             <OpeningHours />
-            <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 font-playfair text-wood-dark text-sm tracking-widest transition-opacity duration-300 md:${hoveredText ? 'opacity-100' : 'opacity-0'}`}>
+            <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 font-playfair text-wood-dark text-sm tracking-widest transition-opacity duration-300 opacity-0 md:${hoveredText ? 'opacity-100' : 'opacity-0'}`}>
                 {hoveredText}
             </div>
         </div>
