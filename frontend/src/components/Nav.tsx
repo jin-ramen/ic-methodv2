@@ -39,7 +39,7 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
                             <Link to="/studio" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/studio' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>Studio</Link>
                     </div>
                     {/* Hamburger Bar */}
-                    <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ${isOpen ? 'hamburger-toggle' : ''}`}>
+                    <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ml-auto ${isOpen ? 'hamburger-toggle' : ''}`}>
                         <div className="relative w-4 h-0.5 rounded-full bg-wood-accent
                                             before:content-[''] before:absolute before:w-4 before:h-0.5 before:rounded-full before:-translate-y-1.5 before:bg-wood-accent
                                             before:transition-all before:duration-150
