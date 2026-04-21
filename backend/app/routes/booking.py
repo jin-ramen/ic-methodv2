@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from app.db.session import get_db
-from app.services.flow import create_flow, list_flows, create_commitment
+from app.services.flow import create_flow, list_flows
+from app.services.commitment import create_commitment
 from app.schemas.flow import FlowResponse
 
 router = APIRouter(prefix="/api", tags=["booking"])
