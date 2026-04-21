@@ -38,6 +38,11 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
                             <Link to="/people" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/people' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>People</Link>
                             <Link to="/studio" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/studio' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>Studio</Link>
                     </div>
+                    {/* Book button (Desktop) */}
+                    <Link to="/booking" className="hidden md:inline-flex items-center gap-2 font-didot text-xs tracking-[0.2em] uppercase bg-wood-accent text-wood-text hover:bg-wood-dark transition-colors duration-300 py-2.5 px-6 rounded-xs group">
+                        <span>Book</span>
+                        <span className="text-wood-text/40 text-[10px] transition-transform duration-300 group-hover:translate-x-1">→</span>
+                    </Link>
                     {/* Hamburger Bar */}
                     <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ml-auto ${isOpen ? 'hamburger-toggle' : ''}`}>
                         <div className="relative w-4 h-0.5 rounded-full bg-wood-accent
@@ -55,6 +60,7 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
                     <Link to="/" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark md:opacity-100 ${pathname === '/' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>About</Link>
                     <Link to="/people" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/people' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>People</Link>
                     <Link to="/studio" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/studio' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>Studio</Link>
+                    <Link to="/booking" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname.startsWith('/booking') ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '500ms' : '0ms' }}>Book</Link>
                 </div>
             </div>
         </>

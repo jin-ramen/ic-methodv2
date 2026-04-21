@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from app.db.session import get_db
 from app.services.flow import create_flow, list_flows, create_commitment
+from app.schemas.flow import FlowResponse
 
 router = APIRouter(prefix="/api", tags=["booking"])
 
@@ -28,7 +29,8 @@ class CommitmentCreate(BaseModel):
 
 @router.get("/flows")
 async def get_flows(db: AsyncSession = Depends(get_db)):
-    return await list_flows(db)
+    flows = await list_flows(db)
+    return {"results": [FlowResponse.model_validate(f).model_dump(mode="json") for f in flows]}
 
 
 @router.post("/flows")

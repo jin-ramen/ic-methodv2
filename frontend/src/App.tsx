@@ -5,13 +5,17 @@ import MainLayout from './layouts/MainLayout'
 import About from './pages/About'
 import People from './pages/People'
 import Studio from './pages/Studio'
+import Booking from './pages/Booking'
+import BookingForm from './pages/BookingForm'
 import type { PeopleType } from './types/people'
 import type { StudioType } from './types/studio'
+import type { FlowType } from './types/flow'
 import { useFetch } from './utils/useFetch';
 
 function App() {
   const { data: team, error: errorPeople } = useFetch<PeopleType[]>('/api/people');
   const { data: photos, error: errorStudio } = useFetch<StudioType[]>('/api/studio');
+  const { data: flows, error: errorFlows } = useFetch<FlowType[]>('/api/flows');
 
   const [shouldAnimate, setShouldAnimate] = useState(() => {
     return !localStorage.getItem('introSeen');
@@ -25,11 +29,13 @@ function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
-        
+
         <Route element={ <MainLayout shouldAnimate={shouldAnimate} handleIntroComplete={handleIntroComplete} />}>
           <Route index element={<About onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate}/>} />
           <Route path="people" element={<People data={team} error={errorPeople} />} />
           <Route path="studio" element={<Studio data={photos} error={errorStudio} />} />
+          <Route path="booking" element={<Booking data={flows} error={errorFlows} />} />
+          <Route path="booking/:flowId" element={<BookingForm />} />
         </Route>
 
         {/* <Route path="/admin" element={<AdminLayout />}>
