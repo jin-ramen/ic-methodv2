@@ -88,8 +88,12 @@ async def get_studio():
 
 app.include_router(api)
 
-app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+DIST = Path(__file__).parent / "frontend" / "dist"
+if (DIST / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
 @app.get("/{full_path:path}")
 async def spa_fallback(full_path: str):
-    return FileResponse(DIST / "index.html")
+    if DIST.exists():
+        return FileResponse(DIST / "index.html")
+    return {"message": "API is running"}
