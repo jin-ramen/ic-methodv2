@@ -27,10 +27,7 @@ def cancel_booking_route(booking_id: UUID, db: Session = Depends(get_db)):
     return service.cancel_booking(db, booking_id)
 
 
-@router.get(
-    "/resources/{resource_id}/availability",
-    response_model=schemas.AvailabilityResponse,
-)
+@router.get("/resources/{resource_id}/availability", response_model=schemas.AvailabilityResponse)
 def get_availability_route(
     resource_id: UUID,
     from_date: date = Query(..., alias="from"),
@@ -41,6 +38,22 @@ def get_availability_route(
         raise HTTPException(status_code=400, detail="Date range too large (max 90 days)")
     slots = availability.compute_availability(db, resource_id, from_date, to_date)
     return {"resource_id": resource_id, "slots": slots}
+
+@router.get("/bookings", response_model=list[schemas.BookingListItem])
+def list_bookings_route(
+    resource_id: UUID | None = Query(default=None),
+    status: str | None = Query(default=None),
+    from_date: date | None = Query(default=None, alias="from"),
+    to_date: date | None = Query(default=None, alias="to"),
+    db: Session = Depends(get_db),
+):
+    return service.list_bookings(
+        db,
+        resource_id=resource_id,
+        status=status,
+        from_date=from_date,
+        to_date=to_date,
+    )
 
 # ---------- Resource CRUD ----------
 
@@ -127,3 +140,19 @@ def list_availability_rules_route(
 def delete_availability_rule_route(rule_id: UUID, db: Session = Depends(get_db)):
     service.delete_availability_rule(db, rule_id)
     return None
+
+
+@router.post("/admin/bookings", response_model=schemas.BookingRead, status_code=201)
+def admin_create_booking_route(
+    payload: schemas.AdminBookingCreate,
+    db: Session = Depends(get_db),
+):
+    return service.admin_create_booking(
+        db,
+        resource_id=payload.resource_id,
+        customer_email=payload.customer_email,
+        customer_name=payload.customer_name,
+        start_time=payload.start_time,
+        end_time=payload.end_time,
+        allow_override=payload.allow_override,
+    )

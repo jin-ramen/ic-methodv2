@@ -24,6 +24,18 @@ class BookingRead(BaseModel):
     status: str
     created_at: datetime
 
+class BookingListItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    resource_id: UUID
+    resource_name: str
+    customer_email: str
+    customer_name: str
+    start_time: datetime
+    end_time: datetime
+    status: str
+    created_at: datetime
 
 class AvailabilitySlot(BaseModel):
     start_time: datetime
@@ -73,3 +85,12 @@ class ResourceRead(BaseModel):
     duration_minutes: int
     buffer_minutes: int
     is_active: bool
+
+
+class AdminBookingCreate(BaseModel):
+    resource_id: UUID
+    customer_email: EmailStr
+    customer_name: str = Field(min_length=1, max_length=200)
+    start_time: datetime
+    end_time: datetime
+    allow_override: bool = False

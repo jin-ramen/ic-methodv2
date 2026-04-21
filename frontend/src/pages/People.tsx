@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Card from "../components/Card"
+import ProfileCard from "../components/ProfileCard"
 import type { PeopleType } from '../types/people'
 
 type PeopleProps = {
@@ -36,7 +36,7 @@ export default function People({ data: team, error }: PeopleProps) {
                     className="opacity-0 animate-text-intro fill-both"
                     style={{ animationDelay: `${index * 0.2}s` }}
                 >
-                    <Card
+                    <ProfileCard
                         name={member.name}
                         role={member.role}
                         img={member.img}

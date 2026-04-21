@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "homepage": "https://jin-ramen.github.io/ic-methodv2/",
-
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -15,6 +14,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
+    "date-fns": "^4.1.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "^7.14.1",
