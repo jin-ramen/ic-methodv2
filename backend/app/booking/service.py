@@ -82,3 +82,106 @@ def cancel_booking(db: Session, booking_id: UUID) -> dict:
     db.commit()
     db.refresh(booking)
     return _to_read_dict(booking)
+
+# ---------- Resources ----------
+
+def create_resource(
+    db: Session,
+    name: str,
+    capacity: int = 1,
+    duration_minutes: int = 30,
+    buffer_minutes: int = 0,
+) -> models.Resource:
+    resource = models.Resource(
+        name=name,
+        capacity=capacity,
+        duration_minutes=duration_minutes,
+        buffer_minutes=buffer_minutes,
+    )
+    db.add(resource)
+    db.commit()
+    db.refresh(resource)
+    return resource
+
+
+def list_resources(db: Session, include_inactive: bool = False) -> list[models.Resource]:
+    query = db.query(models.Resource)
+    if not include_inactive:
+        query = query.filter(models.Resource.is_active.is_(True))
+    return query.order_by(models.Resource.name).all()
+
+
+def get_resource(db: Session, resource_id: UUID) -> models.Resource:
+    resource = db.get(models.Resource, resource_id)
+    if not resource:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    return resource
+
+
+def update_resource(db: Session, resource_id: UUID, updates: dict) -> models.Resource:
+    resource = get_resource(db, resource_id)
+    for key, value in updates.items():
+        setattr(resource, key, value)
+    db.commit()
+    db.refresh(resource)
+    return resource
+
+
+def deactivate_resource(db: Session, resource_id: UUID) -> models.Resource:
+    """Soft delete — preserves booking history."""
+    resource = get_resource(db, resource_id)
+    resource.is_active = False
+    db.commit()
+    db.refresh(resource)
+    return resource
+
+
+# ---------- Availability rules ----------
+
+def create_availability_rule(
+    db: Session,
+    resource_id: UUID,
+    day_of_week: int,
+    start_time: time,
+    end_time: time,
+) -> models.AvailabilityRule:
+    # Verify resource exists (raises 404 if not)
+    get_resource(db, resource_id)
+
+    rule = models.AvailabilityRule(
+        resource_id=resource_id,
+        day_of_week=day_of_week,
+        start_time=start_time,
+        end_time=end_time,
+    )
+    db.add(rule)
+    try:
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        # Either end_time <= start_time or dow out of range — Pydantic should catch
+        # most of these, but the CHECK constraints are the last line of defence
+        raise HTTPException(status_code=422, detail=f"Invalid rule: {e.orig}")
+    db.refresh(rule)
+    return rule
+
+
+def list_availability_rules(db: Session, resource_id: UUID) -> list[models.AvailabilityRule]:
+    get_resource(db, resource_id)  # 404 if resource doesn't exist
+    return (
+        db.query(models.AvailabilityRule)
+        .filter(models.AvailabilityRule.resource_id == resource_id)
+        .order_by(
+            models.AvailabilityRule.day_of_week,
+            models.AvailabilityRule.start_time,
+        )
+        .all()
+    )
+
+
+def delete_availability_rule(db: Session, rule_id: UUID) -> None:
+    rule = db.get(models.AvailabilityRule, rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail="Availability rule not found")
+    db.delete(rule)
+    db.commit()
