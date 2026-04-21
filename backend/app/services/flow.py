@@ -2,6 +2,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.models.models import Flow, Commitment
 
 
@@ -27,7 +28,9 @@ async def create_flow(
 
 
 async def list_flows(db: AsyncSession) -> list[Flow]:
-    result = await db.execute(select(Flow).order_by(Flow.start_time))
+    result = await db.execute(
+        select(Flow).options(selectinload(Flow.method)).order_by(Flow.start_time)
+    )
     return result.scalars().all()
 
 

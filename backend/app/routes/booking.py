@@ -30,7 +30,12 @@ class CommitmentCreate(BaseModel):
 @router.get("/flows")
 async def get_flows(db: AsyncSession = Depends(get_db)):
     flows = await list_flows(db)
-    return {"results": [FlowResponse.model_validate(f).model_dump(mode="json") for f in flows]}
+    results = []
+    for f in flows:
+        data = FlowResponse.model_validate(f).model_dump(mode="json")
+        data["method_name"] = f.method.name if f.method else None
+        results.append(data)
+    return {"results": results}
 
 
 @router.post("/flows")

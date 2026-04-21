@@ -8,6 +8,7 @@ class FlowResponse(BaseModel):
 
     id: UUID
     method_id: UUID | None = None
+    method_name: str | None = None
     start_time: datetime
     end_time: datetime
     capacity: int

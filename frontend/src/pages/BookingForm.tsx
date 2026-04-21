@@ -15,7 +15,7 @@ const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-wid
 
 function FlowInfo({ flow }: { flow: FlowType }) {
     return (
-        <div className="flow bg-wood-dark px-6 py-6 flex flex-col gap-3 opacity-0 animate-text-intro" style={{ animationDelay: '0.1s' }}>
+        <div className="flow bg-wood-dark/80 px-6 py-6 flex flex-col gap-3 opacity-0 animate-text-intro" style={{ animationDelay: '0.1s' }}>
             <p className="font-didot text-wood-text/40 text-xs tracking-widest uppercase">Your Flow</p>
             <h2 className="font-cormorant text-wood-text text-4xl leading-tight">
                 {formatTime(flow.start_time)}<br />
@@ -131,7 +131,7 @@ export default function BookingForm() {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center px-5">
-            <div className={`bg-wood-accent w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
+            <div className={`bg-wood-accent/95 w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
                 {/* Mobile: back link, flow info, form */}
                 <div className="md:hidden flex flex-col gap-10">
                     <button type="button" onClick={() => navigate('/booking')} className="font-didot text-wood-text/40 text-xs tracking-widest text-left">

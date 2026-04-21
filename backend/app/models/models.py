@@ -4,6 +4,7 @@ from sqlalchemy import (
     Column, String, Numeric, ForeignKey, Time, Integer, DateTime
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from app.db.session import Base
 import enum
 
@@ -21,6 +22,7 @@ class Flow(Base): # session
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     method_id = Column(UUID(as_uuid=True), ForeignKey("method.id", ondelete="SET NULL"), nullable=True)
+    method = relationship("Method", lazy="raise")
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
     capacity = Column(Integer, nullable=False, default=1)
