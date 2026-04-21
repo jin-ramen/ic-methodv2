@@ -1,9 +1,12 @@
 fastapi
 uvicorn[standard]
 notion-client
+pydantic[email]
 pydantic-settings
 sqlalchemy
 alembic
 psycopg
 pytest
 pytest-postgresql
+pytest-asyncio
+httpx

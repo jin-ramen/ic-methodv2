@@ -50,6 +50,7 @@ class Booking(Base):
     __tablename__ = "bookings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    idempotency_key = Column(String(100), nullable=True, unique=True)
     resource_id = Column(UUID(as_uuid=True), ForeignKey("resources.id", ondelete="RESTRICT"), nullable=False)
     customer_email = Column(String(320), nullable=False)
     customer_name = Column(String(200), nullable=False)

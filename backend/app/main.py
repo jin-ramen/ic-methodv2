@@ -5,7 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from app.core.config import settings
-from app.notion.routes import router as notion_router
+from app.notion.router import router as notion_router
+from app.booking.router import router as booking_router
 
 app = FastAPI()
 
@@ -17,6 +18,7 @@ app.add_middleware(
 )
 
 app.include_router(notion_router)
+app.include_router(booking_router)
 
 DIST = Path(__file__).parent / "frontend" / "dist"
 if (DIST / "assets").exists():
