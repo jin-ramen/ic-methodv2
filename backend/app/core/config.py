@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     studio_db_id: str
 
     # Database
-    database_url: str = "postgresql+psycopg://postgres:dev@localhost:5432/booking"
+    database_url: str = "postgresql+asyncpg://postgres:dev@localhost:5432/booking"
 
     # App
     cors_origins: list[str] = ["http://localhost:5173"]

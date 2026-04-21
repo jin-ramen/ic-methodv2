@@ -4,17 +4,19 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
 
-from app.api.v1.endpoints import notion_cms
+from app.routes import notion_cms
+from app.routes import booking
 
 
 app = FastAPI()
 
 app.include_router(notion_cms.router)
+app.include_router(booking.router)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
