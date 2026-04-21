@@ -11,8 +11,12 @@
 
   .flow {
     border-radius: 24px 4px 24px 4px;
-    
   }
+
+  .modal {
+    border-radius: 24px 24px 24px 24px;
+  }
+
 
   .cal {
     /* clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); */
@@ -74,6 +78,8 @@
   --animate-text-intro: textIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-fade-in: fadeIn 0.5s ease-in forwards;
   --animate-fade-out: fadeOut 0.3s ease-out forwards;
+  --animate-modal-in: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-modal-out: modalOut 0.2s ease-in forwards;
   --animate-breathe: breathe 8s ease-in-out infinite;
   --animate-breatheslow: breathe 10s ease-in-out infinite;
   --animate-breathefast: breathe 6s ease-in-out infinite;
@@ -102,6 +108,16 @@
 @keyframes slideDown {
   0%   { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(60px); }
+}
+
+@keyframes modalIn {
+  0%   { opacity: 0; transform: scale(0.96) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modalOut {
+  0%   { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.96) translateY(8px); }
 }
 
 @keyframes breathe {

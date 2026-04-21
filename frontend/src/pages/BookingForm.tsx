@@ -130,7 +130,7 @@ export default function BookingForm() {
     );
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center px-5 py-0 md:py-16">
+        <div className="flex-1 flex flex-col items-center justify-center px-5">
             <div className={`bg-wood-accent w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
                 {/* Mobile: back link, flow info, form */}
                 <div className="md:hidden flex flex-col gap-10">
