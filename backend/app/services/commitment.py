@@ -1,8 +1,18 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 from app.models.models import Flow, Commitment
+
+
+async def list_commitments(db: AsyncSession) -> list[Commitment]:
+    result = await db.execute(
+        select(Commitment)
+        .join(Flow, Commitment.flow_id == Flow.id)
+        .options(joinedload(Commitment.flow))
+        .order_by(Flow.start_time)
+    )
+    return result.scalars().all()
 
 async def create_commitment(
     db: AsyncSession,
@@ -22,11 +32,6 @@ async def create_commitment(
         notes=notes,
     )
     db.add(commitment)
-    await db.execute(
-        update(Flow)
-        .where(Flow.id == flow_id, Flow.capacity > 0)
-        .values(capacity=Flow.capacity - 1)
-    )
     await db.commit()
     await db.refresh(commitment)
     return commitment

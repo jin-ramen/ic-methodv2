@@ -8,7 +8,10 @@ type Props = {
 }
 
 export default function DayContent({ flows, onSelect, index = 0 }: Props) {
-    const sorted = [...flows].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+    const now = new Date();
+    const sorted = [...flows]
+        .filter(f => new Date(f.start_time) > now)
+        .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
 
     return (
         <div className="flex flex-col gap-3">
@@ -36,7 +39,7 @@ export default function DayContent({ flows, onSelect, index = 0 }: Props) {
                                     <p className="font-didot text-wood-text/50 text-xs tracking-widest mt-1">{flow.instructor}</p>
                                 )}
                                 <p className="font-didot text-wood-text/30 text-xs mt-1">
-                                    {flow.capacity} spot{flow.capacity !== 1 ? 's' : ''}
+                                    {flow.spots_remaining} spot{flow.spots_remaining !== 1 ? 's' : ''}
                                 </p>
                             </div>
                             <div className="text-right shrink-0">

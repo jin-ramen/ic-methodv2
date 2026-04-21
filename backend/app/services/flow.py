@@ -1,9 +1,9 @@
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
-from app.models.models import Flow
+from app.models.models import Flow, Commitment
 
 
 async def create_flow(
@@ -27,12 +27,19 @@ async def create_flow(
     return flow
 
 
-async def list_flows(db: AsyncSession) -> list[Flow]:
+async def list_flows(db: AsyncSession) -> list[tuple[Flow, int]]:
+    booked = (
+        select(func.count())
+        .where(Commitment.flow_id == Flow.id)
+        .correlate(Flow)
+        .scalar_subquery()
+    )
+    remaining = (Flow.capacity - booked).label("spots_remaining")
     result = await db.execute(
-        select(Flow)
-        .where(Flow.capacity > 0)
+        select(Flow, remaining)
+        .where(remaining > 0)
         .options(selectinload(Flow.method))
         .order_by(Flow.start_time)
     )
-    return result.scalars().all()
+    return result.all()
 

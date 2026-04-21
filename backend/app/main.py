@@ -5,20 +5,25 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 
 from app.routes import notion_cms
-from app.routes import booking
+from app.routes import flows
+from app.routes import commitments
 
 
 app = FastAPI()
 
-app.include_router(notion_cms.router)
-app.include_router(booking.router)
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_methods=["GET", "POST"],
+    allow_origins=[
+        "http://localhost:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(notion_cms.router)
+app.include_router(flows.router)
+app.include_router(commitments.router)
 
 DIST = Path(__file__).parent / "frontend" / "dist"
 if (DIST / "assets").exists():
