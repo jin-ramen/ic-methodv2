@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toDateKey } from '../utils/dateUtils'
 
 type Props = {
@@ -19,11 +19,16 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
 
     const handleClose = () => setClosing(true);
 
+    useEffect(() => {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        meta?.setAttribute('content', '#88847d');
+        return () => {
+            meta?.setAttribute('content', '#e3ddcf');
+        };
+    }, []);
+
     const handleAnimationEnd = () => {
-        if (closing) {
-            document.body.style.backgroundColor = '#e3ddcf';
-            onClose();
-        }
+        if (closing) onClose();
     };
 
     const maxDate = new Date(today);

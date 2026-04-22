@@ -18,7 +18,7 @@ function App() {
   const { data: flows, error: errorFlows, loading: loadingFlows, refetch: refetchFlows } = useFetch<FlowType[]>('/api/flows');
 
   const [shouldAnimate, setShouldAnimate] = useState(() => {
-    return !localStorage.getItem('introSeen');
+    return !localSe.getItem('introSeen');
   });
 
   const handleIntroComplete = () => {
