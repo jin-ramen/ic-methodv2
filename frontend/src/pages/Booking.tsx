@@ -79,7 +79,7 @@ export default function Booking({ data, error }: Props) {
                 {error && <p className="font-didot text-red-400 text-xs tracking-widest shrink-0">{error}</p>}
 
                 {/* Mobile: single day view */}
-                <div className="md:hidden flex flex-col flex-1 overflow-hidden">
+                <div className="lg:hidden flex flex-col flex-1 overflow-hidden">
                     <div className="flex items-center justify-between mb-6 shrink-0">
                         <button
                             onClick={() => { setOffset(o => Math.max(0, o - 1)); setShowPicker(false); }}
@@ -110,7 +110,7 @@ export default function Booking({ data, error }: Props) {
                 </div>
 
                 {/* Desktop: 5-day column view */}
-                <div className="hidden md:flex flex-col flex-1 overflow-hidden">
+                <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
                     <div className="flex justify-between mb-6 shrink-0">
                         <button
                             onClick={() => { setOffset(o => Math.max(0, o - 5)); setShowPicker(false); }}

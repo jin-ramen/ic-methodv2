@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 from uuid import UUID
 from datetime import datetime
 
@@ -10,6 +10,12 @@ class FlowCreate(BaseModel):
     capacity: int = 1
     instructor: str | None = None
 
+    @model_validator(mode="after")
+    def end_after_start(self):
+        if self.end_time <= self.start_time:
+            raise ValueError("end_time must be after start_time")
+        return self
+
 
 class FlowUpdate(BaseModel):
     method_id: UUID | None = None
@@ -17,6 +23,12 @@ class FlowUpdate(BaseModel):
     end_time: datetime | None = None
     capacity: int | None = None
     instructor: str | None = None
+
+    @model_validator(mode="after")
+    def end_after_start(self):
+        if self.start_time is not None and self.end_time is not None and self.end_time <= self.start_time:
+            raise ValueError("end_time must be after start_time")
+        return self
 
 
 class FlowResponse(BaseModel):
