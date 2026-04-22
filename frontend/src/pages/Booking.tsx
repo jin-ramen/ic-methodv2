@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { FlowType } from '../types/flow'
 import { toDateKey } from '../utils/dateUtils'
@@ -51,12 +51,15 @@ export default function Booking({ data, error, loading }: Props) {
         return d;
     };
 
-    const flowsByDate = (data ?? []).reduce<Record<string, FlowType[]>>((acc, flow) => {
-        const key = toDateKey(flow.start_time);
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(flow);
-        return acc;
-    }, {});
+    const flowsByDate = useMemo(
+        () => (data ?? []).reduce<Record<string, FlowType[]>>((acc, flow) => {
+            const key = toDateKey(flow.start_time);
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(flow);
+            return acc;
+        }, {}),
+        [data]
+    );
 
     const handleSelect = (flow: FlowType) => {
         navigate(`/booking/${flow.id}`, { state: { flow } });
@@ -67,7 +70,7 @@ export default function Booking({ data, error, loading }: Props) {
             className="cal flex flex-col px-5 md:px-15 overflow-hidden"
             style={{ height: calHeight }}
         >
-            <div className="flex-1 min-h-0 flex flex-col bg-wood-accent/95 px-6 py-8 md:px-10 md:py-5 opacity-0 animate-fade-in overflow-hidden" style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
+            <div className="flex-1 min-h-0 flex flex-col bg-wood-accent/95 px-6 py-6 md:px-10 md:py-5 opacity-0 animate-fade-in overflow-hidden rounded-xl" style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
                 <div className="hidden md:flex items-center justify-between mb-10 shrink-0">
                     <h1 className="font-cormorant text-wood-text text-3xl md:text-4xl tracking-wide">Create a Commitment</h1>
                     <button onClick={() => setShowPicker(p => !p)} className="focus:outline-none">
@@ -79,11 +82,7 @@ export default function Booking({ data, error, loading }: Props) {
 
                 {error && <p className="font-didot text-red-400 text-xs tracking-widest shrink-0">{error}</p>}
 
-                {/* Mobile: single day view */}
                 <div className="lg:hidden flex flex-col flex-1 overflow-hidden">
-                    {/* <p className="font-didot text-wood-text/50 text-xs tracking-widest text-center mb-6 shrink-0">
-                        {getDate(offset).toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric' })}
-                    </p> */}
                     <DayHeader date={getDate(offset)} index={0} onIconClick={() => setShowPicker(p => !p)} />
                     <div className="flex-1 overflow-y-auto no-scrollbar mt-3">
                         <DayContent
@@ -111,7 +110,6 @@ export default function Booking({ data, error, loading }: Props) {
                     </div>
                 </div>
 
-                {/* Desktop: 5-day column view */}
                 <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
                     <div className="flex justify-between mb-6 shrink-0">
                         <button

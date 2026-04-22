@@ -9,7 +9,7 @@ type Props = {
 export default function DayHeader({ date, index = 0, onIconClick }: Props) {
     return (
         <div
-            className="pb-3 border-b border-wood-text/20 opacity-0 animate-text-intro flex items-stretch justify-between"
+            className="pb-3 border-b border-wood-text/20 opacity-0 animate-text-in flex items-stretch justify-between"
             style={{ animationDelay: `${index * 0.1}s` }}
         >
             <div>

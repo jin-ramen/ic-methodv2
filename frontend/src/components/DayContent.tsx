@@ -50,7 +50,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
         <div className="flex flex-col gap-4">
             {!hasAny ? (
                 <p
-                    className="font-didot text-wood-text/30 text-xs tracking-widest opacity-0 animate-text-intro"
+                    className="font-didot text-wood-text/30 text-xs tracking-widest opacity-0 animate-text-in"
                     style={{ animationDelay: `${index * 0.04}s` }}
                 >
                     No sessions
@@ -58,7 +58,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
             ) : (
                 PERIODS.filter(p => grouped[p].length > 0).map(period => (
                     <div key={period}>
-                        <p className="font-didot text-wood-text/30 text-xs tracking-widest uppercase mb-2 opacity-0 animate-text-intro"
+                        <p className="font-didot text-wood-text/30 text-xs tracking-widest uppercase mb-2 opacity-0 animate-text-in"
                             style={{ animationDelay: `${index * 0.04}s` }}
                         >
                             {period}
@@ -71,7 +71,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                     key={flow.id}
                                     onClick={() => !fullyBooked && onSelect(flow)}
                                     disabled={fullyBooked}
-                                    className={`flow text-left p-3 border py-6 transition-all duration-200 opacity-0 animate-text-intro ${
+                                    className={`flow text-left p-3 border py-6 transition-all duration-200 opacity-0 animate-text-in ${
                                         fullyBooked
                                             ? 'bg-wood-dark/20 border-wood-text/5 cursor-not-allowed'
                                             : 'bg-wood-dark/40 border-wood-text/10 hover:border-wood-text/40 hover:bg-wood-dark/60'

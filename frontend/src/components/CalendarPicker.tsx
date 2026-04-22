@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { toDateKey } from '../utils/dateUtils'
 
 type Props = {
@@ -18,18 +18,6 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
     const [closing, setClosing] = useState(false);
 
     const handleClose = () => setClosing(true);
-
-    useEffect(() => {
-        const setThemeColor = (color: string) => {
-            document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
-            const meta = document.createElement('meta');
-            meta.name = 'theme-color';
-            meta.content = color;
-            document.head.appendChild(meta);
-        };
-        setThemeColor('#88847d');
-        return () => setThemeColor('#e3ddcf');
-    }, []);
 
     const handleAnimationEnd = () => {
         if (closing) onClose();
@@ -59,13 +47,13 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
     const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="lg:bg-black/40 fixed inset-0 z-50 flex items-center justify-center">
             <div
-                className={`absolute inset-0 bg-black/40 ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
+                className={`absolute inset-0 ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
                 onClick={handleClose}
             />
             <div
-                className={`modal relative bg-wood-accent/90 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                className={`modal relative bg-wood-dark/80 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
                 style={{ width: 320, minHeight: 360 }}
                 onAnimationEnd={handleAnimationEnd}
             >

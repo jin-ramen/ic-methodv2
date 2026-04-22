@@ -33,7 +33,7 @@ export default function People({ data: team, error }: PeopleProps) {
             {team.map((member, index) => (
                 <div
                     key={index}
-                    className="opacity-0 animate-text-intro fill-both"
+                    className="opacity-0 animate-text-in fill-both"
                     style={{ animationDelay: `${index * 0.2}s` }}
                 >
                     <Card

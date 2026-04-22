@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
+export function Header() {
 
     const [isOpen, setIsOpen] = useState(false);
     const { pathname } = useLocation();
@@ -26,24 +26,16 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
 
     return (
         <>
-            <header className={`relative z-50 px-5 py-5 md:px-10 md:py-10 pb-10 ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
+            <header className="relative z-50 px-5 py-5 md:px-10 md:py-10 pb-10">
                 <div className="flex items-center justify-between relative">
-                    {/* Name */}
                     <Link to="/" className="font-cormorant text-3xl md:text-4xl text-wood-accent absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
                         IC Method.
                     </Link>
-                    {/* Links (Desktop View) */}
                     <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 flex-row items-center gap-12">
                             <Link to="/" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>About</Link>
                             <Link to="/people" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/people' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>People</Link>
                             <Link to="/studio" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/studio' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>Studio</Link>
                     </div>
-                    {/* Book button (Desktop) */}
-                    <Link to="/booking" className="hidden md:inline-flex items-center gap-2 font-didot text-xs tracking-[0.2em] uppercase bg-wood-accent text-wood-text hover:bg-wood-dark transition-colors duration-300 py-2.5 px-6 rounded-xs group">
-                        <span>Book</span>
-                        <span className="text-wood-text/40 text-[10px] transition-transform duration-300 group-hover:translate-x-1">→</span>
-                    </Link>
-                    {/* Hamburger Bar */}
                     <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ml-auto ${isOpen ? 'hamburger-toggle' : ''}`}>
                         <div className="relative w-4 h-0.5 rounded-full bg-wood-accent
                                             before:content-[''] before:absolute before:w-4 before:h-0.5 before:rounded-full before:-translate-y-1.5 before:bg-wood-accent
@@ -54,7 +46,6 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
                     </div>
                 </div>
             </header>
-            {/* Links (Mobile View) */}
             <div className={`fixed inset-0 z-40 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 <div className="flex flex-col bg-wood-light items-center justify-center h-full gap-5">
                     <Link to="/" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark md:opacity-100 ${pathname === '/' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>About</Link>
@@ -67,10 +58,9 @@ export function Header({ shouldAnimate }: { shouldAnimate: boolean }) {
     )
 }
 
-export function Footer({ shouldAnimate }: { shouldAnimate: boolean }) {
+export function Footer() {
     return (
-        <footer className={`relative z-40 px-5 py-5 md:px-10 md:py-10 pt-10 flex justify-between items-end ${shouldAnimate ? 'opacity-0 animate-text-intro [animation-delay:5000ms]' : ''}`}>
-            {/* Socials */}
+        <footer className="relative z-40 px-5 py-5 md:px-10 md:py-10 pt-10 flex justify-between items-end">
             <div className="flex flex-row gap-6">
                 <a href="https://www.instagram.com/icmethod_official/" target="_blank" className="group">
                     <svg className="w-6 h-6" viewBox="3 3 26 26" xmlns="http://www.w3.org/2000/svg">
@@ -97,7 +87,6 @@ export function Footer({ shouldAnimate }: { shouldAnimate: boolean }) {
                     </svg>
                 </a>
             </div>
-            {/* Address */}
             <div className="font-didot text-right text-[clamp(0.8rem,1.3vw,1.2rem)] text-wood-accent">
                 <p><span className="md:inline ">434 Burwood Rd,</span><br className="md:hidden" /><span className="md:inline"> Hawthorn VIC 3122</span></p>
             </div>

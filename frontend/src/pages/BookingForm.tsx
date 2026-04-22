@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import type { FlowType } from '../types/flow'
-
-function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true });
-}
+import { formatTime } from '../utils/dateUtils'
 
 function formatFullDate(iso: string) {
     return new Date(iso).toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -15,7 +12,7 @@ const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-wid
 
 function FlowInfo({ flow }: { flow: FlowType }) {
     return (
-        <div className="flow bg-wood-dark/80 px-6 py-6 flex flex-col gap-3 opacity-0 animate-text-intro" style={{ animationDelay: '0.1s' }}>
+        <div className="flow bg-wood-dark/80 px-6 py-6 flex flex-col gap-3 opacity-0 animate-text-in" style={{ animationDelay: '0.1s' }}>
             <p className="font-didot text-wood-text/40 text-xs tracking-widest uppercase">Your Flow</p>
             <h2 className="font-cormorant text-wood-text text-4xl leading-tight">
                 {formatTime(flow.start_time)}<br />
@@ -146,7 +143,6 @@ export default function BookingForm({ onBooked }: Props) {
     return (
         <div className="flex-1 flex flex-col items-center justify-center px-5">
             <div className={`bg-wood-accent/95 w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
-                {/* Mobile: back link, flow info, form */}
                 <div className="md:hidden flex flex-col gap-10">
                     <button type="button" onClick={() => navigate('/booking')} className="font-didot text-wood-text/40 text-xs tracking-widest text-left">
                         ← Back to calender
@@ -155,7 +151,6 @@ export default function BookingForm({ onBooked }: Props) {
                     {FormFields}
                 </div>
 
-                {/* Desktop: spacer | form (center) | flow info (right) */}
                 <div className="hidden md:grid md:grid-cols-3 gap-16">
                     <div />
                     {FormFields}
