@@ -11,9 +11,11 @@ class FlowCreate(BaseModel):
     instructor: str | None = None
 
     @model_validator(mode="after")
-    def end_after_start(self):
+    def validate_times(self):
         if self.end_time <= self.start_time:
             raise ValueError("end_time must be after start_time")
+        if self.start_time.date() != self.end_time.date():
+            raise ValueError("start_time and end_time must be on the same date")
         return self
 
 
@@ -25,9 +27,12 @@ class FlowUpdate(BaseModel):
     instructor: str | None = None
 
     @model_validator(mode="after")
-    def end_after_start(self):
-        if self.start_time is not None and self.end_time is not None and self.end_time <= self.start_time:
-            raise ValueError("end_time must be after start_time")
+    def validate_times(self):
+        if self.start_time is not None and self.end_time is not None:
+            if self.end_time <= self.start_time:
+                raise ValueError("end_time must be after start_time")
+            if self.start_time.date() != self.end_time.date():
+                raise ValueError("start_time and end_time must be on the same date")
         return self
 
 
