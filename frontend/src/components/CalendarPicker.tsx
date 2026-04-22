@@ -19,6 +19,13 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
 
     const handleClose = () => setClosing(true);
 
+    const handleAnimationEnd = () => {
+        if (closing) {
+            document.body.style.backgroundColor = '#e3ddcf';
+            onClose();
+        }
+    };
+
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + maxDays);
 
@@ -51,7 +58,7 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
             <div
                 className={`modal relative bg-wood-accent/90 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
                 style={{ width: 320, minHeight: 360 }}
-                onAnimationEnd={closing ? onClose : undefined}
+                onAnimationEnd={handleAnimationEnd}
             >
                 <div className="flex items-center justify-between mb-4">
                     <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">←</button>
