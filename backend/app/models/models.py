@@ -34,7 +34,7 @@ class Commitment(Base): # booking
     __tablename__ = "commitment"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    flow_id = Column(UUID(as_uuid=True), ForeignKey("flow.id", ondelete="CASCADE"))
+    flow_id = Column(UUID(as_uuid=True), ForeignKey("flow.id", ondelete="RESTRICT"))
     flow = relationship("Flow", lazy="raise")
     first_name = Column(String(255), nullable=False)
     last_name = Column(String(255), nullable=False)

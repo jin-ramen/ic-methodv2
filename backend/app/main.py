@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 
 from app.routes import notion_cms
+from app.routes import methods
 from app.routes import flows
 from app.routes import commitments
 
@@ -22,6 +23,7 @@ app.add_middleware(
 )
 
 app.include_router(notion_cms.router)
+app.include_router(methods.router)
 app.include_router(flows.router)
 app.include_router(commitments.router)
 
