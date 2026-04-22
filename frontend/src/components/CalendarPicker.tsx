@@ -45,11 +45,11 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div
-                className={`absolute inset-0 bg-black/40 ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
+                className={`absolute inset-0 ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
                 onClick={handleClose}
             />
             <div
-                className={`modal relative bg-wood-accent border border-wood-text/20 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                className={`modal relative bg-wood-dark/90 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
                 style={{ width: 320, height: 360 }}
                 onAnimationEnd={closing ? onClose : undefined}
             >
