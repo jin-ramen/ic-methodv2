@@ -100,8 +100,8 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
                     })}
                 </div>
                 <div className="flex items-center justify-between mt-4 md:hidden">
-                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity">←</button>
-                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity">→</button>
+                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/15 disabled:opacity-20 disabled:active:bg-transparent text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-colors">←</button>
+                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/15 disabled:opacity-20 disabled:active:bg-transparent text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-colors">→</button>
                 </div>
             </div>
         </div>

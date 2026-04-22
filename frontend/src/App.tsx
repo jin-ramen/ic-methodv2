@@ -18,11 +18,11 @@ function App() {
   const { data: flows, error: errorFlows, loading: loadingFlows, refetch: refetchFlows } = useFetch<FlowType[]>('/api/flows');
 
   const [shouldAnimate, setShouldAnimate] = useState(() => {
-    return !localSe.getItem('introSeen');
+    return !sessionStorage.getItem('introSeen');
   });
 
   const handleIntroComplete = () => {
-    localStorage.setItem('introSeen', '1');
+    sessionStorage.setItem('introSeen', '1');
     setShouldAnimate(false);
   };
 
