@@ -81,25 +81,9 @@ export default function Booking({ data, error, loading }: Props) {
 
                 {/* Mobile: single day view */}
                 <div className="lg:hidden flex flex-col flex-1 overflow-hidden">
-                    <div className="flex items-center justify-between mb-6 shrink-0">
-                        <button
-                            onClick={() => { setOffset(o => Math.max(0, o - 1)); setShowPicker(false); }}
-                            disabled={offset === 0}
-                            className="font-didot text-wood-text disabled:opacity-20 text-xs tracking-widest transition-opacity"
-                        >
-                            ← Prev
-                        </button>
-                        <p className="font-didot text-wood-text/50 text-xs tracking-widest">
-                            {getDate(offset).toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric' })}
-                        </p>
-                        <button
-                            onClick={() => { setOffset(o => Math.min(MAX_DAYS, o + 1)); setShowPicker(false); }}
-                            disabled={offset >= MAX_DAYS}
-                            className="font-didot text-wood-text disabled:opacity-20 text-xs tracking-widest transition-opacity"
-                        >
-                            Next →
-                        </button>
-                    </div>
+                    {/* <p className="font-didot text-wood-text/50 text-xs tracking-widest text-center mb-6 shrink-0">
+                        {getDate(offset).toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric' })}
+                    </p> */}
                     <DayHeader date={getDate(offset)} index={0} onIconClick={() => setShowPicker(p => !p)} />
                     <div className="flex-1 overflow-y-auto no-scrollbar mt-3">
                         <DayContent
@@ -108,6 +92,22 @@ export default function Booking({ data, error, loading }: Props) {
                             index={0}
                             loading={loading}
                         />
+                    </div>
+                    <div className="flex items-center justify-between mt-6 shrink-0">
+                        <button
+                            onClick={() => { setOffset(o => Math.max(0, o - 1)); setShowPicker(false); }}
+                            disabled={offset === 0}
+                            className="font-didot text-wood-text/70 hover:text-wood-text disabled:opacity-20 text-xl border border-wood-text/30 hover:border-wood-text/60 rounded-xl disabled:hover:border-wood-text/30 w-12 h-12 flex items-center justify-center leading-none transition-colors"
+                        >
+                            ‹
+                        </button>
+                        <button
+                            onClick={() => { setOffset(o => Math.min(MAX_DAYS, o + 1)); setShowPicker(false); }}
+                            disabled={offset >= MAX_DAYS}
+                            className="font-didot text-wood-text/70 hover:text-wood-text disabled:opacity-20 text-xl border border-wood-text/30 hover:border-wood-text/60 rounded-xl disabled:hover:border-wood-text/30 w-12 h-12 flex items-center justify-center leading-none transition-colors"
+                        >
+                            ›
+                        </button>
                     </div>
                 </div>
 

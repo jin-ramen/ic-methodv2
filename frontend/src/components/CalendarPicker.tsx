@@ -45,18 +45,18 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div
-                className={`absolute inset-0 ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
+                className={`absolute inset-0 bg-black/40 ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
                 onClick={handleClose}
             />
             <div
-                className={`modal relative bg-wood-dark/90 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
-                style={{ width: 320, height: 360 }}
+                className={`modal relative bg-wood-accent/90 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                style={{ width: 320, minHeight: 360 }}
                 onAnimationEnd={closing ? onClose : undefined}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity">←</button>
-                    <p className="font-cormorant text-wood-text text-lg tracking-wide">{monthLabel}</p>
-                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity">→</button>
+                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">←</button>
+                    <p className="font-cormorant text-wood-text text-lg tracking-wide w-full text-left md:text-center">{monthLabel}</p>
+                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">→</button>
                 </div>
                 <div className="grid grid-cols-7 mb-1">
                     {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
@@ -86,6 +86,10 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
                             </button>
                         );
                     })}
+                </div>
+                <div className="flex items-center justify-between mt-4 md:hidden">
+                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity">←</button>
+                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity">→</button>
                 </div>
             </div>
         </div>
