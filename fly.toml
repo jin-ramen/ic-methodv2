@@ -1,5 +1,5 @@
 # fly.toml app configuration file generated for ic-methodv2 on 2026-04-22T16:44:33+10:00
-#
+# github actions token
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
