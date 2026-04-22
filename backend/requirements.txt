@@ -5,3 +5,6 @@ pydantic-settings
 sqlalchemy
 asyncpg
 greenlet
+slowapi
+alembic
+psycopg[binary]

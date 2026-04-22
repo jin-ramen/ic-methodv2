@@ -28,7 +28,7 @@ app.include_router(methods.router)
 app.include_router(flows.router)
 app.include_router(commitments.router)
 
-DIST = Path(__file__).parent / "frontend" / "dist"
+DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 if (DIST / "assets").exists():
     app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
