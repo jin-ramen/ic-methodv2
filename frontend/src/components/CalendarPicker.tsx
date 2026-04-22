@@ -20,11 +20,15 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
     const handleClose = () => setClosing(true);
 
     useEffect(() => {
-        const meta = document.querySelector('meta[name="theme-color"]');
-        meta?.setAttribute('content', '#88847d');
-        return () => {
-            meta?.setAttribute('content', '#e3ddcf');
+        const setThemeColor = (color: string) => {
+            document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+            const meta = document.createElement('meta');
+            meta.name = 'theme-color';
+            meta.content = color;
+            document.head.appendChild(meta);
         };
+        setThemeColor('#88847d');
+        return () => setThemeColor('#e3ddcf');
     }, []);
 
     const handleAnimationEnd = () => {
@@ -100,8 +104,8 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
                     })}
                 </div>
                 <div className="flex items-center justify-between mt-4 md:hidden">
-                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/15 disabled:opacity-20 disabled:active:bg-transparent text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-colors">←</button>
-                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/15 disabled:opacity-20 disabled:active:bg-transparent text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-colors">→</button>
+                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/30 active:scale-75 active:shadow-inner disabled:opacity-20 disabled:active:bg-transparent disabled:active:scale-100 text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-all duration-75 ease-out">←</button>
+                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/30 active:scale-75 active:shadow-inner disabled:opacity-20 disabled:active:bg-transparent disabled:active:scale-100 text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-all duration-75 ease-out">→</button>
                 </div>
             </div>
         </div>
