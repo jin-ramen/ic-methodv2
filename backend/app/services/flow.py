@@ -15,16 +15,11 @@ async def create_flow(db: AsyncSession, method_id: UUID | None, start_time: date
 
 
 async def list_flows(db: AsyncSession) -> list[tuple[Flow, int]]:
-    booked = (
-        select(func.count())
-        .where(Commitment.flow_id == Flow.id)
-        .correlate(Flow)
-        .scalar_subquery()
-    )
-    remaining = (Flow.capacity - booked).label("spots_remaining")
+    remaining = (Flow.capacity - func.count(Commitment.id)).label("spots_remaining")
     result = await db.execute(
         select(Flow, remaining)
-        .where(remaining > 0)
+        .outerjoin(Commitment, Commitment.flow_id == Flow.id)
+        .group_by(Flow.id)
         .options(selectinload(Flow.method))
         .order_by(Flow.start_time)
     )

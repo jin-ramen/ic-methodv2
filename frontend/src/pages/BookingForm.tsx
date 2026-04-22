@@ -32,7 +32,9 @@ function FlowInfo({ flow }: { flow: FlowType }) {
     );
 }
 
-export default function BookingForm() {
+type Props = { onBooked: () => void }
+
+export default function BookingForm({ onBooked }: Props) {
     useParams<{ flowId: string }>();
     const { state } = useLocation();
     const navigate = useNavigate();
@@ -68,7 +70,19 @@ export default function BookingForm() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ flow_id: flow.id, ...form }),
             });
+            if (res.status === 429) {
+                setErrorMsg('Too many attempts. Please wait a moment and try again.');
+                setStatus('error');
+                return;
+            }
+            if (res.status === 409) {
+                const body = await res.json().catch(() => ({}));
+                setErrorMsg(body.detail ?? 'This session is no longer available.');
+                setStatus('error');
+                return;
+            }
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            onBooked();
             setLeaving(true);
             setTimeout(() => setStatus('success'), 300);
         } catch (err) {

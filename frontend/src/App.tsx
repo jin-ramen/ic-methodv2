@@ -15,7 +15,7 @@ import { useFetch } from './utils/useFetch';
 function App() {
   const { data: team, error: errorPeople } = useFetch<PeopleType[]>('/api/people');
   const { data: photos, error: errorStudio } = useFetch<StudioType[]>('/api/studio');
-  const { data: flows, error: errorFlows } = useFetch<FlowType[]>('/api/flows');
+  const { data: flows, error: errorFlows, loading: loadingFlows, refetch: refetchFlows } = useFetch<FlowType[]>('/api/flows');
 
   const [shouldAnimate, setShouldAnimate] = useState(() => {
     return !localStorage.getItem('introSeen');
@@ -34,8 +34,8 @@ function App() {
           <Route index element={<About onIntroComplete={handleIntroComplete} shouldAnimate={shouldAnimate}/>} />
           <Route path="people" element={<People data={team} error={errorPeople} />} />
           <Route path="studio" element={<Studio data={photos} error={errorStudio} />} />
-          <Route path="booking" element={<Booking data={flows} error={errorFlows} />} />
-          <Route path="booking/:flowId" element={<BookingForm />} />
+          <Route path="booking" element={<Booking data={flows} error={errorFlows} loading={loadingFlows} />} />
+          <Route path="booking/:flowId" element={<BookingForm onBooked={refetchFlows} />} />
         </Route>
 
         {/* <Route path="/admin" element={<AdminLayout />}>

@@ -9,11 +9,12 @@ import DayContent from '../components/DayContent'
 type Props = {
     data: FlowType[] | null;
     error: string | null;
+    loading: boolean;
 }
 
 const MAX_DAYS = 90;
 
-export default function Booking({ data, error }: Props) {
+export default function Booking({ data, error, loading }: Props) {
     const [offset, setOffset] = useState(0);
     const [showPicker, setShowPicker] = useState(false);
     const [calHeight, setCalHeight] = useState<string>('auto');
@@ -105,6 +106,7 @@ export default function Booking({ data, error }: Props) {
                             flows={flowsByDate[toDateKey(getDate(offset))] ?? []}
                             onSelect={handleSelect}
                             index={0}
+                            loading={loading}
                         />
                     </div>
                 </div>
@@ -141,6 +143,7 @@ export default function Booking({ data, error }: Props) {
                                         flows={flowsByDate[toDateKey(date)] ?? []}
                                         onSelect={handleSelect}
                                         index={i}
+                                        loading={loading}
                                     />
                                 </div>
                             );

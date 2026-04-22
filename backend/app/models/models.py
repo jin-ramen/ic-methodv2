@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Numeric, ForeignKey, Time, Integer, DateTime, CheckConstraint
+    Column, String, Numeric, ForeignKey, Time, Integer, DateTime, CheckConstraint, UniqueConstraint, Index
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -31,6 +31,7 @@ class Flow(Base): # session
 
     __table_args__ = (
         CheckConstraint("end_time > start_time", name="ck_flow_end_after_start"),
+        Index("ix_flow_start_time", "start_time"),
     )
         
 
@@ -46,5 +47,10 @@ class Commitment(Base): # booking
     phone = Column(String(20), nullable=True)
     notes = Column(String(1000), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint("flow_id", "email", name="uq_commitment_flow_email"),
+        Index("ix_commitment_flow_id", "flow_id"),
+    )
 
 
