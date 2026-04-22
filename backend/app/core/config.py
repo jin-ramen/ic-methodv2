@@ -1,15 +1,13 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # Notion
-    notion_token: str
-    people_db_id: str
-    studio_db_id: str
-
-    # Database
-    database_url: str
+    notion_token: Optional[str] = None
+    people_db_id: Optional[str] = None
+    studio_db_id: Optional[str] = None
+    database_url: Optional[str] = None
 
     # App
     cors_origins: list[str] = ["http://localhost:5173"]

@@ -5,6 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from app.core.config import settings
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -52,13 +54,47 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+# def run_migrations_online() -> None:
+#     """Run migrations in 'online' mode.
+
+#     In this scenario we need to create an Engine
+#     and associate a connection with the context.
+
+#     """
+#     connectable = engine_from_config(
+#         config.get_section(config.config_ini_section, {}),
+#         prefix="sqlalchemy.",
+#         poolclass=pool.NullPool,
+#     )
+
+#     with connectable.connect() as connection:
+#         context.configure(
+#             connection=connection, target_metadata=target_metadata
+#         )
+
+#         with context.begin_transaction():
+#             context.run_migrations()
+
+import os
+
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+    # 1. Capture the URL from the Fly.io environment
+    url = os.environ.get("database_url")
+    
+    if url:
+        # Replace driver
+        url = url.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)
+        url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+        
+        # REMOVE problematic SSL params entirely for the migration
+        if "?" in url:
+            base_url, query = url.split("?", 1)
+            # Filter out any param that starts with 'ssl' (like ssl= or sslmode=)
+            clean_params = [p for p in query.split("&") if not p.startswith("ssl")]
+            url = base_url + ("?" + "&".join(clean_params) if clean_params else "")
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
+        config.set_main_option("sqlalchemy.url", url)
 
-    """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
@@ -67,11 +103,16 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, 
+            target_metadata=target_metadata
         )
 
         with context.begin_transaction():
             context.run_migrations()
+
+
+
+
 
 
 if context.is_offline_mode():

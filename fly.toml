@@ -1,10 +1,13 @@
-# fly.toml app configuration file generated for ic-methodv2 on 2026-04-19T12:44:50+10:00
+# fly.toml app configuration file generated for ic-methodv2 on 2026-04-22T16:44:33+10:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'ic-methodv2'
 primary_region = 'syd'
+
+[deploy]
+  release_command = "python -m alembic upgrade head"
 
 [build]
 
@@ -18,6 +21,5 @@ primary_region = 'syd'
 
 [[vm]]
   memory = '1gb'
-  cpu_kind = 'shared'
   cpus = 1
   memory_mb = 1024
