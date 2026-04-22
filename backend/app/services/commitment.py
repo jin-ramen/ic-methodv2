@@ -1,7 +1,6 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, func
-from sqlalchemy.orm import joinedload
 from app.models.models import Flow, Commitment
 
 
@@ -31,7 +30,6 @@ async def list_commitments(db: AsyncSession) -> list[Commitment]:
     result = await db.execute(
         select(Commitment)
         .join(Flow, Commitment.flow_id == Flow.id)
-        .options(joinedload(Commitment.flow))
         .order_by(Flow.start_time)
     )
     return result.scalars().all()

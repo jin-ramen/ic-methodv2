@@ -1,6 +1,5 @@
 from notion_client import Client
 from app.core.config import settings
-from app.core.cache import cached
 
 notion = Client(auth=settings.notion_token)
 

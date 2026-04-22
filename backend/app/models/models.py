@@ -1,14 +1,14 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Numeric, ForeignKey, Time, Integer, DateTime, CheckConstraint, UniqueConstraint, Index
+    Column, String, Numeric, ForeignKey, Integer, DateTime, CheckConstraint, UniqueConstraint, Index
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.session import Base
-import enum
 
-class Method(Base): # class type
+
+class Method(Base):
     __tablename__ = "method"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -17,7 +17,7 @@ class Method(Base): # class type
     description = Column(String(1000))
 
 
-class Flow(Base): # session
+class Flow(Base):
     __tablename__ = "flow"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -33,9 +33,9 @@ class Flow(Base): # session
         CheckConstraint("end_time > start_time", name="ck_flow_end_after_start"),
         Index("ix_flow_start_time", "start_time"),
     )
-        
 
-class Commitment(Base): # booking
+
+class Commitment(Base):
     __tablename__ = "commitment"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -50,7 +50,6 @@ class Commitment(Base): # booking
 
     __table_args__ = (
         UniqueConstraint("flow_id", "email", name="uq_commitment_flow_email"),
-        Index("ix_commitment_flow_id", "flow_id"),
     )
 
 

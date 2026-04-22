@@ -51,7 +51,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
             {!hasAny ? (
                 <p
                     className="font-didot text-wood-text/30 text-xs tracking-widest opacity-0 animate-text-intro"
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    style={{ animationDelay: `${index * 0.04}s` }}
                 >
                     No sessions
                 </p>
@@ -59,7 +59,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                 PERIODS.filter(p => grouped[p].length > 0).map(period => (
                     <div key={period}>
                         <p className="font-didot text-wood-text/30 text-xs tracking-widest uppercase mb-2 opacity-0 animate-text-intro"
-                            style={{ animationDelay: `${index * 0.1}s` }}
+                            style={{ animationDelay: `${index * 0.04}s` }}
                         >
                             {period}
                         </p>
@@ -76,7 +76,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                             ? 'bg-wood-dark/20 border-wood-text/5 cursor-not-allowed'
                                             : 'bg-wood-dark/40 border-wood-text/10 hover:border-wood-text/40 hover:bg-wood-dark/60'
                                     }`}
-                                    style={{ animationDelay: `${(index * 0.1) + (i * 0.08)}s` }}
+                                    style={{ animationDelay: `${(index * 0.04) + (i * 0.03)}s` }}
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div>

@@ -10,19 +10,18 @@ router = APIRouter(prefix="/api", tags=["flow"])
 
 @router.post("/flows", response_model=FlowResponse, status_code=status.HTTP_201_CREATED)
 async def post_flow(data: FlowCreate, db: AsyncSession = Depends(get_db)):
-    flow = await create_flow(db, method_id=data.method_id, start_time=data.start_time, end_time=data.end_time, capacity=data.capacity, instructor=data.instructor)
-    return FlowResponse.model_validate(flow).model_dump(mode="json")
+    return await create_flow(db, method_id=data.method_id, start_time=data.start_time, end_time=data.end_time, capacity=data.capacity, instructor=data.instructor)
 
 
 @router.get("/flows")
 async def get_flows(db: AsyncSession = Depends(get_db)):
-    results = []
-    for flow, spots_remaining in await list_flows(db):
+    def serialize(flow, spots_remaining):
         data = FlowResponse.model_validate(flow).model_dump(mode="json")
         data["method_name"] = flow.method.name if flow.method else None
         data["spots_remaining"] = spots_remaining
-        results.append(data)
-    return {"results": results}
+        return data
+
+    return {"results": [serialize(f, s) for f, s in await list_flows(db)]}
 
 
 @router.patch("/flows/{id}", response_model=FlowResponse)

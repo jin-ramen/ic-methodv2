@@ -13,7 +13,7 @@ async def post_method(data: MethodCreate, db: AsyncSession = Depends(get_db)):
     return await create_method(db, name=data.name, price=data.price, description=data.description)
 
 
-@router.get("/methods", response_model=dict)
+@router.get("/methods")
 async def get_methods(db: AsyncSession = Depends(get_db)):
     methods = await list_methods(db)
     return {"results": [MethodResponse.model_validate(m).model_dump(mode="json") for m in methods]}
