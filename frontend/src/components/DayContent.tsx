@@ -54,7 +54,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                 {[...Array(2)].map((_, i) => (
                     <div
                         key={i}
-                        className={`p-3 py-6 border animate-pulse ${t.skeleton}`}
+                        className={`p-3 py-6 border ${variant === 'dark' ? 'animate-pulse' : ''} ${t.skeleton}`}
                         style={{ animationDelay: `${i * 0.1}s` }}
                     />
                 ))}
@@ -66,7 +66,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
         <div className="flex flex-col gap-4">
             {!hasAny ? (
                 <p
-                    className={`font-didot text-xs tracking-widest opacity-0 animate-text-in ${t.empty}`}
+                    className={`font-didot text-xs tracking-widest ${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} ${t.empty}`}
                     style={{ animationDelay: `${index * 0.04}s` }}
                 >
                     No sessions
@@ -74,7 +74,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
             ) : (
                 PERIODS.filter(p => grouped[p].length > 0).map(period => (
                     <div key={period}>
-                        <p className={`font-didot text-xs tracking-widest uppercase mb-2 opacity-0 animate-text-in ${t.period}`}
+                        <p className={`font-didot text-xs tracking-widest uppercase mb-2 ${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} ${t.period}`}
                             style={{ animationDelay: `${index * 0.04}s` }}
                         >
                             {period}
@@ -86,7 +86,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                 return (
                                 <div
                                     key={flow.id}
-                                    className={`opacity-0 animate-text-in ${isPast ? '[&>button]:opacity-40' : ''}`}
+                                    className={`${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} ${isPast ? '[&>button]:opacity-40' : ''}`}
                                     style={{ animationDelay: `${(index * 0.04) + (i * 0.03)}s` }}
                                 >
                                 <button

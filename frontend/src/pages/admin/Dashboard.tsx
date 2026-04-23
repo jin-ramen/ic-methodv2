@@ -49,22 +49,30 @@ export default function Dashboard() {
                             <p className="font-didot text-xs text-wood-accent/60 tracking-wide">{dateLabel}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="inline-flex items-center gap-2 font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-300 py-3 px-6 rounded-xl active:scale-95"
-                    >
-                        + Add Session
-                    </button>
+                    <div className='flex flex-row gap-2'>
+                        <button
+                            // onClick={() -> setShowRuleModa(true)} TODO test
+                            className="flex-1 whitespace-nowrap inline-flex items-center justify-center font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-200 py-3 px-4 rounded-xl active:scale-95"
+                        >
+                            + RULE
+                        </button>
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="flex-1 whitespace-nowrap inline-flex items-center justify-center font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-200 py-3 px-4 rounded-xl active:scale-95"
+                        >
+                            + SESSION
+                        </button>
+                    </div>
                 </div>
-                <div className="py-6 flex flex-row justify-between">
-                    <button onClick={() => setOffset(offset - 1)} className="border border-color-wood-accent px-1 rounded-lg text-4xl font-didot text-wood-accent/50 hover:text-wood-dark shadow-sm hover:shadow-md transition-colors duration-200 leading-none">←</button>
+                <div className="py-6 flex flex-row justify-between gap-2">
+                    <button onClick={() => setOffset(offset - 1)} className="flex-1 border border-color-wood-accent px-1 rounded-lg text-4xl font-didot text-wood-accent/50 hover:text-wood-dark shadow-sm hover:shadow-md transition-colors duration-200 leading-none">←</button>
                     <button 
                         onClick={() => setOffset(0)} 
-                        className="flex-initial inline-flex items-center justify-center font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-200 py-3 px-6 rounded-xl active:scale-95"
+                        className="flex-1 whitespace-nowrap inline-flex items-center justify-center font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-200 py-3 px-6 rounded-xl active:scale-95"
                     >
                         Today
                     </button>
-                    <button onClick={() => setOffset(offset + 1)} className="border border-color-wood-accent px-1 rounded-lg text-4xl font-didot text-wood-accent/50 hover:text-wood-dark shadow-sm hover:shadow-md transition-colors duration-200 leading-none">→</button>
+                    <button onClick={() => setOffset(offset + 1)} className="flex-1 border border-color-wood-accent px-1 rounded-lg text-4xl font-didot text-wood-accent/50 hover:text-wood-dark shadow-sm hover:shadow-md transition-colors duration-200 leading-none">→</button>
                 </div>
 
                 {loading && <p className="font-didot text-sm text-wood-accent/50">Loading...</p>}

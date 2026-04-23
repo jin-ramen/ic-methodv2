@@ -15,7 +15,7 @@ export default function DayHeader({ date, index = 0, onIconClick, variant = 'dar
 
     return (
         <div
-            className={`pb-3 border-b opacity-0 animate-text-in flex items-stretch justify-between ${border}`}
+            className={`pb-3 border-b ${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} flex items-stretch justify-between ${border}`}
             style={{ animationDelay: `${index * 0.1}s` }}
         >
             <div>
