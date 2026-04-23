@@ -14,3 +14,12 @@ export function getDayLabel(date: Date): string {
     if (diff === 1) return 'Tomorrow';
     return date.toLocaleDateString('en-AU', { weekday: 'short' });
 }
+
+export function localDateStr(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+export function isoToTime(iso: string) {
+    const d = new Date(iso);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}

@@ -53,7 +53,7 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
                 onClick={handleClose}
             />
             <div
-                className={`modal relative bg-wood-dark/80 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                className={`modal relative bg-wood-dark/90 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
                 style={{ width: 320, minHeight: 360 }}
                 onAnimationEnd={handleAnimationEnd}
             >

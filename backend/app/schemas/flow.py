@@ -1,6 +1,8 @@
 from pydantic import BaseModel, ConfigDict, model_validator
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
+from datetime import timezone
+
 
 
 class FlowCreate(BaseModel):
@@ -12,10 +14,10 @@ class FlowCreate(BaseModel):
 
     @model_validator(mode="after")
     def validate_times(self):
-        if self.end_time <= self.start_time:
+        start = self.start_time.astimezone(timezone.utc)
+        end = self.end_time.astimezone(timezone.utc)
+        if end <= start:
             raise ValueError("end_time must be after start_time")
-        if self.start_time.date() != self.end_time.date():
-            raise ValueError("start_time and end_time must be on the same date")
         return self
 
 
@@ -29,10 +31,10 @@ class FlowUpdate(BaseModel):
     @model_validator(mode="after")
     def validate_times(self):
         if self.start_time is not None and self.end_time is not None:
-            if self.end_time <= self.start_time:
+            start = self.start_time.astimezone(timezone.utc)
+            end = self.end_time.astimezone(timezone.utc)
+            if end <= start:
                 raise ValueError("end_time must be after start_time")
-            if self.start_time.date() != self.end_time.date():
-                raise ValueError("start_time and end_time must be on the same date")
         return self
 
 

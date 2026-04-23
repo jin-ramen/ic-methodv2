@@ -27,8 +27,8 @@ async def post_commitment(request: Request, data: CommitmentCreate, db: AsyncSes
 
 
 @router.get("/commitments")
-async def get_commitments(db: AsyncSession = Depends(get_db)):
-    commitments = await list_commitments(db)
+async def get_commitments(db: AsyncSession = Depends(get_db), flow_id: UUID | None = None):
+    commitments = await list_commitments(db, flow_id=flow_id)
     return {"results": [CommitmentResponse.model_validate(c).model_dump(mode="json") for c in commitments]}
 
 

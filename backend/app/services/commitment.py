@@ -26,12 +26,11 @@ async def create_commitment(db: AsyncSession, flow_id: UUID, first_name: str, la
     return commitment
 
 
-async def list_commitments(db: AsyncSession) -> list[Commitment]:
-    result = await db.execute(
-        select(Commitment)
-        .join(Flow, Commitment.flow_id == Flow.id)
-        .order_by(Flow.start_time)
-    )
+async def list_commitments(db: AsyncSession, flow_id: UUID | None = None) -> list[Commitment]:
+    q = select(Commitment).join(Flow, Commitment.flow_id == Flow.id)
+    if flow_id:
+        q = q.where(Commitment.flow_id == flow_id)
+    result = await db.execute(q.order_by(Flow.start_time))
     return result.scalars().all()
 
 

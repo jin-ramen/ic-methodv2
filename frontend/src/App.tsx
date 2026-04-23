@@ -1,11 +1,16 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
+import AdminLayout from './layouts/AdminLayout'
+
 import About from './pages/About'
 import People from './pages/People'
 import Studio from './pages/Studio'
 import Booking from './pages/Booking'
 import BookingForm from './pages/BookingForm'
+
+import AdminDashBoard from './pages/admin/Dashboard'
+
 import type { PeopleType } from './types/people'
 import type { StudioType } from './types/studio'
 import type { FlowType } from './types/flow'
@@ -28,8 +33,10 @@ function App() {
           <Route path="booking/:flowId" element={<BookingForm onBooked={refetchFlows} />} />
         </Route>
 
-        {/* <Route path="/admin" element={<AdminLayout />}>
-        </Route> */}
+
+        <Route element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashBoard />} />
+        </Route>
 
       </Routes>
     </BrowserRouter>
