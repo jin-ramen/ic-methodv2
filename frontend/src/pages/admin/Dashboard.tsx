@@ -58,7 +58,12 @@ export default function Dashboard() {
                 </div>
                 <div className="py-6 flex flex-row justify-between">
                     <button onClick={() => setOffset(offset - 1)} className="border border-color-wood-accent px-1 rounded-lg text-4xl font-didot text-wood-accent/50 hover:text-wood-dark shadow-sm hover:shadow-md transition-colors duration-200 leading-none">←</button>
-                    <button onClick={() => setOffset(0)} className="p-3 rounded-lg text-sm font-didot bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-colors duration-200 leading-none">Today</button>
+                    <button 
+                        onClick={() => setOffset(0)} 
+                        className="flex-initial inline-flex items-center justify-center font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-200 py-3 px-6 rounded-xl active:scale-95"
+                    >
+                        Today
+                    </button>
                     <button onClick={() => setOffset(offset + 1)} className="border border-color-wood-accent px-1 rounded-lg text-4xl font-didot text-wood-accent/50 hover:text-wood-dark shadow-sm hover:shadow-md transition-colors duration-200 leading-none">→</button>
                 </div>
 

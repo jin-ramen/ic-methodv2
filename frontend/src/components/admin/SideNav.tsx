@@ -21,7 +21,7 @@ export default function SideNav() {
     ];
 
     return (
-        <aside className="fixed top-0 left-0 h-[100dvh] w-16 md:w-64 bg-wood-light border-r border-wood-accent/20 flex flex-col items-center md:items-start py-8 px-3 md:px-6 z-40">
+        <aside className="fixed top-0 left-0 h-[100dvh] w-16 md:w-64 bg-wood-light border-r border-wood-accent/20 flex flex-col items-center md:items-start py-8 px-3 md:px-6">
             <Link to="/dashboard" className="flex md:hidden text-left mb-12 font-cormorant text-3xl text-wood-accent">
                 IC
             </Link>
