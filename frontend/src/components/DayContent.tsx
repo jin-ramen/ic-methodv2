@@ -23,7 +23,7 @@ const PERIODS: Period[] = ['Morning', 'Afternoon', 'Evening'];
 export default function DayContent({ flows, onSelect, index = 0, loading = false, variant = 'dark' }: Props) {
     const now = new Date();
     const sorted = [...flows]
-        .filter(f => new Date(f.start_time) > now)
+        .filter(f => variant === 'light' || new Date(f.start_time) > now)
         .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
 
     const grouped = PERIODS.reduce<Record<Period, FlowType[]>>((acc, p) => {
@@ -82,13 +82,16 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                         <div className="flex flex-col gap-3">
                             {grouped[period].map((flow, i) => {
                                 const fullyBooked = flow.spots_remaining === 0;
+                                const isPast = new Date(flow.start_time) <= now;
                                 return (
-                                <button
+                                <div
                                     key={flow.id}
-                                    onClick={() => !fullyBooked && onSelect(flow)}
-                                    disabled={fullyBooked}
-                                    className={`flow text-left p-3 border py-6 transition-all duration-200 opacity-0 animate-text-in ${fullyBooked ? t.cardFull : t.cardOk}`}
+                                    className={`opacity-0 animate-text-in ${isPast ? '[&>button]:opacity-40' : ''}`}
                                     style={{ animationDelay: `${(index * 0.04) + (i * 0.03)}s` }}
+                                >
+                                <button
+                                    onClick={() => onSelect(flow)}
+                                    className={`flow w-full text-left p-3 border py-6 transition-all duration-200 ${fullyBooked ? t.cardFull : t.cardOk}`}
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div>
@@ -112,6 +115,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                         </div>
                                     </div>
                                 </button>
+                                </div>
                                 );
                             })}
                         </div>
