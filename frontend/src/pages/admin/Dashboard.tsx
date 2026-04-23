@@ -38,7 +38,7 @@ export default function Dashboard() {
 
     return (
         <>
-        <div className="relative flex flex-col md:flex-row gap-6 p-6 md:h-full md:overflow-hidden" onClick={() => setSelectedSession(null)}>
+        <div className="relative flex flex-col md:flex-row gap-6 p-6 min-h-screen md:min-h-0 md:h-full md:overflow-hidden bg-wood-dark/5" onClick={() => setSelectedSession(null)}>
 
             {/* Left — Today's Flows */}
             <section className="w-full md:w-5/12 shrink-0 flex flex-col md:min-h-0">

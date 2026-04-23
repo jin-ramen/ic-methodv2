@@ -4,6 +4,7 @@ import CalendarPicker from '../CalendarPicker';
 
 const titleMap: Record<string, string> = {
     '/dashboard': 'Dashboard',
+    '/schedule': 'Schedule',
 };
 
 type Props = {

@@ -10,6 +10,7 @@ import Booking from './pages/Booking'
 import BookingForm from './pages/BookingForm'
 
 import AdminDashBoard from './pages/admin/Dashboard'
+import AdminSchedule from './pages/admin/Schedule'
 
 import type { PeopleType } from './types/people'
 import type { StudioType } from './types/studio'
@@ -36,6 +37,7 @@ function App() {
 
         <Route element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashBoard />} />
+          <Route path="schedule" element={<AdminSchedule />} />
         </Route>
 
       </Routes>
