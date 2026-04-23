@@ -72,11 +72,12 @@ export default function Dashboard() {
                 <div className="flex flex-col gap-4 max-w-2xl md:overflow-y-auto md:flex-1 no-scrollbar">
                     {sessions.map(f => {
                         const booked = f.capacity - f.spots_remaining;
+                        const isPast = new Date(f.start_time) <= new Date();
                         return (
                             <button
                                 key={f.id}
                                 onClick={e => { e.stopPropagation(); setSelectedSession(s => s?.id === f.id ? null : f); }}
-                                className={`flex items-center justify-between gap-2 py-4 px-4 text-left border rounded-xl transition-colors duration-200 group ${selectedSession?.id === f.id ? 'bg-wood-accent/10 border-wood-accent/40 shadow-md' : 'bg-wood-light border-wood-accent/10 hover:bg-wood-accent/5 shadow-sm hover:shadow-md'}`}
+                                className={`flex items-center justify-between gap-2 py-4 px-4 text-left border rounded-xl transition-colors duration-200 group ${isPast ? 'opacity-40' : ''} ${selectedSession?.id === f.id ? 'bg-wood-accent/10 border-wood-accent/40 shadow-md' : 'bg-wood-light border-wood-accent/10 hover:bg-wood-accent/5 shadow-sm hover:shadow-md'}`}
                             >
                                 <div className="shrink-0 min-w-0">
                                     <p className="font-cormorant text-xl text-wood-dark leading-tight whitespace-nowrap">{formatTime(f.start_time)}</p>
