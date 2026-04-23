@@ -5,11 +5,12 @@ type Props = {
     today: Date;
     offset: number;
     maxDays: number;
+    minDays?: number;
     onSelect: (offset: number) => void;
     onClose: () => void;
 }
 
-export default function CalendarPicker({ today, offset, maxDays, onSelect, onClose }: Props) {
+export default function CalendarPicker({ today, offset, maxDays, minDays = 0, onSelect, onClose }: Props) {
     const selected = new Date(today);
     selected.setDate(today.getDate() + offset);
 
@@ -23,10 +24,12 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
         if (closing) onClose();
     };
 
+    const minDate = new Date(today);
+    minDate.setDate(today.getDate() + minDays);
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + maxDays);
 
-    const prevDisabled = viewYear === today.getFullYear() && viewMonth === today.getMonth();
+    const prevDisabled = viewYear === minDate.getFullYear() && viewMonth === minDate.getMonth();
     const nextDisabled = new Date(viewYear, viewMonth + 1, 1) > maxDate;
 
     const handlePrev = () => {
@@ -70,7 +73,7 @@ export default function CalendarPicker({ today, offset, maxDays, onSelect, onClo
                 <div className="grid grid-cols-7">
                     {cells.map((date, i) => {
                         if (!date) return <div key={i} className="py-1.5" />;
-                        const isDisabled = date < today || date > maxDate;
+                        const isDisabled = date < minDate || date > maxDate;
                         const isSelected = toDateKey(date) === toDateKey(selected);
                         const isToday = toDateKey(date) === toDateKey(today);
                         const diff = Math.round((date.getTime() - today.getTime()) / 86400000);

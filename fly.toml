@@ -9,6 +9,9 @@ primary_region = 'syd'
 [deploy]
   release_command = "python -m alembic upgrade head"
 
+[env]
+  TZ = "Australia/Melbourne" 
+
 [build]
 
 [http_service]

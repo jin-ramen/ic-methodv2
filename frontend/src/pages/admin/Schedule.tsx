@@ -80,8 +80,8 @@ export default function Schedule() {
                     </div>
                     <div className="flex items-center justify-between mt-6 shrink-0">
                         <button
-                            onClick={() => setOffset(Math.max(0, offset - 1))}
-                            disabled={offset === 0}
+                            onClick={() => setOffset(Math.max(-MAX_DAYS, offset - 1))}
+                            disabled={offset <= -MAX_DAYS}
                             className="font-didot text-wood-accent/70 hover:text-wood-dark disabled:opacity-20 text-xl border bg-wood-light border-wood-accent/10 hover:bg-wood-accent/5 shadow-sm hover:shadow-md rounded-xl disabled:hover:border-wood-accent/30 w-12 h-12 flex items-center justify-center leading-none transition-colors"
                         >
                             ‹
@@ -100,8 +100,8 @@ export default function Schedule() {
                 <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
                     <div className="flex justify-between mb-6 shrink-0">
                         <button
-                            onClick={() => setOffset(Math.max(0, offset - 5))}
-                            disabled={offset === 0}
+                            onClick={() => setOffset(Math.max(-MAX_DAYS, offset - 5))}
+                            disabled={offset <= -MAX_DAYS}
                             className="font-didot text-wood-accent disabled:opacity-20 text-xs tracking-widest transition-opacity"
                         >
                             ← Previous week

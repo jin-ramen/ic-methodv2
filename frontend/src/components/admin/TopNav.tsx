@@ -47,6 +47,7 @@ export default function TopNav({ today, offset, onOffsetChange }: Props) {
                 <CalendarPicker
                     today={today}
                     offset={offset}
+                    minDays={-90}
                     maxDays={365}
                     onSelect={onOffsetChange}
                     onClose={() => setOpen(false)}
