@@ -25,7 +25,7 @@ function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
-
+      {/* test */}
         <Route element={<MainLayout />}>
           <Route index element={<About />} />
           <Route path="people" element={<People data={team} error={errorPeople} />} />
