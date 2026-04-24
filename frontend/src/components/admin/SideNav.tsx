@@ -22,11 +22,8 @@ export default function SideNav() {
     ];
 
     return (
-        <aside className="fixed top-0 left-0 h-[100dvh] w-16 md:w-64 bg-wood-light border-r border-wood-accent/20 flex flex-col items-center md:items-start py-8 px-3 md:px-6">
-            <Link to={{ pathname: '/dashboard', search: searchParams.toString() }} className="flex md:hidden text-left mb-12 font-cormorant text-3xl text-wood-accent">
-                IC
-            </Link>
-            <Link to={{ pathname: '/dashboard', search: searchParams.toString() }} className="hidden md:flex text-left mb-12 font-cormorant text-4xl text-wood-accent">
+        <aside className="hidden md:flex fixed top-0 left-0 h-[100dvh] w-64 bg-wood-light border-r border-wood-accent/20 flex-col items-start py-8 px-6">
+            <Link to={{ pathname: '/dashboard', search: searchParams.toString() }} className="text-left mb-12 font-cormorant text-4xl text-wood-accent">
                 IC Method
             </Link>
             <nav className="flex flex-col gap-2 w-full">
@@ -36,10 +33,10 @@ export default function SideNav() {
                         <Link
                             key={to}
                             to={{ pathname: to, search: searchParams.toString() }}
-                            className={`flex items-center justify-center md:justify-start gap-3 font-didot text-base tracking-wide px-2 md:px-3 py-2 rounded transition-colors duration-300 hover:text-wood-dark ${active ? 'text-wood-dark bg-wood-accent/10' : 'text-wood-accent'}`}
+                            className={`flex items-center gap-3 font-didot text-base tracking-wide px-3 py-2 rounded transition-colors duration-300 hover:text-wood-dark ${active ? 'text-wood-dark bg-wood-accent/10' : 'text-wood-accent'}`}
                         >
                             {icon}
-                            <span className="hidden md:inline">{label}</span>
+                            {label}
                         </Link>
                     );
                 })}

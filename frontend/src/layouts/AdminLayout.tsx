@@ -39,7 +39,7 @@ export default function AdminLayout() {
         <AdminContext.Provider value={{ selectedDate, offset, setOffset }}>
             <div className="flex md:h-[100dvh] md:overflow-hidden">
                 <SideNav />
-                <div className="flex flex-col flex-1 ml-16 md:ml-64 min-w-0 md:overflow-hidden">
+                <div className="flex flex-col flex-1 md:ml-64 min-w-0 md:overflow-hidden">
                     <TopNav />
                     <main className="flex-1 flex flex-col md:overflow-hidden">
                         <Outlet />
