@@ -1,13 +1,16 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { FlowType } from '../types/flow'
-import { toDateKey } from '../utils/dateUtils'
-import CalendarPicker from '../components/CalendarPicker'
+
+import type { SessionType } from '../types/SessionType'
+
+import { toDateKey, getTodayDate, getDate } from '../utils/dateUtils'
+
+import Calendar from '../components/CalendarModal'
 import DayHeader from '../components/DayHeader'
 import DayContent from '../components/DayContent'
 
 type Props = {
-    data: FlowType[] | null;
+    data: SessionType[] | null;
     error: string | null;
     loading: boolean;
 }
@@ -42,27 +45,18 @@ export default function Booking({ data, error, loading }: Props) {
         };
     }, []);
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const getDate = (n: number) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() + n);
-        return d;
-    };
-
-    const flowsByDate = useMemo(
-        () => (data ?? []).reduce<Record<string, FlowType[]>>((acc, flow) => {
-            const key = toDateKey(flow.start_time);
+    const SessionsByDate = useMemo(
+        () => (data ?? []).reduce<Record<string, SessionType[]>>((acc, session) => {
+            const key = toDateKey(session.start_time);
             if (!acc[key]) acc[key] = [];
-            acc[key].push(flow);
+            acc[key].push(session);
             return acc;
         }, {}),
         [data]
     );
 
-    const handleSelect = (flow: FlowType) => {
-        navigate(`/booking/${flow.id}`, { state: { flow } });
+    const handleSelect = (session: SessionType) => {
+        navigate(`/booking/${session.id}`, { state: { session } });
     };
 
     return (
@@ -86,7 +80,7 @@ export default function Booking({ data, error, loading }: Props) {
                     <DayHeader date={getDate(offset)} index={0} onIconClick={() => setShowPicker(p => !p)} />
                     <div className="flex-1 overflow-y-auto no-scrollbar mt-3">
                         <DayContent
-                            flows={flowsByDate[toDateKey(getDate(offset))] ?? []}
+                            flows={SessionsByDate[toDateKey(getDate(offset))] ?? []}
                             onSelect={handleSelect}
                             index={0}
                             loading={loading}
@@ -138,7 +132,7 @@ export default function Booking({ data, error, loading }: Props) {
                             return (
                                 <div key={i} className="overflow-y-auto no-scrollbar min-h-0">
                                     <DayContent
-                                        flows={flowsByDate[toDateKey(date)] ?? []}
+                                        flows={SessionsByDate[toDateKey(date)] ?? []}
                                         onSelect={handleSelect}
                                         index={i}
                                         loading={loading}
@@ -150,8 +144,8 @@ export default function Booking({ data, error, loading }: Props) {
                 </div>
             </div>
             {showPicker && (
-                <CalendarPicker
-                    today={today}
+                <Calendar
+                    today={getTodayDate()}
                     offset={offset}
                     maxDays={MAX_DAYS}
                     onSelect={setOffset}

@@ -1,16 +1,17 @@
 import { useState } from 'react'
-import { toDateKey } from '../utils/dateUtils'
+import { useAdminContext } from '../../../layouts/AdminLayout'
+import { toDateKey, getTodayDate } from '../../../utils/dateUtils'
+
+const MAX_DAYS = 90;
 
 type Props = {
-    today: Date;
-    offset: number;
-    maxDays: number;
-    minDays?: number;
-    onSelect: (offset: number) => void;
     onClose: () => void;
 }
 
-export default function CalendarPicker({ today, offset, maxDays, minDays = 0, onSelect, onClose }: Props) {
+export default function CalendarModalAdmin({ onClose }: Props) {
+    const { offset, setOffset } = useAdminContext();
+
+    const today = getTodayDate();
     const selected = new Date(today);
     selected.setDate(today.getDate() + offset);
 
@@ -19,15 +20,12 @@ export default function CalendarPicker({ today, offset, maxDays, minDays = 0, on
     const [closing, setClosing] = useState(false);
 
     const handleClose = () => setClosing(true);
-
-    const handleAnimationEnd = () => {
-        if (closing) onClose();
-    };
+    const handleAnimationEnd = () => { if (closing) onClose(); };
 
     const minDate = new Date(today);
-    minDate.setDate(today.getDate() + minDays);
+    minDate.setDate(today.getDate() - MAX_DAYS);
     const maxDate = new Date(today);
-    maxDate.setDate(today.getDate() + maxDays);
+    maxDate.setDate(today.getDate() + MAX_DAYS);
 
     const prevDisabled = viewYear === minDate.getFullYear() && viewMonth === minDate.getMonth();
     const nextDisabled = new Date(viewYear, viewMonth + 1, 1) > maxDate;
@@ -56,18 +54,18 @@ export default function CalendarPicker({ today, offset, maxDays, minDays = 0, on
                 onClick={handleClose}
             />
             <div
-                className={`modal relative bg-wood-dark/90 p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                className={`modal relative bg-wood-light border border-wood-accent/10 shadow-xl p-6 shrink-0 opacity-0 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
                 style={{ width: 320, minHeight: 360 }}
                 onAnimationEnd={handleAnimationEnd}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">←</button>
-                    <p className="font-cormorant text-wood-text text-lg tracking-wide w-full text-left md:text-center">{monthLabel}</p>
-                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">→</button>
+                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-accent/70 hover:text-wood-dark disabled:opacity-20 text-md tracking-widests transition-opacity hidden md:block">←</button>
+                    <p className="font-cormorant text-wood-dark text-lg tracking-wide w-full text-left md:text-center">{monthLabel}</p>
+                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-accent/70 hover:text-wood-dark disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">→</button>
                 </div>
                 <div className="grid grid-cols-7 mb-1">
                     {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                        <p key={d} className="font-didot text-wood-text/30 text-md tracking-widest text-center py-1">{d}</p>
+                        <p key={d} className="font-didot text-wood-accent/40 text-md tracking-widest text-center py-1">{d}</p>
                     ))}
                 </div>
                 <div className="grid grid-cols-7">
@@ -81,12 +79,12 @@ export default function CalendarPicker({ today, offset, maxDays, minDays = 0, on
                             <button
                                 key={i}
                                 disabled={isDisabled}
-                                onClick={() => { onSelect(diff); handleClose(); }}
-                                className={`font-cormorant text-xl py-1.5 text-center transition-colors ${
-                                    isDisabled ? 'text-wood-text/15 cursor-default' :
-                                    isSelected ? 'bg-wood-text/20 text-wood-text' :
-                                    isToday ? 'text-wood-text underline underline-offset-2' :
-                                    'text-wood-text/60 hover:text-wood-text'
+                                onClick={() => { setOffset(diff); handleClose(); }}
+                                className={`font-cormorant text-xl py-1.5 text-center transition-colors rounded ${
+                                    isDisabled ? 'text-wood-accent/15 cursor-default' :
+                                    isSelected ? 'bg-wood-accent/15 text-wood-dark' :
+                                    isToday ? 'text-wood-dark underline underline-offset-2' :
+                                    'text-wood-accent/60 hover:text-wood-dark'
                                 }`}
                             >
                                 {date.getDate()}
@@ -95,8 +93,8 @@ export default function CalendarPicker({ today, offset, maxDays, minDays = 0, on
                     })}
                 </div>
                 <div className="flex items-center justify-between mt-4 md:hidden">
-                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/30 active:scale-75 active:shadow-inner disabled:opacity-20 disabled:active:bg-transparent disabled:active:scale-100 text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-all duration-75 ease-out">←</button>
-                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-text/70 active:text-wood-text active:bg-wood-text/30 active:scale-75 active:shadow-inner disabled:opacity-20 disabled:active:bg-transparent disabled:active:scale-100 text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-all duration-75 ease-out">→</button>
+                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-accent/70 active:text-wood-dark active:bg-wood-accent/10 active:scale-75 active:shadow-inner disabled:opacity-20 disabled:active:bg-transparent disabled:active:scale-100 text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-all duration-75 ease-out">←</button>
+                    <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-accent/70 active:text-wood-dark active:bg-wood-accent/10 active:scale-75 active:shadow-inner disabled:opacity-20 disabled:active:bg-transparent disabled:active:scale-100 text-md tracking-widest w-12 h-12 flex items-center justify-center leading-none transition-all duration-75 ease-out">→</button>
                 </div>
             </div>
         </div>

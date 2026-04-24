@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
-import type { FlowType } from '../../types/flow';
+
+import type { SessionType } from '../../../types/SessionType';
+
+import { formatTime, formatDate } from '../../../utils/dateUtils'
+
 import EditSessionModal from './EditSessionModal';
-import CancelFlowModal from './CancelFlowModal';
+import CancelSessionModal from './CancelSessionModal';
 import CancelBookingModal from './CancelBookingModal';
 
-type Commitment = {
+type Booking = {
     id: string;
     flow_id: string;
     first_name: string;
@@ -15,38 +19,30 @@ type Commitment = {
 };
 
 type Props = {
-    session: FlowType;
+    session: SessionType;
     onClose: () => void;
     onUpdated: () => void;
     onDeleted: () => void;
 };
 
-function fmt(iso: string) {
-    return new Date(iso).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true });
-}
+export default function SessionModal({ session: session, onClose, onUpdated, onDeleted }: Props) {
+    const [clients, setClients] = useState<Booking[]>([]);
+    const [spotsRemaining, setSpotsRemaining] = useState(session.spots_remaining);
 
-function fmtDate(iso: string) {
-    return new Date(iso).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-export default function SessionPanel({ session: f, onClose, onUpdated, onDeleted }: Props) {
-    const [clients, setClients] = useState<Commitment[]>([]);
-    const [spotsRemaining, setSpotsRemaining] = useState(f.spots_remaining);
-
-    const isPast = new Date(f.end_time) < new Date();
-    const booked = f.capacity - spotsRemaining;
-    const fillPct = f.capacity > 0 ? Math.round((booked / f.capacity) * 100) : 0;
+    const isPast = new Date(session.end_time) < new Date();
+    const booked = session.capacity - spotsRemaining;
+    const fillPct = session.capacity > 0 ? Math.round((booked / session.capacity) * 100) : 0;
     const [showEdit, setShowEdit] = useState(false);
     const [showCancel, setShowCancel] = useState(false);
-    const [cancelBooking, setCancelBooking] = useState<Commitment | null>(null);
+    const [cancelBooking, setCancelBooking] = useState<Booking | null>(null);
     const [cancelError, setCancelError] = useState(false);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/commitments?flow_id=${f.id}`)
+        fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/bookings?session_id=${session.id}`)
             .then(r => r.json())
             .then(j => setClients(j.results ?? []))
             .catch(() => {});
-    }, [f.id]);
+    }, [session.id]);
 
     return (
         <div className="fixed inset-x-5 inset-y-20 md:inset-auto md:relative md:block  flex flex-col md:h-full bg-wood-light rounded-xl shadow-md overflow-hidden animate-modal-in">
@@ -54,7 +50,7 @@ export default function SessionPanel({ session: f, onClose, onUpdated, onDeleted
             {/* Title */}
             <div className="px-6 pt-6 pb-4">
                 <div className="flex items-start justify-between pb-3">
-                    <p className="font-cormorant text-2xl text-wood-dark leading-tight">{f.method_name ?? '—'}</p>
+                    <p className="font-cormorant text-2xl text-wood-dark leading-tight">{session.method_name ?? '—'}</p>
                     <button
                         onClick={onClose}
                         className="font-didot text-wood-accent/40 hover:text-wood-dark transition-colors duration-200 text-3xl leading-none shrink-0"
@@ -65,19 +61,19 @@ export default function SessionPanel({ session: f, onClose, onUpdated, onDeleted
                         <svg className="w-3.5 h-3.5 shrink-0 text-wood-accent/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
                         </svg>
-                        <p className="font-didot text-xs text-wood-accent/70">{fmt(f.start_time)} – {fmt(f.end_time)}</p>
+                        <p className="font-didot text-xs text-wood-accent/70">{formatTime(session.start_time)} – {formatTime(session.end_time)}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <svg className="w-3.5 h-3.5 shrink-0 text-wood-accent/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
                         </svg>
-                        <p className="font-didot text-xs text-wood-accent/70">{fmtDate(f.start_time)}</p>
+                        <p className="font-didot text-xs text-wood-accent/70">{formatDate(session.start_time)}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <svg className="w-3.5 h-3.5 shrink-0 text-wood-accent/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                         </svg>
-                        <p className="font-didot text-xs text-wood-accent/70">{f.instructor ?? '—'}</p>
+                        <p className="font-didot text-xs text-wood-accent/70">{session.instructor ?? '—'}</p>
                     </div>
                 </div>
             </div>
@@ -108,21 +104,21 @@ export default function SessionPanel({ session: f, onClose, onUpdated, onDeleted
 
             {showEdit && (
                 <EditSessionModal
-                    session={f}
+                    session={session}
                     onClose={() => setShowEdit(false)}
                     onUpdated={() => { setShowEdit(false); onUpdated(); }}
                 />
             )}
             {showCancel && (
-                <CancelFlowModal
-                    session={f}
+                <CancelSessionModal
+                    session={session}
                     onClose={() => setShowCancel(false)}
                     onDeleted={() => { setShowCancel(false); onDeleted(); }}
                 />
             )}
             {cancelBooking && (
                 <CancelBookingModal
-                    commitmentId={cancelBooking.id}
+                    bookingId={cancelBooking.id}
                     clientName={`${cancelBooking.first_name} ${cancelBooking.last_name}`}
                     onClose={() => setCancelBooking(null)}
                     onDeleted={() => {
@@ -138,7 +134,7 @@ export default function SessionPanel({ session: f, onClose, onUpdated, onDeleted
             <div className="px-6 pb-4 flex flex-col gap-2">
                 <div className="flex justify-between items-end">
                     <span className="font-didot text-xs text-wood-accent/60 tracking-wide">Capacity</span>
-                    <span className="font-cormorant text-xl text-wood-dark">{booked} <span className="text-wood-accent/40 text-base">/ {f.capacity}</span></span>
+                    <span className="font-cormorant text-xl text-wood-dark">{booked} <span className="text-wood-accent/40 text-base">/ {session.capacity}</span></span>
                 </div>
                 <div className="w-full h-1.5 bg-wood-accent/10 rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-wood-accent transition-all duration-500" style={{ width: `${fillPct}%` }} />

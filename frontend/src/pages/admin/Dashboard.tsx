@@ -1,21 +1,20 @@
 import { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import { useFetch } from '../../utils/useFetch';
-import type { FlowType } from '../../types/flow';
-import type { AdminContext } from '../../layouts/AdminLayout';
-import AddSessionModal from '../../components/admin/AddSessionModal';
-import SessionPanel from '../../components/admin/SessionPanel';
+import { useAdminContext } from '../../layouts/AdminLayout';
+import { formatDay, formatDate, formatTime, getTodayDate } from '../../utils/dateUtils'
 
-function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true });
-}
+import type { SessionType } from '../../types/SessionType';
 
-function formatDuration(start: string, end: string) {
+import AddSessionModal from '../../components/admin/modal/AddSessionModal';
+import SessionModal from '../../components/admin/modal/SessionModal';
+
+
+function formatDuration(start: Date, end: Date): string {
     const mins = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000);
-    return mins >= 60 ? `${Math.floor(mins / 60)} hrs ${mins % 60 ? ` ${mins % 60}m` : ''}` : `${mins} mins`;
+    return `${mins} mins`;
 }
 
-function flowsForDate(flows: FlowType[], date: Date) {
+function flowsForDate(flows: SessionType[], date: Date) {
     return flows.filter(f => {
         const d = new Date(f.start_time);
         return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate();
@@ -23,13 +22,10 @@ function flowsForDate(flows: FlowType[], date: Date) {
 }
 
 export default function Dashboard() {
-    const { selectedDate, offset, setOffset } = useOutletContext<AdminContext>();
-    const { data: flows, loading, error, refetch } = useFetch<FlowType[]>('/api/flows');
+    const { selectedDate, offset, setOffset } = useAdminContext();
+    const { data: flows, loading, error, refetch } = useFetch<SessionType[]>('/api/sessions');
     const [showAddModal, setShowAddModal] = useState(false);
-    const [selectedSession, setSelectedSession] = useState<FlowType | null>(null);
-
-    const todayStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-    const dateLabel = selectedDate.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const [selectedSession, setSelectedSession] = useState<SessionType | null>(null);
 
     const sessions = flows ? flowsForDate(flows, selectedDate) : [];
     const totalCapacity = sessions.reduce((s, f) => s + f.capacity, 0);
@@ -46,7 +42,7 @@ export default function Dashboard() {
                     <div className="flex flex-col items-start gap-2">
                         <h2 className="font-cormorant text-2xl text-wood-dark">Today's Flows</h2>
                         <div className="flex items-center gap-2">
-                            <p className="font-didot text-xs text-wood-accent/60 tracking-wide">{dateLabel}</p>
+                            <p className="font-didot text-xs text-wood-accent/60 tracking-wide">{formatDate(selectedDate)}</p>
                         </div>
                     </div>
                     <div className='flex flex-row gap-2'>
@@ -118,7 +114,7 @@ export default function Dashboard() {
             {/* Right — Summary or Session Panel */}
             <aside className="w-full flex-1 min-w-0 flex flex-col md:overflow-hidden" onClick={e => e.stopPropagation()}>
                 {selectedSession ? (
-                    <SessionPanel
+                    <SessionModal
                         session={selectedSession}
                         onClose={() => setSelectedSession(null)}
                         onUpdated={refetch}
@@ -140,7 +136,7 @@ export default function Dashboard() {
 
         {showAddModal && (
             <AddSessionModal
-                defaultDate={todayStr}
+                defaultDate={formatDay(getTodayDate())}
                 onClose={() => setShowAddModal(false)}
                 onCreated={refetch}
             />

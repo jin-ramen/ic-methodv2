@@ -3,7 +3,7 @@ from uuid import UUID
 from datetime import datetime
 
 
-class CommitmentCreate(BaseModel):
+class BookingCreate(BaseModel):
     flow_id: UUID
     first_name: str
     last_name: str
@@ -12,7 +12,7 @@ class CommitmentCreate(BaseModel):
     notes: str | None = None
 
 
-class CommitmentUpdate(BaseModel):
+class BookingUpdate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     email: str | None = None
@@ -20,7 +20,7 @@ class CommitmentUpdate(BaseModel):
     notes: str | None = None
 
 
-class CommitmentResponse(BaseModel):
+class BookingResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID

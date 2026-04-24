@@ -14,13 +14,13 @@ import AdminSchedule from './pages/admin/Schedule'
 
 import type { PeopleType } from './types/people'
 import type { StudioType } from './types/studio'
-import type { FlowType } from './types/flow'
+import type { SessionType } from './types/SessionType'
 import { useFetch } from './utils/useFetch';
 
 function App() {
   const { data: team, error: errorPeople } = useFetch<PeopleType[]>('/api/people');
   const { data: photos, error: errorStudio } = useFetch<StudioType[]>('/api/studio');
-  const { data: flows, error: errorFlows, loading: loadingFlows, refetch: refetchFlows } = useFetch<FlowType[]>('/api/flows');
+  const { data: flows, error: errorFlows, loading: loadingFlows, refetch: refetchFlows } = useFetch<SessionType[]>('/api/sessions');
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>

@@ -1,23 +1,26 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
+
 import { useFetch } from '../../utils/useFetch'
-import type { FlowType } from '../../types/flow'
-import type { AdminContext } from '../../layouts/AdminLayout'
-import { toDateKey } from '../../utils/dateUtils'
+import { useAdminContext } from '../../layouts/AdminLayout'
+import { toDateKey, formatDay, getTodayDate, getDate } from '../../utils/dateUtils'
+
+import type { SessionType } from '../../types/SessionType'
+
 import DayHeader from '../../components/DayHeader'
 import DayContent from '../../components/DayContent'
-import SessionPanel from '../../components/admin/SessionPanel'
-import AddSessionModal from '../../components/admin/AddSessionModal';
+
+import SessionModal from '../../components/admin/modal/SessionModal'
+import AddSessionModal from '../../components/admin/modal/AddSessionModal';
 
 const MAX_DAYS = 90;
 
 export default function Schedule() {
-    const { offset, setOffset } = useOutletContext<AdminContext>();
+    const { offset, setOffset } = useAdminContext();
     const [calHeight, setCalHeight] = useState<string>('auto');
-    const [selectedSession, setSelectedSession] = useState<FlowType | null>(null);
+    const [selectedSession, setSelectedSession] = useState<SessionType | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
 
-    const { data, error, loading, refetch } = useFetch<FlowType[]>('/api/flows');
+    const { data, error, loading, refetch } = useFetch<SessionType[]>('/api/sessions');
 
     useEffect(() => {
         const body = document.body;
@@ -39,22 +42,11 @@ export default function Schedule() {
         };
     }, []);
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-    const getDate = (n: number) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() + n);
-        return d;
-    };
-
-    const flowsByDate = useMemo(
-        () => (data ?? []).reduce<Record<string, FlowType[]>>((acc, flow) => {
-            const key = toDateKey(flow.start_time);
+    const SessionsByDate = useMemo(
+        () => (data ?? []).reduce<Record<string, SessionType[]>>((acc, session) => {
+            const key = toDateKey(session.start_time);
             if (!acc[key]) acc[key] = [];
-            acc[key].push(flow);
+            acc[key].push(session);
             return acc;
         }, {}),
         [data]
@@ -75,7 +67,7 @@ export default function Schedule() {
                     <DayHeader date={getDate(offset)} index={0} variant="light" />
                     <div className="flex-1 overflow-y-auto no-scrollbar mt-3">
                         <DayContent
-                            flows={flowsByDate[toDateKey(getDate(offset))] ?? []}
+                            flows={SessionsByDate[toDateKey(getDate(offset))] ?? []}
                             onSelect={setSelectedSession}
                             index={0}
                             loading={loading}
@@ -172,7 +164,7 @@ export default function Schedule() {
                             return (
                                 <div key={i} className="overflow-y-auto no-scrollbar min-h-0">
                                     <DayContent
-                                        flows={flowsByDate[toDateKey(date)] ?? []}
+                                        flows={SessionsByDate[toDateKey(date)] ?? []}
                                         onSelect={setSelectedSession}
                                         index={i}
                                         loading={loading}
@@ -191,7 +183,7 @@ export default function Schedule() {
             <div className="lg:bg-black/40 fixed inset-0 z-50 flex items-center justify-center">
                 <div className="absolute inset-0" onClick={() => setSelectedSession(null)} />
                 <div className="relative w-full max-w-lg mx-4 h-[85dvh]">
-                    <SessionPanel
+                    <SessionModal
                         session={selectedSession}
                         onClose={() => setSelectedSession(null)}
                         onUpdated={refetch}
@@ -203,7 +195,7 @@ export default function Schedule() {
 
         {showAddModal && (
             <AddSessionModal
-                defaultDate={todayStr}
+                defaultDate={formatDay(getTodayDate())}
                 onClose={() => setShowAddModal(false)}
                 onCreated={refetch}
             />

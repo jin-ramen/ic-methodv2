@@ -1,27 +1,20 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import CalendarPicker from '../CalendarPicker';
+import { useAdminContext } from '../../layouts/AdminLayout';
+import Calendar from './modal/CalendarModalAdmin';
 
 const titleMap: Record<string, string> = {
     '/dashboard': 'Dashboard',
     '/schedule': 'Schedule',
 };
 
-type Props = {
-    today: Date;
-    offset: number;
-    onOffsetChange: (offset: number) => void;
-};
-
-export default function TopNav({ today, offset, onOffsetChange }: Props) {
+export default function TopNav() {
     const { pathname } = useLocation();
+    const { selectedDate } = useAdminContext();
     const title = titleMap[pathname] ?? 'Admin';
     const [open, setOpen] = useState(false);
 
-    const selected = new Date(today);
-    selected.setDate(today.getDate() + offset);
-
-    const dateLabel = selected.toLocaleDateString('en-AU', {
+    const dateLabel = selectedDate.toLocaleDateString('en-AU', {
         weekday: 'short',
         day: 'numeric',
         month: 'short',
@@ -43,16 +36,7 @@ export default function TopNav({ today, offset, onOffsetChange }: Props) {
                 </button>
             </header>
 
-            {open && (
-                <CalendarPicker
-                    today={today}
-                    offset={offset}
-                    minDays={-90}
-                    maxDays={365}
-                    onSelect={onOffsetChange}
-                    onClose={() => setOpen(false)}
-                />
-            )}
+            {open && <Calendar onClose={() => setOpen(false)} />}
         </>
     );
 }

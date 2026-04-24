@@ -1,9 +1,9 @@
-import type { FlowType } from '../types/flow'
+import type { SessionType } from '../types/SessionType'
 import { formatTime } from '../utils/dateUtils'
 
 type Props = {
-    flows: FlowType[];
-    onSelect: (f: FlowType) => void;
+    flows: SessionType[];
+    onSelect: (f: SessionType) => void;
     index?: number;
     loading?: boolean;
     variant?: 'dark' | 'light';
@@ -11,8 +11,8 @@ type Props = {
 
 type Period = 'Morning' | 'Afternoon' | 'Evening'
 
-function getPeriod(isoString: string): Period {
-    const hour = new Date(isoString).getHours();
+function getPeriod(iso: Date): Period {
+    const hour = new Date(iso).getHours();
     if (hour < 12) return 'Morning';
     if (hour < 15) return 'Afternoon';
     return 'Evening';
@@ -26,7 +26,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
         .filter(f => variant === 'light' || new Date(f.start_time) > now)
         .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
 
-    const grouped = PERIODS.reduce<Record<Period, FlowType[]>>((acc, p) => {
+    const grouped = PERIODS.reduce<Record<Period, SessionType[]>>((acc, p) => {
         acc[p] = sorted.filter(f => getPeriod(f.start_time) === p);
         return acc;
     }, { Morning: [], Afternoon: [], Evening: [] });

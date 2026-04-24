@@ -1,29 +1,28 @@
 import { useState } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
-import type { FlowType } from '../types/flow'
-import { formatTime } from '../utils/dateUtils'
 
-function formatFullDate(iso: string) {
-    return new Date(iso).toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric' });
-}
+import type { SessionType } from '../types/SessionType'
+
+import { formatTime, formatDate } from '../utils/dateUtils'
+
 
 const inputClass = "w-full bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm md:text-base py-2 md:py-3 tracking-wide transition-colors duration-200 placeholder:text-wood-text/30";
 const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-widest uppercase";
 
-function FlowInfo({ flow }: { flow: FlowType }) {
+function SessionInfo({ session }: { session: SessionType }) {
     return (
-        <div className="flow bg-wood-dark/80 px-6 py-6 flex flex-col gap-3 opacity-0 animate-text-in" style={{ animationDelay: '0.1s' }}>
-            <p className="font-didot text-wood-text/40 text-xs tracking-widest uppercase">Your Flow</p>
+        <div className="rounded-xl bg-wood-dark/80 px-6 py-6 flex flex-col gap-3">
+            <p className="font-didot text-wood-text/40 text-xs tracking-widest uppercase">Your Session</p>
             <h2 className="font-cormorant text-wood-text text-4xl leading-tight">
-                {formatTime(flow.start_time)}<br />
-                <span className="text-wood-text/60 text-2xl">– {formatTime(flow.end_time)}</span>
+                {formatTime(session.start_time)}<br />
+                <span className="text-wood-text/60 text-2xl">– {formatTime(session.end_time)}</span>
             </h2>
-            <p className="font-didot text-wood-text/80 text-sm tracking-widest mt-1">{formatFullDate(flow.start_time)}</p>
-            {flow.instructor && (
-                <p className="font-didot text-wood-text/50 text-xs tracking-widest mt-2">with {flow.instructor}</p>
+            <p className="font-didot text-wood-text/80 text-sm tracking-widest mt-1">{formatDate(session.start_time)}</p>
+            {session.instructor && (
+                <p className="font-didot text-wood-text/50 text-xs tracking-widest mt-2">with {session.instructor}</p>
             )}
             <p className="font-didot text-wood-text/30 text-xs tracking-widest mt-1">
-                {flow.capacity} spot{flow.capacity !== 1 ? 's' : ''} available
+                {session.capacity} spot{session.capacity !== 1 ? 's' : ''} available
             </p>
         </div>
     );
@@ -32,21 +31,21 @@ function FlowInfo({ flow }: { flow: FlowType }) {
 type Props = { onBooked: () => void }
 
 export default function BookingForm({ onBooked }: Props) {
-    useParams<{ flowId: string }>();
+    useParams<{ sessionId: string }>();
     const { state } = useLocation();
     const navigate = useNavigate();
-    const flow: FlowType | undefined = state?.flow;
+    const session: SessionType | undefined = state?.session;
 
     const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', notes: '' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [errorMsg, setErrorMsg] = useState('');
     const [leaving, setLeaving] = useState(false);
 
-    if (!flow) {
+    if (!session) {
         return (
             <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                    <p className="font-didot text-wood-text text-sm tracking-widest">Flow not found.</p>
+                    <p className="font-didot text-wood-text text-sm tracking-widest">Session not found.</p>
                     <button onClick={() => navigate('/booking')} className="font-didot text-wood-text/50 text-xs tracking-widest underline underline-offset-4 mt-4">
                         ← Back to schedule
                     </button>
@@ -62,10 +61,10 @@ export default function BookingForm({ onBooked }: Props) {
         e.preventDefault();
         setStatus('loading');
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/commitments`, {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/bookings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ flow_id: flow.id, ...form }),
+                body: JSON.stringify({ session_id: session.id, ...form }),
             });
             if (res.status === 429) {
                 setErrorMsg('Too many attempts. Please wait a moment and try again.');
@@ -92,9 +91,9 @@ export default function BookingForm({ onBooked }: Props) {
         return (
             <div className="flex-1 flex items-center justify-center px-5">
                 <div className="text-center">
-                    <p className="font-cormorant text-wood-dark text-4xl mb-3">You're commited.</p>
+                    <p className="font-cormorant text-wood-dark text-4xl mb-3">You're booked.</p>
                     <p className="font-didot text-wood-accent text-sm tracking-widest mb-8">
-                        See you on {formatFullDate(flow.start_time)}.
+                        See you on {formatDate(session.start_time)}.
                     </p>
                     <button onClick={() => navigate('/')} className="font-didot text-wood-accent/60 text-xs tracking-widest underline underline-offset-4">
                         ← Back to home
@@ -142,19 +141,19 @@ export default function BookingForm({ onBooked }: Props) {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center px-5">
-            <div className={`bg-wood-accent/95 w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
+            <div className={`rounded-xl bg-wood-accent/95 w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
                 <div className="md:hidden flex flex-col gap-10">
                     <button type="button" onClick={() => navigate('/booking')} className="font-didot text-wood-text/40 text-xs tracking-widest text-left">
                         ← Back to calender
                     </button>
-                    <FlowInfo flow={flow} />
+                    <SessionInfo session={session} />
                     {FormFields}
                 </div>
 
                 <div className="hidden md:grid md:grid-cols-3 gap-16">
                     <div />
                     {FormFields}
-                    <FlowInfo flow={flow} />
+                    <SessionInfo session={session} />
                 </div>
             </div>
         </div>

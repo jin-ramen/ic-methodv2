@@ -1,7 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 
 export default function SideNav() {
     const { pathname } = useLocation();
+    const [searchParams] = useSearchParams();
 
     const HomeIcon = (
         <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -22,10 +23,10 @@ export default function SideNav() {
 
     return (
         <aside className="fixed top-0 left-0 h-[100dvh] w-16 md:w-64 bg-wood-light border-r border-wood-accent/20 flex flex-col items-center md:items-start py-8 px-3 md:px-6">
-            <Link to="/dashboard" className="flex md:hidden text-left mb-12 font-cormorant text-3xl text-wood-accent">
+            <Link to={{ pathname: '/dashboard', search: searchParams.toString() }} className="flex md:hidden text-left mb-12 font-cormorant text-3xl text-wood-accent">
                 IC
             </Link>
-            <Link to="/dashboard" className="hidden md:flex text-left mb-12 font-cormorant text-4xl text-wood-accent">
+            <Link to={{ pathname: '/dashboard', search: searchParams.toString() }} className="hidden md:flex text-left mb-12 font-cormorant text-4xl text-wood-accent">
                 IC Method
             </Link>
             <nav className="flex flex-col gap-2 w-full">
@@ -34,7 +35,7 @@ export default function SideNav() {
                     return (
                         <Link
                             key={to}
-                            to={to}
+                            to={{ pathname: to, search: searchParams.toString() }}
                             className={`flex items-center justify-center md:justify-start gap-3 font-didot text-base tracking-wide px-2 md:px-3 py-2 rounded transition-colors duration-300 hover:text-wood-dark ${active ? 'text-wood-dark bg-wood-accent/10' : 'text-wood-accent'}`}
                         >
                             {icon}

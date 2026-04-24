@@ -1,37 +1,31 @@
 import { useState, useEffect } from 'react';
-import type { FlowType } from '../../types/flow';
-import CalendarPicker from '../CalendarPicker';
-import { Field, inputCls } from './FormField';
-import { localDateStr, isoToTime } from '../../utils/dateUtils';
-import { extractError } from '../../utils/apiUtils';
+import { useAdminContext } from '../../../layouts/AdminLayout';
+
+import type { SessionType } from '../../../types/SessionType';
+import Calendar from '../../CalendarModal';
+import { Field, inputCls } from '../FormField';
+
+
+import { formatDate, formatTime24, getDate, getTodayDate } from '../../../utils/dateUtils';
+import { extractError } from '../../../utils/apiUtils';
 
 type Method = { id: string; name: string };
 
 type Props = {
-    session: FlowType;
+    session: SessionType;
     onClose: () => void;
     onUpdated: () => void;
 };
 
 export default function EditSessionModal({ session: f, onClose, onUpdated }: Props) {
-    const [today] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; });
-
-    const [dateOffset, setDateOffset] = useState(() => {
-        const t = new Date(); t.setHours(0, 0, 0, 0);
-        const sessionDate = new Date(f.start_time);
-        sessionDate.setHours(0, 0, 0, 0);
-        return Math.round((sessionDate.getTime() - t.getTime()) / 86400000);
-    });
+    const { offset, setOffset } = useAdminContext();
     const [showCalendar, setShowCalendar] = useState(false);
 
-    const selectedDate = new Date(today);
-    selectedDate.setDate(today.getDate() + dateOffset);
-    const date = localDateStr(selectedDate);
-    const dateLabel = selectedDate.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const date = formatDate(getDate(offset));
 
     const [methods, setMethods] = useState<Method[]>([]);
-    const [startTime, setStartTime] = useState(isoToTime(f.start_time));
-    const [endTime, setEndTime] = useState(isoToTime(f.end_time));
+    const [startTime, setStartTime] = useState(formatTime24(f.start_time));
+    const [endTime, setEndTime] = useState(formatTime24(f.end_time));
     const [methodId, setMethodId] = useState(f.method_id ?? '');
     const [instructor, setInstructor] = useState(f.instructor ?? '');
     const [capacity, setCapacity] = useState(f.capacity);
@@ -54,7 +48,7 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
         setError(null);
         setSubmitting(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/flows/${f.id}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/sessions/${f.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -91,7 +85,7 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
                             onClick={() => setShowCalendar(true)}
                             className={inputCls + ' text-left'}
                         >
-                            {dateLabel}
+                            {date}
                         </button>
                     </Field>
                     <div className="flex gap-4">
@@ -124,11 +118,11 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
         </div>
 
         {showCalendar && (
-            <CalendarPicker
-                today={today}
-                offset={dateOffset}
+            <Calendar
+                today={getTodayDate()}
+                offset={offset}
                 maxDays={365}
-                onSelect={o => setDateOffset(o)}
+                onSelect={o => setOffset(o)}
                 onClose={() => setShowCalendar(false)}
             />
         )}

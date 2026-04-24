@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from app.services.notion_cms import fetch_notion_data, get_text
 from app.core.config import settings
 from app.core.cache import cached

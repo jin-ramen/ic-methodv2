@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
 type Props = {
-    commitmentId: string;
+    bookingId: string;
     clientName: string;
     onClose: () => void;
     onDeleted: () => void;
 };
 
-export default function CancelBookingModal({ commitmentId, clientName, onClose, onDeleted }: Props) {
+export default function CancelBookingModal({ bookingId, clientName, onClose, onDeleted }: Props) {
     const [input, setInput] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export default function CancelBookingModal({ commitmentId, clientName, onClose, 
         setError(null);
         setSubmitting(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/commitments/${commitmentId}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/bookings/${bookingId}`, {
                 method: 'DELETE',
             });
             if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);

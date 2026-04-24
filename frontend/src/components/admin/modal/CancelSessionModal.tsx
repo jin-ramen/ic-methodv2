@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import type { FlowType } from '../../types/flow';
+import type { SessionType } from '../../../types/SessionType';
 
 type Props = {
-    session: FlowType;
+    session: SessionType;
     onClose: () => void;
     onDeleted: () => void;
 };
 
-export default function CancelFlowModal({ session: f, onClose, onDeleted }: Props) {
+export default function CancelSessionModal({ session: f, onClose, onDeleted }: Props) {
     const [input, setInput] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export default function CancelFlowModal({ session: f, onClose, onDeleted }: Prop
         setError(null);
         setSubmitting(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/flows/${f.id}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/sessions/${f.id}`, {
                 method: 'DELETE',
             });
             if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);

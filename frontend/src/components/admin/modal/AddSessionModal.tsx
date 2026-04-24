@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import CalendarPicker from '../CalendarPicker';
-import { Field, inputCls } from './FormField';
-import { localDateStr } from '../../utils/dateUtils';
-import { extractError } from '../../utils/apiUtils';
+import { useAdminContext } from '../../../layouts/AdminLayout';
+
+import Calendar from '../../CalendarModal';
+
+import { Field, inputCls } from '../FormField';
+
+import { localDateStr } from '../../../utils/dateUtils';
+import { extractError } from '../../../utils/apiUtils';
 
 type Method = { id: string; name: string };
 
@@ -15,15 +19,11 @@ type Props = {
 export default function AddSessionModal({ defaultDate, onClose, onCreated }: Props) {
     const [today] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; });
 
-    const [dateOffset, setDateOffset] = useState(() => {
-        const t = new Date(); t.setHours(0, 0, 0, 0);
-        const target = new Date(defaultDate + 'T00:00:00');
-        return Math.round((target.getTime() - t.getTime()) / 86400000);
-    });
+    const { offset, setOffset } = useAdminContext();
     const [showCalendar, setShowCalendar] = useState(false);
 
     const selectedDate = new Date(today);
-    selectedDate.setDate(today.getDate() + dateOffset);
+    selectedDate.setDate(today.getDate() + offset);
     const date = localDateStr(selectedDate);
     const dateLabel = selectedDate.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -52,7 +52,7 @@ export default function AddSessionModal({ defaultDate, onClose, onCreated }: Pro
         setError(null);
         setSubmitting(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/flows`, {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/sessions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -180,11 +180,11 @@ export default function AddSessionModal({ defaultDate, onClose, onCreated }: Pro
         </div>
 
         {showCalendar && (
-            <CalendarPicker
+            <Calendar
                 today={today}
-                offset={dateOffset}
+                offset={offset}
                 maxDays={365}
-                onSelect={o => setDateOffset(o)}
+                onSelect={o => setOffset(o)}
                 onClose={() => setShowCalendar(false)}
             />
         )}

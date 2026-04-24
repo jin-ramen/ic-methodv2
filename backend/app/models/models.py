@@ -7,7 +7,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 
-
 class Method(Base):
     __tablename__ = "method"
 
@@ -17,8 +16,8 @@ class Method(Base):
     description = Column(String(1000))
 
 
-class Flow(Base):
-    __tablename__ = "flow"
+class Session(Base):
+    __tablename__ = "session"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     method_id = Column(UUID(as_uuid=True), ForeignKey("method.id", ondelete="SET NULL"), nullable=True)
@@ -30,17 +29,17 @@ class Flow(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
-        CheckConstraint("end_time > start_time", name="ck_flow_end_after_start"),
-        Index("ix_flow_start_time", "start_time"),
+        CheckConstraint("end_time > start_time", name="ck_session_end_after_start"),
+        Index("ix_session_start_time", "start_time"),
     )
 
 
-class Commitment(Base):
-    __tablename__ = "commitment"
+class Booking(Base):
+    __tablename__ = "booking"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    flow_id = Column(UUID(as_uuid=True), ForeignKey("flow.id", ondelete="RESTRICT"))
-    flow = relationship("Flow", lazy="raise")
+    session_id = Column(UUID(as_uuid=True), ForeignKey("session.id", ondelete="RESTRICT"))
+    session = relationship("Session", lazy="raise")
     first_name = Column(String(255), nullable=False)
     last_name = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False)
@@ -49,7 +48,7 @@ class Commitment(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
-        UniqueConstraint("flow_id", "email", name="uq_commitment_flow_email"),
+        UniqueConstraint("session_id", "email", name="uq_booking_session_email"),
     )
 
 

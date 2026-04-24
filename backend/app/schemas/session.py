@@ -5,7 +5,7 @@ from datetime import timezone
 
 
 
-class FlowCreate(BaseModel):
+class SessionCreate(BaseModel):
     method_id: UUID | None = None
     start_time: datetime
     end_time: datetime
@@ -21,7 +21,7 @@ class FlowCreate(BaseModel):
         return self
 
 
-class FlowUpdate(BaseModel):
+class SessionUpdate(BaseModel):
     method_id: UUID | None = None
     start_time: datetime | None = None
     end_time: datetime | None = None
@@ -38,7 +38,7 @@ class FlowUpdate(BaseModel):
         return self
 
 
-class FlowResponse(BaseModel):
+class SessionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
