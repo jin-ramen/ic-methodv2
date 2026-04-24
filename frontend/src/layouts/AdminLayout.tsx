@@ -41,7 +41,7 @@ export default function AdminLayout() {
                 <SideNav />
                 <div className="flex flex-col flex-1 ml-16 md:ml-64 min-w-0 md:overflow-hidden">
                     <TopNav />
-                    <main className="flex-1 md:overflow-hidden">
+                    <main className="flex-1 flex flex-col md:overflow-hidden">
                         <Outlet />
                     </main>
                 </div>

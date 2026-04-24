@@ -5,9 +5,10 @@ type Props = {
     index?: number;
     onIconClick?: () => void;
     variant?: 'dark' | 'light';
+    animate?: boolean;
 }
 
-export default function DayHeader({ date, index = 0, onIconClick, variant = 'dark' }: Props) {
+export default function DayHeader({ date, index = 0, onIconClick, variant = 'dark', animate = true }: Props) {
     const border  = variant === 'light' ? 'border-wood-accent/20' : 'border-wood-text/20';
     const label   = variant === 'light' ? 'text-wood-dark'        : 'text-wood-text';
     const sub     = variant === 'light' ? 'text-wood-accent/50'   : 'text-wood-text/50';
@@ -15,7 +16,7 @@ export default function DayHeader({ date, index = 0, onIconClick, variant = 'dar
 
     return (
         <div
-            className={`pb-3 border-b ${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} flex items-stretch justify-between ${border}`}
+            className={`pb-3 border-b ${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} flex items-stretch justify-between ${border}`}
             style={{ animationDelay: `${index * 0.1}s` }}
         >
             <div>

@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class BookingCreate(BaseModel):
-    flow_id: UUID
+    session_id: UUID
     first_name: str
     last_name: str
     email: str
@@ -24,7 +24,7 @@ class BookingResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
-    flow_id: UUID
+    session_id: UUID
     first_name: str
     last_name: str
     email: str

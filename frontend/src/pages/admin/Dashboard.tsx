@@ -47,12 +47,6 @@ export default function Dashboard() {
                     </div>
                     <div className='flex flex-row gap-2'>
                         <button
-                            // onClick={() -> setShowRuleModa(true)} TODO test
-                            className="flex-1 whitespace-nowrap inline-flex items-center justify-center font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-200 py-3 px-4 rounded-xl active:scale-95"
-                        >
-                            + RULE
-                        </button>
-                        <button
                             onClick={() => setShowAddModal(true)}
                             className="flex-1 whitespace-nowrap inline-flex items-center justify-center font-didot text-[10px] tracking-[0.2em] uppercase bg-wood-accent text-white hover:bg-wood-dark shadow-sm hover:shadow-md transition-all duration-200 py-3 px-4 rounded-xl active:scale-95"
                         >

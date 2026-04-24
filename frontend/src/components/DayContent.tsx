@@ -7,6 +7,7 @@ type Props = {
     index?: number;
     loading?: boolean;
     variant?: 'dark' | 'light';
+    animate?: boolean;
 }
 
 type Period = 'Morning' | 'Afternoon' | 'Evening'
@@ -20,7 +21,7 @@ function getPeriod(iso: Date): Period {
 
 const PERIODS: Period[] = ['Morning', 'Afternoon', 'Evening'];
 
-export default function DayContent({ flows, onSelect, index = 0, loading = false, variant = 'dark' }: Props) {
+export default function DayContent({ flows, onSelect, index = 0, loading = false, variant = 'dark', animate = true }: Props) {
     const now = new Date();
     const sorted = [...flows]
         .filter(f => variant === 'light' || new Date(f.start_time) > now)
@@ -66,7 +67,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
         <div className="flex flex-col gap-4">
             {!hasAny ? (
                 <p
-                    className={`font-didot text-xs tracking-widest ${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} ${t.empty}`}
+                    className={`font-didot text-xs tracking-widest ${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} ${t.empty}`}
                     style={{ animationDelay: `${index * 0.04}s` }}
                 >
                     No sessions
@@ -74,7 +75,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
             ) : (
                 PERIODS.filter(p => grouped[p].length > 0).map(period => (
                     <div key={period}>
-                        <p className={`font-didot text-xs tracking-widest uppercase mb-2 ${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} ${t.period}`}
+                        <p className={`font-didot text-xs tracking-widest uppercase mb-2 ${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} ${t.period}`}
                             style={{ animationDelay: `${index * 0.04}s` }}
                         >
                             {period}
@@ -86,7 +87,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                 return (
                                 <div
                                     key={flow.id}
-                                    className={`${variant === 'dark' ? 'opacity-0 animate-text-in' : ''} ${isPast ? '[&>button]:opacity-40' : ''}`}
+                                    className={`${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} ${isPast ? '[&>button]:opacity-40' : ''}`}
                                     style={{ animationDelay: `${(index * 0.04) + (i * 0.03)}s` }}
                                 >
                                 <button

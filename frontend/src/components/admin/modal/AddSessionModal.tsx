@@ -13,19 +13,22 @@ type Method = { id: string; name: string };
 type Props = {
     onClose: () => void;
     onCreated: () => void;
+    initialStartTime?: string;
+    initialEndTime?: string;
+    initialDate?: string;
 };
 
-export default function AddSessionModal({ onClose, onCreated }: Props) {
-    const { offset, setOffset } = useAdminContext();
+export default function AddSessionModal({ onClose, onCreated, initialStartTime, initialEndTime, initialDate }: Props) {
+    const { offset } = useAdminContext();
     const [showCalendar, setShowCalendar] = useState(false);
 
-    const selectedDate = getDate(offset);
-    const date = formatDay(selectedDate);
-    const dateLabel = formatDateShort(selectedDate);
+    const [date, setDate] = useState(initialDate ?? formatDay(getDate(offset)));
+    const dateLabel = formatDateShort(new Date(date + 'T00:00:00'));
+    const dateOffset = Math.round((new Date(date + 'T00:00:00').getTime() - getTodayDate().getTime()) / 86400000);
 
     const [methods, setMethods] = useState<Method[]>([]);
-    const [startTime, setStartTime] = useState('09:00');
-    const [endTime, setEndTime] = useState('10:00');
+    const [startTime, setStartTime] = useState(initialStartTime ?? '09:00');
+    const [endTime, setEndTime] = useState(initialEndTime ?? '10:00');
     const [methodId, setMethodId] = useState('');
     const [instructor, setInstructor] = useState('');
     const [capacity, setCapacity] = useState(1);
@@ -178,9 +181,9 @@ export default function AddSessionModal({ onClose, onCreated }: Props) {
         {showCalendar && (
             <Calendar
                 today={getTodayDate()}
-                offset={offset}
+                offset={dateOffset}
                 maxDays={365}
-                onSelect={o => setOffset(o)}
+                onSelect={o => { setDate(formatDay(getDate(o))); setShowCalendar(false); }}
                 onClose={() => setShowCalendar(false)}
             />
         )}
