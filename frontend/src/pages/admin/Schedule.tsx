@@ -10,8 +10,8 @@ import SessionModal from '../../components/admin/modal/SessionModal'
 import AddSessionModal from '../../components/admin/modal/AddSessionModal'
 
 const MAX_DAYS = 90;
-const START_HOUR = 9;
-const END_HOUR = 19; // 7pm
+const START_HOUR = 8;
+const END_HOUR = 20; // 7pm
 const NUM_HOURS = END_HOUR - START_HOUR;
 const HOUR_PX_MIN = 60;
 const HOUR_PX_MAX = 160;
@@ -104,7 +104,7 @@ function SessionCard({ session, style: s, col, totalCols, onClick }: {
 }
 
 export default function Schedule() {
-    const { offset: ctxOffset } = useAdminContext();
+    const { offset: ctxOffset, setOffset: setCtxOffset } = useAdminContext();
     const [offset, setOffset] = useState(ctxOffset);
     useEffect(() => { setOffset(ctxOffset); }, [ctxOffset]);
     const [selectedSession, setSelectedSession] = useState<SessionType | null>(null);
@@ -157,7 +157,7 @@ export default function Schedule() {
 
                 <div className="flex flex-1 gap-2">
                     <button onClick={() => setShowAddModal(true)} className={`${btnBase} flex-1 h-10 px-3`}>+ Session</button>
-                    <button onClick={() => setOffset(0)}          className={`${btnBase} flex-1 h-10 px-3`}>Today</button>
+                    <button onClick={() => { setOffset(0); setCtxOffset(0); }} className={`${btnBase} flex-1 h-10 px-3`}>Today</button>
                     <button
                         onClick={() => setHourPx(h => Math.max(HOUR_PX_MIN, h - HOUR_PX_STEP))}
                         disabled={hourPx <= HOUR_PX_MIN}
