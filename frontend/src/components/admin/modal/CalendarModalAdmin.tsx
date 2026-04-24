@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAdminContext } from '../../../layouts/AdminLayout'
-import { toDateKey, getTodayDate } from '../../../utils/dateUtils'
+import { toDateKey, getTodayDate, getDate } from '../../../utils/dateUtils'
 
 const MAX_DAYS = 90;
 
@@ -12,8 +12,9 @@ export default function CalendarModalAdmin({ onClose }: Props) {
     const { offset, setOffset } = useAdminContext();
 
     const today = getTodayDate();
-    const selected = new Date(today);
-    selected.setDate(today.getDate() + offset);
+    const selected = getDate(offset);
+    const minDate = getDate(-MAX_DAYS);
+    const maxDate = getDate(MAX_DAYS);
 
     const [viewYear, setViewYear] = useState(selected.getFullYear());
     const [viewMonth, setViewMonth] = useState(selected.getMonth());
@@ -21,11 +22,6 @@ export default function CalendarModalAdmin({ onClose }: Props) {
 
     const handleClose = () => setClosing(true);
     const handleAnimationEnd = () => { if (closing) onClose(); };
-
-    const minDate = new Date(today);
-    minDate.setDate(today.getDate() - MAX_DAYS);
-    const maxDate = new Date(today);
-    maxDate.setDate(today.getDate() + MAX_DAYS);
 
     const prevDisabled = viewYear === minDate.getFullYear() && viewMonth === minDate.getMonth();
     const nextDisabled = new Date(viewYear, viewMonth + 1, 1) > maxDate;
@@ -59,7 +55,7 @@ export default function CalendarModalAdmin({ onClose }: Props) {
                 onAnimationEnd={handleAnimationEnd}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-accent/70 hover:text-wood-dark disabled:opacity-20 text-md tracking-widests transition-opacity hidden md:block">←</button>
+                    <button onClick={handlePrev} disabled={prevDisabled} className="font-didot text-wood-accent/70 hover:text-wood-dark disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">←</button>
                     <p className="font-cormorant text-wood-dark text-lg tracking-wide w-full text-left md:text-center">{monthLabel}</p>
                     <button onClick={handleNext} disabled={nextDisabled} className="font-didot text-wood-accent/70 hover:text-wood-dark disabled:opacity-20 text-md tracking-widest transition-opacity hidden md:block">→</button>
                 </div>

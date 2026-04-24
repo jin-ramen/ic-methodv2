@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 
 import { useFetch } from '../../utils/useFetch'
 import { useAdminContext } from '../../layouts/AdminLayout'
-import { toDateKey, formatDay, getTodayDate, getDate } from '../../utils/dateUtils'
+import { toDateKey, getDate } from '../../utils/dateUtils'
 
 import type { SessionType } from '../../types/SessionType'
 
@@ -195,7 +195,6 @@ export default function Schedule() {
 
         {showAddModal && (
             <AddSessionModal
-                defaultDate={formatDay(getTodayDate())}
                 onClose={() => setShowAddModal(false)}
                 onCreated={refetch}
             />

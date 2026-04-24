@@ -6,7 +6,7 @@ import Calendar from '../../CalendarModal';
 import { Field, inputCls } from '../FormField';
 
 
-import { formatDate, formatTime24, getDate, getTodayDate } from '../../../utils/dateUtils';
+import { formatDateShort, formatDay, formatTime24, getDate, getTodayDate } from '../../../utils/dateUtils';
 import { extractError } from '../../../utils/apiUtils';
 
 type Method = { id: string; name: string };
@@ -21,7 +21,9 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
     const { offset, setOffset } = useAdminContext();
     const [showCalendar, setShowCalendar] = useState(false);
 
-    const date = formatDate(getDate(offset));
+    const selectedDate = getDate(offset);
+    const dateValue = formatDay(selectedDate);
+    const dateLabel = formatDateShort(selectedDate);
 
     const [methods, setMethods] = useState<Method[]>([]);
     const [startTime, setStartTime] = useState(formatTime24(f.start_time));
@@ -53,8 +55,8 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     method_id: methodId || null,
-                    start_time: `${date}T${startTime}`,
-                    end_time: `${date}T${endTime}`,
+                    start_time: `${dateValue}T${startTime}`,
+                    end_time: `${dateValue}T${endTime}`,
                     capacity,
                     instructor: instructor.trim() || null,
                 }),
@@ -85,7 +87,7 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
                             onClick={() => setShowCalendar(true)}
                             className={inputCls + ' text-left'}
                         >
-                            {date}
+                            {dateLabel}
                         </button>
                     </Field>
                     <div className="flex gap-4">

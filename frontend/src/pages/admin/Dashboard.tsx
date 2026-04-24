@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useFetch } from '../../utils/useFetch';
 import { useAdminContext } from '../../layouts/AdminLayout';
-import { formatDay, formatDate, formatTime, getTodayDate } from '../../utils/dateUtils'
+import { formatDate, formatTime } from '../../utils/dateUtils'
 
 import type { SessionType } from '../../types/SessionType';
 
@@ -136,7 +136,6 @@ export default function Dashboard() {
 
         {showAddModal && (
             <AddSessionModal
-                defaultDate={formatDay(getTodayDate())}
                 onClose={() => setShowAddModal(false)}
                 onCreated={refetch}
             />

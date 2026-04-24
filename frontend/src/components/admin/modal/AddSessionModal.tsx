@@ -5,27 +5,23 @@ import Calendar from '../../CalendarModal';
 
 import { Field, inputCls } from '../FormField';
 
-import { localDateStr } from '../../../utils/dateUtils';
+import { getTodayDate, getDate, formatDay, formatDateShort } from '../../../utils/dateUtils';
 import { extractError } from '../../../utils/apiUtils';
 
 type Method = { id: string; name: string };
 
 type Props = {
-    defaultDate: string; // YYYY-MM-DD
     onClose: () => void;
     onCreated: () => void;
 };
 
-export default function AddSessionModal({ defaultDate, onClose, onCreated }: Props) {
-    const [today] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; });
-
+export default function AddSessionModal({ onClose, onCreated }: Props) {
     const { offset, setOffset } = useAdminContext();
     const [showCalendar, setShowCalendar] = useState(false);
 
-    const selectedDate = new Date(today);
-    selectedDate.setDate(today.getDate() + offset);
-    const date = localDateStr(selectedDate);
-    const dateLabel = selectedDate.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const selectedDate = getDate(offset);
+    const date = formatDay(selectedDate);
+    const dateLabel = formatDateShort(selectedDate);
 
     const [methods, setMethods] = useState<Method[]>([]);
     const [startTime, setStartTime] = useState('09:00');
@@ -181,7 +177,7 @@ export default function AddSessionModal({ defaultDate, onClose, onCreated }: Pro
 
         {showCalendar && (
             <Calendar
-                today={today}
+                today={getTodayDate()}
                 offset={offset}
                 maxDays={365}
                 onSelect={o => setOffset(o)}

@@ -35,6 +35,7 @@ export default function BookingForm({ onBooked }: Props) {
     const { state } = useLocation();
     const navigate = useNavigate();
     const session: SessionType | undefined = state?.session;
+    const backHref = `/booking${state?.back ? `?${state.back}` : ''}`;
 
     const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', notes: '' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -46,7 +47,7 @@ export default function BookingForm({ onBooked }: Props) {
             <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                     <p className="font-didot text-wood-text text-sm tracking-widest">Session not found.</p>
-                    <button onClick={() => navigate('/booking')} className="font-didot text-wood-text/50 text-xs tracking-widest underline underline-offset-4 mt-4">
+                    <button onClick={() => navigate(backHref)} className="font-didot text-wood-text/50 text-xs tracking-widest underline underline-offset-4 mt-4">
                         ← Back to schedule
                     </button>
                 </div>
@@ -133,7 +134,7 @@ export default function BookingForm({ onBooked }: Props) {
             >
                 {status === 'loading' ? 'Booking...' : 'Confirm Commitment'}
             </button>
-            <button type="button" onClick={() => navigate('/booking')} className="font-didot text-wood-text/30 text-xs tracking-widest">
+            <button type="button" onClick={() => navigate(backHref)} className="font-didot text-wood-text/30 text-xs tracking-widest">
                 ← Back to calender
             </button>
         </form>
@@ -143,7 +144,7 @@ export default function BookingForm({ onBooked }: Props) {
         <div className="flex-1 flex flex-col items-center justify-center px-5">
             <div className={`rounded-xl bg-wood-accent/95 w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
                 <div className="md:hidden flex flex-col gap-10">
-                    <button type="button" onClick={() => navigate('/booking')} className="font-didot text-wood-text/40 text-xs tracking-widest text-left">
+                    <button type="button" onClick={() => navigate(backHref)} className="font-didot text-wood-text/40 text-xs tracking-widest text-left">
                         ← Back to calender
                     </button>
                     <SessionInfo session={session} />

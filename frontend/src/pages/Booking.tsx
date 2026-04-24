@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import type { SessionType } from '../types/SessionType'
 
@@ -18,7 +18,10 @@ type Props = {
 const MAX_DAYS = 90;
 
 export default function Booking({ data, error, loading }: Props) {
-    const [offset, setOffset] = useState(0);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const offset = Math.min(MAX_DAYS, Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10)));
+    const setOffset = (n: number) => setSearchParams(p => { p.set('offset', n.toString()); return p; }, { replace: true });
+
     const [showPicker, setShowPicker] = useState(false);
     const [calHeight, setCalHeight] = useState<string>('auto');
     const navigate = useNavigate();
@@ -56,7 +59,7 @@ export default function Booking({ data, error, loading }: Props) {
     );
 
     const handleSelect = (session: SessionType) => {
-        navigate(`/booking/${session.id}`, { state: { session } });
+        navigate(`/booking/${session.id}`, { state: { session, back: searchParams.toString() } });
     };
 
     return (
@@ -88,14 +91,14 @@ export default function Booking({ data, error, loading }: Props) {
                     </div>
                     <div className="flex items-center justify-between mt-6 shrink-0">
                         <button
-                            onClick={() => { setOffset(o => Math.max(0, o - 1)); setShowPicker(false); }}
+                            onClick={() => { setOffset(Math.max(0, offset - 1)); setShowPicker(false); }}
                             disabled={offset === 0}
                             className="font-didot text-wood-text/70 hover:text-wood-text disabled:opacity-20 text-xl border border-wood-text/30 hover:border-wood-text/60 rounded-xl disabled:hover:border-wood-text/30 w-12 h-12 flex items-center justify-center leading-none transition-colors"
                         >
                             ‹
                         </button>
                         <button
-                            onClick={() => { setOffset(o => Math.min(MAX_DAYS, o + 1)); setShowPicker(false); }}
+                            onClick={() => { setOffset(Math.min(MAX_DAYS, offset + 1)); setShowPicker(false); }}
                             disabled={offset >= MAX_DAYS}
                             className="font-didot text-wood-text/70 hover:text-wood-text disabled:opacity-20 text-xl border border-wood-text/30 hover:border-wood-text/60 rounded-xl disabled:hover:border-wood-text/30 w-12 h-12 flex items-center justify-center leading-none transition-colors"
                         >
@@ -107,14 +110,14 @@ export default function Booking({ data, error, loading }: Props) {
                 <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
                     <div className="flex justify-between mb-6 shrink-0">
                         <button
-                            onClick={() => { setOffset(o => Math.max(0, o - 5)); setShowPicker(false); }}
+                            onClick={() => { setOffset(Math.max(0, offset - 5)); setShowPicker(false); }}
                             disabled={offset === 0}
                             className="font-didot text-wood-text disabled:opacity-20 text-xs tracking-widest transition-opacity"
                         >
                             ← Previous week
                         </button>
                         <button
-                            onClick={() => { setOffset(o => Math.min(MAX_DAYS - 4, o + 5)); setShowPicker(false); }}
+                            onClick={() => { setOffset(Math.min(MAX_DAYS - 4, offset + 5)); setShowPicker(false); }}
                             disabled={offset >= MAX_DAYS - 4}
                             className="font-didot text-wood-text disabled:opacity-20 text-xs tracking-widest transition-opacity"
                         >

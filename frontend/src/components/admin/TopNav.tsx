@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAdminContext } from '../../layouts/AdminLayout';
+import { formatDateShort } from '../../utils/dateUtils';
 import Calendar from './modal/CalendarModalAdmin';
 
 const titleMap: Record<string, string> = {
@@ -14,16 +15,11 @@ export default function TopNav() {
     const title = titleMap[pathname] ?? 'Admin';
     const [open, setOpen] = useState(false);
 
-    const dateLabel = selectedDate.toLocaleDateString('en-AU', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    });
+    const dateLabel = formatDateShort(selectedDate);
 
     return (
         <>
-            <header className="flex items-center justify-between px-6 py-5 border-b border-wood-accent/20">
+            <header className="sticky top-0 z-10 bg-wood-light flex items-center justify-between px-6 py-5 border-b border-wood-accent/20 overflow-hidden">
                 <h1 className="font-cormorant text-3xl text-wood-dark">{title}</h1>
                 <button
                     onClick={() => setOpen(true)}
