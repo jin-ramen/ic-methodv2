@@ -5,7 +5,7 @@ from app.db.session import get_db
 from app.services.method import create_method, list_methods, update_method, delete_method
 from app.schemas.method import MethodCreate, MethodUpdate, MethodResponse
 
-router = APIRouter(prefix="/api", tags=["booking"])
+router = APIRouter(prefix="/api", tags=["method"])
 
 
 @router.post("/methods", response_model=MethodResponse, status_code=status.HTTP_201_CREATED)

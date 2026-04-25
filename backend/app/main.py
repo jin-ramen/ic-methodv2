@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.limiter import limiter
-from app.routes import notion_cms, methods, bookings, sessions
+from app.routes import notion_cms, methods, bookings, sessions, users
 
 app = FastAPI()
 app.state.limiter = limiter
@@ -23,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(users.router)
 app.include_router(notion_cms.router)
 app.include_router(methods.router)
 app.include_router(sessions.router)

@@ -8,3 +8,6 @@ greenlet
 slowapi
 alembic
 psycopg[binary]
+passlib
+passlib[argon2]
+pyjwt

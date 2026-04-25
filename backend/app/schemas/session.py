@@ -1,7 +1,6 @@
 from pydantic import BaseModel, ConfigDict, model_validator
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
-from datetime import timezone
 
 
 
