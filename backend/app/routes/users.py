@@ -1,12 +1,32 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
 from app.db.session import get_db
+from app.models.models import User
 from app.schemas.user import UserCreate, UserUpdate, UserRead, UserLogin
 from app.services.user import create_user, list_users, update_user, delete_user, auth_user
 
 router = APIRouter(prefix="/api", tags=["user"])
+
+
+@router.get("/users/check")
+async def api_check_user(email: str | None = None, phone: str | None = None, db: AsyncSession = Depends(get_db)):
+    conditions = []
+    if email:
+        conditions.append(User.email == email)
+    if phone:
+        conditions.append(User.phone == phone)
+    if not conditions:
+        return {"email_taken": False, "phone_taken": False}
+
+    result = await db.execute(select(User.email, User.phone).where(or_(*conditions)))
+    rows = result.all()
+    return {
+        "email_taken": bool(email) and any(r.email == email for r in rows),
+        "phone_taken": bool(phone) and any(r.phone == phone for r in rows),
+    }
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def api_auth_user(login_data: UserLogin, db: AsyncSession = Depends(get_db)): 

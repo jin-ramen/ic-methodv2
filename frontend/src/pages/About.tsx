@@ -17,7 +17,7 @@ export default function About() {
         </p>
         <Link
           to="/booking"
-          className=" opacity-0 animate-text-in [animation-delay:200ms] inline-flex items-center gap-3 font-didot text-xs tracking-[0.2em] uppercase bg-wood-accent text-wood-text hover:bg-wood-dark transition-colors duration-300 py-3 px-8 rounded-xl group"
+          className=" opacity-0 animate-text-in [animation-delay:200ms] inline-flex items-center gap-3 font-didot text-xs tracking-[0.2em] uppercase bg-wood-accent text-wood-text hover:bg-wood-dark transition-colors duration-300 py-3 px-8 rounded-md group"
         >
           <span className="hidden md:flex">Book Now</span>
           <span className="md:hidden flex">Book</span>

@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "homepage": "https://jin-ramen.github.io/ic-methodv2/",
-
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -14,6 +13,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.6",
     "@tailwindcss/vite": "^4.2.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

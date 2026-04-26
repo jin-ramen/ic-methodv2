@@ -8,6 +8,9 @@ import People from './pages/People'
 import Studio from './pages/Studio'
 import Booking from './pages/Booking'
 import BookingForm from './pages/BookingForm'
+import UserLogin from './pages/UserLogin'
+import UserRegistration from './pages/UserRegistration'
+import SSOCallback from './pages/SSOCallback'
 
 import AdminDashBoard from './pages/admin/Dashboard'
 import AdminSchedule from './pages/admin/Schedule'
@@ -32,6 +35,9 @@ function App() {
           <Route path="studio" element={<Studio data={photos} error={errorStudio} />} />
           <Route path="booking" element={<Booking data={flows} error={errorFlows} loading={loadingFlows} />} />
           <Route path="booking/:flowId" element={<BookingForm onBooked={refetchFlows} />} />
+          <Route path="login" element={<UserLogin />} />
+          <Route path="register" element={<UserRegistration />} />
+          <Route path="sso-callback" element={<SSOCallback />} />
         </Route>
 
 

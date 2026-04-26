@@ -4,7 +4,6 @@ from uuid import UUID
 from app.models.models import UserRole
 
 class UserBase(BaseModel):
-    id: UUID
     first_name: str
     last_name: str
     email: EmailStr
