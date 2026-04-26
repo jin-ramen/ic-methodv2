@@ -2,6 +2,7 @@ fastapi
 uvicorn[standard]
 notion-client
 pydantic-settings
+pydantic[email]
 pydantic-extra-types
 phonenumbers
 sqlalchemy
