@@ -13,7 +13,8 @@ primary_region = 'syd'
   TZ = "Australia/Melbourne" 
 
 [build.args]
-  VITE_CLERK_PUBLISHABLE_KEY=pk_test_dGhvcm91Z2gtZ3JhY2tsZS03OC5jbGVyay5hY2NvdW50cy5kZXYk
+  # change to pk_live_... on deploy
+  VITE_CLERK_PUBLISHABLE_KEY= "pk_test_dGhvcm91Z2gtZ3JhY2tsZS03OC5jbGVyay5hY2NvdW50cy5kZXYk" 
 
 [http_service]
   internal_port = 8000
