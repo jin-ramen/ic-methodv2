@@ -62,8 +62,13 @@ export default function ClientModal({ user, onClose }: Props) {
     const handleAnimationEnd = () => { if (closing) onClose(); };
 
     const now = new Date();
-    const upcoming = bookings.filter(b => new Date(b.session_start) > now);
-    const past = [...bookings.filter(b => new Date(b.session_start) <= now)].reverse();
+    const upcoming = bookings.filter(b => b.status === 'booked' && new Date(b.session_start) > now);
+    const past = [...bookings.filter(b => b.status === 'booked' && new Date(b.session_start) <= now)].reverse();
+    const cancelled = [...bookings.filter(b => b.status === 'cancelled')].sort((a, b) => new Date(b.session_start).getTime() - new Date(a.session_start).getTime());
+
+    const totalClassMinutes = past.reduce((sum, b) =>
+        sum + (new Date(b.session_end).getTime() - new Date(b.session_start).getTime()) / 60_000
+    , 0);
 
     return (
         <>
@@ -110,13 +115,26 @@ export default function ClientModal({ user, onClose }: Props) {
                                 </div>
                             )}
                         </div>
+
+                        {!loadingBookings && (
+                            <div className="mt-3 flex items-center gap-2">
+                                <svg className="w-3.5 h-3.5 text-wood-accent/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                </svg>
+                                <p className="font-didot text-xs text-wood-accent/70 tracking-wide">
+                                    {totalClassMinutes >= 60
+                                        ? `${Math.floor(totalClassMinutes / 60)}h ${totalClassMinutes % 60 > 0 ? `${totalClassMinutes % 60}m` : ''}`.trim()
+                                        : `${totalClassMinutes}m`} total class time
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Bookings */}
                     <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-4">
                         {loadingBookings ? (
                             <p className="font-didot text-xs text-wood-accent/40 tracking-widest">Loading bookings…</p>
-                        ) : bookings.length === 0 ? (
+                        ) : upcoming.length === 0 && past.length === 0 && cancelled.length === 0 ? (
                             <p className="font-didot text-xs text-wood-accent/40 tracking-widest">No bookings yet.</p>
                         ) : (
                             <div className="flex flex-col gap-6">
@@ -126,6 +144,16 @@ export default function ClientModal({ user, onClose }: Props) {
                                         <div className="flex flex-col gap-2">
                                             {upcoming.map(b => (
                                                 <BookingRow key={b.id} booking={b} onClick={() => setSelectedBooking(b)} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {cancelled.length > 0 && (
+                                    <div>
+                                        <p className="font-didot text-[10px] tracking-widest uppercase text-wood-accent/40 mb-3">Cancelled</p>
+                                        <div className="flex flex-col gap-2">
+                                            {cancelled.map(b => (
+                                                <CancelledBookingRow key={b.id} booking={b} />
                                             ))}
                                         </div>
                                     </div>
@@ -158,6 +186,26 @@ export default function ClientModal({ user, onClose }: Props) {
                 />
             )}
         </>
+    );
+}
+
+function CancelledBookingRow({ booking, past }: { booking: ClientBookingType; past?: boolean }) {
+    return (
+        <div className={`flex items-center justify-between gap-2 border rounded-lg px-4 py-3 ${past ? 'border-wood-accent/10 opacity-50 hover:opacity-80' : 'border-wood-accent/10'}`}>
+            <div className="min-w-0 opacity-50">
+                <p className="font-cormorant text-base text-wood-accent/60 leading-tight line-through decoration-wood-accent/30">
+                    {formatDate(booking.session_start as unknown as Date)}
+                </p>
+                <p className="font-didot text-xs text-wood-accent/40">
+                    {formatTime(booking.session_start as unknown as Date)} – {formatTime(booking.session_end as unknown as Date)}
+                </p>
+            </div>
+            {booking.cancellation_type && (
+                <span className="font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-400 shrink-0">
+                    {booking.cancellation_type}
+                </span>
+            )}
+        </div>
     );
 }
 

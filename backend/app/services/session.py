@@ -30,7 +30,7 @@ async def list_sessions(db: AsyncSession) -> list[tuple[Session, int]]:
     remaining = (Session.capacity - func.count(Booking.id)).label("spots_remaining")
     result = await db.execute(
         select(Session, remaining)
-        .outerjoin(Booking, Booking.session_id == Session.id)
+        .outerjoin(Booking, (Booking.session_id == Session.id) & (Booking.status == 'booked'))
         .group_by(Session.id)
         .options(selectinload(Session.method))
         .order_by(Session.start_time)

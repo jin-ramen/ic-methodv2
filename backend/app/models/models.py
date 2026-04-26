@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Optional
 
 from sqlalchemy import (
-    String, Numeric, ForeignKey, Integer, CheckConstraint, 
+    String, Numeric, ForeignKey, Integer, CheckConstraint,
     UniqueConstraint, Index, DateTime, Enum
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -60,6 +60,10 @@ class Session(Base):
         UniqueConstraint("instructor", "start_time", name="uq_session_instructor_start_time"),
     )
 
+class BookingStatus(str, enum.Enum):
+    BOOKED = "booked"
+    CANCELLED = "cancelled"
+
 class Booking(Base):
     __tablename__ = "booking"
 
@@ -74,6 +78,9 @@ class Booking(Base):
     phone: Mapped[Optional[str]] = mapped_column(String(20))
 
     notes: Mapped[Optional[str]] = mapped_column(String(1000))
+    status: Mapped[str] = mapped_column(String(20), default=BookingStatus.BOOKED, server_default="booked")
+    cancelled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancellation_type: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships

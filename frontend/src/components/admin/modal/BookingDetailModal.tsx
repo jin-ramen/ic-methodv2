@@ -12,6 +12,8 @@ export type BookingType = {
     notes: string | null;
     is_guest: boolean;
     role: string | null;
+    status: string;
+    cancellation_type: string | null;
 };
 
 const ROLE_STYLES: Record<string, string> = {

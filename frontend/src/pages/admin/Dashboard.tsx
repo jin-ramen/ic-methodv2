@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFetch } from '../../utils/useFetch';
 import { useAdminContext } from '../../layouts/AdminLayout';
 import { formatDate, formatTime } from '../../utils/dateUtils'
@@ -26,6 +26,13 @@ export default function Dashboard() {
     const { data: flows, loading, error, refetch } = useFetch<SessionType[]>('/api/sessions');
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedSession, setSelectedSession] = useState<SessionType | null>(null);
+
+    useEffect(() => {
+        const id = setInterval(refetch, 30_000);
+        const onVisible = () => { if (document.visibilityState === 'visible') refetch(); };
+        document.addEventListener('visibilitychange', onVisible);
+        return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
+    }, [refetch]);
 
     const sessions = flows ? flowsForDate(flows, selectedDate) : [];
     const totalCapacity = sessions.reduce((s, f) => s + f.capacity, 0);

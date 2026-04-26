@@ -131,9 +131,10 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
                         <select
                             value={methodId}
                             onChange={e => setMethodId(e.target.value)}
+                            required
                             className={inputCls}
                         >
-                            <option value="">— None —</option>
+                            <option value="" disabled>— Select —</option>
                             {methods.map(m => (
                                 <option key={m.id} value={m.id}>{m.name}</option>
                             ))}
@@ -141,8 +142,8 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
                     </Field>
 
                     <Field label="Instructor">
-                        <select value={instructor} onChange={e => setInstructor(e.target.value)} className={inputCls}>
-                            <option value="">— None —</option>
+                        <select value={instructor} onChange={e => setInstructor(e.target.value)} required className={inputCls}>
+                            <option value="" disabled>— Select —</option>
                             {staffList.map(s => {
                                 const name = `${s.first_name} ${s.last_name}`;
                                 return <option key={s.id} value={name}>{name}</option>;

@@ -32,6 +32,10 @@ class BookingUpdate(BaseModel):
     notes: str | None = None
 
 
+class BookingCancelRequest(BaseModel):
+    cancellation_type: str  # 'early' or 'late'
+
+
 class BookingResponse(BaseModel):
     id: UUID
     session_id: UUID
@@ -43,6 +47,9 @@ class BookingResponse(BaseModel):
     notes: str | None = None
     is_guest: bool
     role: str | None = None
+    status: str = 'booked'
+    cancelled_at: datetime | None = None
+    cancellation_type: str | None = None
     created_at: datetime
     session_start: datetime | None = None
     session_end: datetime | None = None

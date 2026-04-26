@@ -86,6 +86,7 @@ async def list_users(db: AsyncSession, id: UUID | None = None, search: str | Non
     result = await db.scalars(q)
     return result.all()
 
+
 async def update_user(db: AsyncSession, id: UUID, first_name: str | None, last_name: str | None, email: str | None, phone: str | None, role: str | None) -> User | None:
     user = await db.get(User, id)
 

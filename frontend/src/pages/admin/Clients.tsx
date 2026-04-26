@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import ClientModal from '../../components/admin/modal/ClientModal';
+import CreateClientModal, { type CreatedUser } from '../../components/admin/modal/CreateClientModal';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -64,6 +65,7 @@ export default function Clients() {
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<UserType | null>(null);
+    const [showCreate, setShowCreate] = useState(false);
 
     useEffect(() => {
         fetch(`${BASE}/api/users`)
@@ -103,6 +105,15 @@ export default function Clients() {
                     <p className="font-didot text-xs text-wood-accent/40 tracking-widest shrink-0">
                         {filtered.length} {filtered.length === 1 ? 'client' : 'clients'}
                     </p>
+                    <button
+                        onClick={() => setShowCreate(true)}
+                        className="flex items-center gap-1.5 font-didot text-xs tracking-widest uppercase bg-wood-accent text-white hover:bg-wood-dark px-3 py-2 rounded-lg transition-colors duration-200 shrink-0 ml-auto"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        New Client
+                    </button>
                 </div>
 
                 {/* Grid */}
@@ -126,6 +137,13 @@ export default function Clients() {
 
             {selected && (
                 <ClientModal user={selected} onClose={() => setSelected(null)} />
+            )}
+
+            {showCreate && (
+                <CreateClientModal
+                    onClose={() => setShowCreate(false)}
+                    onCreated={(u: CreatedUser) => setUsers(prev => [u, ...prev])}
+                />
             )}
         </>
     );

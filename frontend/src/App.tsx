@@ -18,6 +18,7 @@ import AdminSchedule from './pages/admin/Schedule'
 import AdminClients from './pages/admin/Clients'
 import AdminMethods from './pages/admin/Methods'
 import AdminStaff from './pages/admin/Staff'
+import AdminBookings from './pages/admin/Bookings'
 import Profile from './pages/Profile'
 
 import type { PeopleType } from './types/people'
@@ -37,11 +38,12 @@ function App() {
           <Route index element={<About />} />
           <Route path="people" element={<People data={team} error={errorPeople} />} />
           <Route path="studio" element={<Studio data={photos} error={errorStudio} />} />
-          <Route path="booking" element={<Booking data={flows} error={errorFlows} loading={loadingFlows} />} />
+          <Route path="booking" element={<Booking data={flows} error={errorFlows} loading={loadingFlows} refetch={refetchFlows} />} />
           <Route path="booking/:flowId" element={<BookingForm onBooked={refetchFlows} />} />
           <Route path="login" element={<UserLogin />} />
           <Route path="register" element={<UserRegistration />} />
           <Route path="account" element={<UserDashboard />} />
+          <Route path="account/profile" element={<Profile />} />
           <Route path="sso-callback" element={<SSOCallback />} />
         </Route>
 
@@ -52,6 +54,7 @@ function App() {
           <Route path="clients" element={<AdminClients />} />
           <Route path="methods" element={<AdminMethods />} />
           <Route path="staff" element={<AdminStaff />} />
+          <Route path="bookings" element={<AdminBookings />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 

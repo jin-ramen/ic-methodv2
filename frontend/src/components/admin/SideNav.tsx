@@ -37,9 +37,16 @@ export default function SideNav() {
         </svg>
     );
 
+    const BookingIcon = (
+        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
+        </svg>
+    );
+
     const links = [
         { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
         { to: '/schedule', label: 'Schedule', icon: CalendarIcon },
+        { to: '/bookings', label: 'Bookings', icon: BookingIcon },
         { to: '/clients', label: 'Clients', icon: PeopleIcon },
         { to: '/staff', label: 'Staff', icon: StaffIcon },
         { to: '/methods', label: 'Methods', icon: MethodIcon },

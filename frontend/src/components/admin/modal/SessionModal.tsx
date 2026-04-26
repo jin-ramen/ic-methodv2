@@ -40,7 +40,11 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
     const fetchClients = () => {
         fetch(`${BASE}/api/bookings?session_id=${session.id}`)
             .then(r => r.json())
-            .then(j => setClients(j.results ?? []))
+            .then(j => {
+                const results: BookingType[] = j.results ?? [];
+                results.sort((a, b) => (a.status === 'cancelled' ? 1 : 0) - (b.status === 'cancelled' ? 1 : 0));
+                setClients(results);
+            })
             .catch(() => {});
     };
 
@@ -90,7 +94,7 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     Edit Flow
                 </button>
                 <button
-                    onClick={() => { if (clients.length > 0) { setCancelError(true); } else { setCancelError(false); setShowCancel(true); } }}
+                    onClick={() => { if (clients.some(c => c.status === 'booked')) { setCancelError(true); } else { setCancelError(false); setShowCancel(true); } }}
                     disabled={isPast}
                     className="flex-1 font-didot text-xs tracking-wide bg-red-400 text-white hover:bg-red-600 py-2 rounded-lg transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-400"
                 >
@@ -142,22 +146,28 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     <p className="font-didot text-xs text-wood-accent/40">No bookings yet.</p>
                 )}
                 {clients.map(c => {
+                    const isCancelled = c.status === 'cancelled';
                     const roleStyle = c.role ? (ROLE_STYLES[c.role.toLowerCase()] ?? ROLE_STYLES.member) : '';
                     return (
                         <button
                             key={c.id}
                             onClick={() => setDetailBooking(c)}
-                            className="flex flex-row items-center py-2.5 border-b border-wood-accent/10 last:border-0 group w-full text-left hover:bg-wood-accent/5 -mx-2 px-2 rounded-lg transition-colors duration-150"
+                            className={`flex flex-row items-center py-2.5 border-b border-wood-accent/10 last:border-0 group w-full text-left -mx-2 px-2 rounded-lg transition-colors duration-150 ${isCancelled ? 'opacity-40' : 'hover:bg-wood-accent/5'}`}
                         >
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
-                                    <p className="font-cormorant text-base text-wood-dark">{c.first_name} {c.last_name}</p>
-                                    {c.is_guest
-                                        ? <span className="font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">Guest</span>
-                                        : c.role
-                                            ? <span className={`font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full ${roleStyle}`}>{c.role.charAt(0).toUpperCase() + c.role.slice(1).toLowerCase()}</span>
-                                            : null
-                                    }
+                                    <p className={`font-cormorant text-base ${isCancelled ? 'text-wood-accent/60 line-through' : 'text-wood-dark'}`}>
+                                        {c.first_name} {c.last_name}
+                                    </p>
+                                    {isCancelled ? (
+                                        <span className="font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-red-100 text-red-400">
+                                            {c.cancellation_type ?? 'cancelled'}
+                                        </span>
+                                    ) : c.is_guest ? (
+                                        <span className="font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">Guest</span>
+                                    ) : c.role ? (
+                                        <span className={`font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full ${roleStyle}`}>{c.role.charAt(0).toUpperCase() + c.role.slice(1).toLowerCase()}</span>
+                                    ) : null}
                                 </div>
                                 <p className="font-didot text-xs text-wood-accent/50 truncate">
                                     {c.email ?? '—'}{c.phone ? ` · ${c.phone}` : ''}

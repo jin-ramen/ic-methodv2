@@ -7,8 +7,8 @@ from app.core.limiter import limiter
 from app.core.security import verify_access_token
 from app.db.session import get_db
 from app.models.models import Booking, User, UserRole
-from app.services.booking import create_booking, list_bookings, update_booking, delete_booking
-from app.schemas.booking import BookingCreate, AdminBookingCreate, BookingUpdate, BookingResponse
+from app.services.booking import create_booking, list_bookings, update_booking, delete_booking, cancel_booking
+from app.schemas.booking import BookingCreate, AdminBookingCreate, BookingUpdate, BookingCancelRequest, BookingResponse
 
 router = APIRouter(prefix="/api", tags=["booking"])
 
@@ -71,8 +71,13 @@ def _serialize(booking: Booking) -> dict:
         "is_guest": is_guest,
         "role": role,
         "created_at": booking.created_at.isoformat(),
+        "status": booking.status,
+        "cancelled_at": booking.cancelled_at.isoformat() if booking.cancelled_at else None,
+        "cancellation_type": booking.cancellation_type,
         "session_start": booking.session.start_time.isoformat() if booking.session else None,
         "session_end": booking.session.end_time.isoformat() if booking.session else None,
+        "session_instructor": booking.session.instructor if booking.session else None,
+        "session_method_name": booking.session.method.name if booking.session and booking.session.method else None,
     }
 
 
@@ -128,6 +133,19 @@ async def patch_booking(id: UUID, data: BookingUpdate, db: AsyncSession = Depend
     booking = await update_booking(db, id, data.notes)
     if not booking:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+    return _serialize(booking)
+
+
+@router.post("/bookings/{id}/cancel")
+async def cancel_user_booking(
+    id: UUID,
+    data: BookingCancelRequest,
+    db: AsyncSession = Depends(get_db),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    booking = await cancel_booking(db, id, user_id, data.cancellation_type)
+    if not booking:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found.")
     return _serialize(booking)
 
 

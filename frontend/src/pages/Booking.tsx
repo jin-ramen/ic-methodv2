@@ -13,11 +13,14 @@ type Props = {
     data: SessionType[] | null;
     error: string | null;
     loading: boolean;
+    refetch: () => void;
 }
 
 const MAX_DAYS = 90;
 
-export default function Booking({ data, error, loading }: Props) {
+const POLL_MS = 30_000;
+
+export default function Booking({ data, error, loading, refetch }: Props) {
     const [searchParams, setSearchParams] = useSearchParams();
     const offset = Math.min(MAX_DAYS, Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10)));
     const setOffset = (n: number) => setSearchParams(p => { p.set('offset', n.toString()); return p; }, { replace: true });
@@ -48,6 +51,16 @@ export default function Booking({ data, error, loading }: Props) {
             body.style.overflow = prevBodyOverflow;
         };
     }, []);
+
+    useEffect(() => {
+        const id = setInterval(refetch, POLL_MS);
+        const onVisible = () => { if (document.visibilityState === 'visible') refetch(); };
+        document.addEventListener('visibilitychange', onVisible);
+        return () => {
+            clearInterval(id);
+            document.removeEventListener('visibilitychange', onVisible);
+        };
+    }, [refetch]);
 
     const SessionsByDate = useMemo(
         () => (data ?? []).reduce<Record<string, SessionType[]>>((acc, session) => {
