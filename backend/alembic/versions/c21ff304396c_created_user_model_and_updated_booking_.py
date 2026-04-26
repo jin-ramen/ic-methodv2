@@ -19,32 +19,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    bind = op.get_bind()
-    inspector = sa.inspect(bind)
-    existing_tables = set(inspector.get_table_names())
-
-    # Drop legacy 'flow' table if it exists in this environment
-    if 'flow' in existing_tables:
-        flow_fks = {fk['name'] for fk in inspector.get_foreign_keys('flow')}
-        if 'flow_method_id_fkey' in flow_fks:
-            op.drop_constraint('flow_method_id_fkey', 'flow', type_='foreignkey')
-        op.drop_table('flow')
-
-    # booking must go before session (it has a FK referencing session)
-    if 'booking' in existing_tables:
-        op.drop_table('booking')
-
-    if 'session' in existing_tables:
-        session_fks = {fk['name'] for fk in inspector.get_foreign_keys('session')}
-        if 'session_method_id_fkey' in session_fks:
-            op.drop_constraint('session_method_id_fkey', 'session', type_='foreignkey')
-        session_indexes = {idx['name'] for idx in inspector.get_indexes('session')}
-        if 'ix_session_start_time' in session_indexes:
-            op.drop_index('ix_session_start_time', table_name='session')
-        op.drop_table('session')
-
-    if 'method' in existing_tables:
-        op.drop_table('method')
+    # Drop all legacy tables with CASCADE to handle any unknown FK dependents.
+    # Order: child tables that reference flow/session first, then parents.
+    op.execute("DROP TABLE IF EXISTS commitment CASCADE")
+    op.execute("DROP TABLE IF EXISTS booking CASCADE")
+    op.execute("DROP TABLE IF EXISTS flow CASCADE")
+    op.execute("DROP TABLE IF EXISTS session CASCADE")
+    op.execute("DROP TABLE IF EXISTS method CASCADE")
 
 
 
