@@ -2,6 +2,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, or_
+from sqlalchemy.exc import IntegrityError
 from app.schemas.user import UserCreate, UserLogin
 from app.models.models import User, UserRole
 from app.core.security import hash_password, verify_password, create_access_token
@@ -40,10 +41,31 @@ async def create_user(db: AsyncSession, user_in: UserCreate) -> User:
         hashed_password=hashed_password
     )
 
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
-    return new_user
+    try:
+        db.add(new_user)
+        # The unique constraint check happens during the commit
+        await db.commit()
+        await db.refresh(new_user)
+        return new_user
+        
+    except IntegrityError as e:
+        # 1. Rollback the failed transaction so the DB is clean
+        await db.rollback()
+        
+        # 2. Check the error message to see which field failed (Optional)
+        error_msg = str(e.orig)
+        detail = "User with this email or phone already exists."
+        
+        if "email" in error_msg:
+            detail = "This email is already registered."
+        elif "phone" in error_msg:
+            detail = "This phone number is already registered."
+
+        # 3. Raise a 400 Bad Request instead of a 500 crash
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=detail
+        )
 
 async def list_users(db: AsyncSession, id: UUID | None) -> list[User]:
     q = select(User)
