@@ -10,7 +10,10 @@ router = APIRouter(prefix="/api", tags=["session"])
 
 @router.post("/sessions", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
 async def post_session(data: SessionCreate, db: AsyncSession = Depends(get_db)):
-    return await creater_session(db, method_id=data.method_id, start_time=data.start_time, end_time=data.end_time, capacity=data.capacity, instructor=data.instructor)
+    try:
+        return await creater_session(db, method_id=data.method_id, start_time=data.start_time, end_time=data.end_time, capacity=data.capacity, instructor=data.instructor)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.get("/sessions")
@@ -26,7 +29,10 @@ async def get_sessions(db: AsyncSession = Depends(get_db)):
 
 @router.patch("/sessions/{id}", response_model=SessionResponse)
 async def patch_session(id: UUID, data: SessionUpdate, db: AsyncSession = Depends(get_db)):
-    session = await update_session(db, id, data.method_id, data.start_time, data.end_time, data.capacity, data.instructor)
+    try:
+        session = await update_session(db, id, data.method_id, data.start_time, data.end_time, data.capacity, data.instructor)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     if not session:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
     return session

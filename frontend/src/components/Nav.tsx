@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../utils/useAuth';
 
 export function Header() {
 
     const [isOpen, setIsOpen] = useState(false);
     const { pathname } = useLocation();
+    const { isLoggedIn } = useAuth();
 
     const handleClick = () => {
         setIsOpen(!isOpen);
@@ -36,6 +38,12 @@ export function Header() {
                             <Link to="/people" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/people' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>People</Link>
                             <Link to="/studio" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/studio' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>Studio</Link>
                     </div>
+                    <Link
+                        to={isLoggedIn ? '/account' : '/login'}
+                        className="hidden md:block font-didot text-xs tracking-widest uppercase text-wood-accent hover:text-wood-dark transition-colors duration-300"
+                    >
+                        {isLoggedIn ? 'Dashboard' : 'Log in'}
+                    </Link>
                     <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ml-auto ${isOpen ? 'hamburger-toggle' : ''}`}>
                         <div className="relative w-4 h-0.5 rounded-full bg-wood-accent
                                             before:content-[''] before:absolute before:w-4 before:h-0.5 before:rounded-full before:-translate-y-1.5 before:bg-wood-accent
@@ -52,6 +60,7 @@ export function Header() {
                     <Link to="/people" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/people' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>People</Link>
                     <Link to="/studio" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/studio' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>Studio</Link>
                     <Link to="/booking" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname.startsWith('/booking') ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '500ms' : '0ms' }}>Book</Link>
+                    <Link to={isLoggedIn ? '/account' : '/login'} onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${(isLoggedIn ? pathname === '/account' : pathname === '/login') ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '600ms' : '0ms' }}>{isLoggedIn ? 'Dashboard' : 'Log in'}</Link>
                 </div>
             </div>
         </>

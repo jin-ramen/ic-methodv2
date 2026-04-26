@@ -9,6 +9,7 @@ import { getTodayDate, getDate, formatDay, formatDateShort } from '../../../util
 import { extractError } from '../../../utils/apiUtils';
 
 type Method = { id: string; name: string };
+type StaffMember = { id: string; first_name: string; last_name: string; role: string };
 
 type Props = {
     onClose: () => void;
@@ -27,6 +28,7 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
     const dateOffset = Math.round((new Date(date + 'T00:00:00').getTime() - getTodayDate().getTime()) / 86400000);
 
     const [methods, setMethods] = useState<Method[]>([]);
+    const [staffList, setStaffList] = useState<StaffMember[]>([]);
     const [startTime, setStartTime] = useState(initialStartTime ?? '09:00');
     const [endTime, setEndTime] = useState(initialEndTime ?? '10:00');
     const [methodId, setMethodId] = useState('');
@@ -37,9 +39,14 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
     const [closing, setClosing] = useState(false);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/methods`)
+        const base = import.meta.env.VITE_API_BASE_URL ?? '';
+        fetch(`${base}/api/methods`)
             .then(r => r.json())
             .then(j => setMethods(j.results ?? []))
+            .catch(() => {});
+        fetch(`${base}/api/users`)
+            .then(r => r.ok ? r.json() : [])
+            .then((users: StaffMember[]) => setStaffList(users.filter(u => ['owner', 'staff'].includes(u.role.toLowerCase()))))
             .catch(() => {});
     }, []);
 
@@ -134,13 +141,13 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
                     </Field>
 
                     <Field label="Instructor">
-                        <input
-                            type="text"
-                            value={instructor}
-                            onChange={e => setInstructor(e.target.value)}
-                            placeholder="Optional"
-                            className={inputCls}
-                        />
+                        <select value={instructor} onChange={e => setInstructor(e.target.value)} className={inputCls}>
+                            <option value="">— None —</option>
+                            {staffList.map(s => {
+                                const name = `${s.first_name} ${s.last_name}`;
+                                return <option key={s.id} value={name}>{name}</option>;
+                            })}
+                        </select>
                     </Field>
 
                     <Field label="Capacity">

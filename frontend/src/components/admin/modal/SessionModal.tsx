@@ -1,21 +1,19 @@
 import { useEffect, useState } from 'react';
 
 import type { SessionType } from '../../../types/SessionType';
-
-import { formatTime, formatDate } from '../../../utils/dateUtils'
+import { formatTime, formatDate } from '../../../utils/dateUtils';
 
 import EditSessionModal from './EditSessionModal';
 import CancelSessionModal from './CancelSessionModal';
-import CancelBookingModal from './CancelBookingModal';
+import BookingDetailModal, { type BookingType } from './BookingDetailModal';
+import AddClientModal from './AddClientModal';
 
-type Booking = {
-    id: string;
-    flow_id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string | null;
-    notes: string | null;
+const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+
+const ROLE_STYLES: Record<string, string> = {
+    owner: 'bg-amber-100 text-amber-700',
+    staff: 'bg-blue-100 text-blue-700',
+    member: 'bg-wood-accent/10 text-wood-accent/60',
 };
 
 type Props = {
@@ -25,27 +23,31 @@ type Props = {
     onDeleted: () => void;
 };
 
-export default function SessionModal({ session: session, onClose, onUpdated, onDeleted }: Props) {
-    const [clients, setClients] = useState<Booking[]>([]);
+export default function SessionModal({ session, onClose, onUpdated, onDeleted }: Props) {
+    const [clients, setClients] = useState<BookingType[]>([]);
     const [spotsRemaining, setSpotsRemaining] = useState(session.spots_remaining);
 
     const isPast = new Date(session.end_time) < new Date();
     const booked = session.capacity - spotsRemaining;
     const fillPct = session.capacity > 0 ? Math.round((booked / session.capacity) * 100) : 0;
+
     const [showEdit, setShowEdit] = useState(false);
     const [showCancel, setShowCancel] = useState(false);
-    const [cancelBooking, setCancelBooking] = useState<Booking | null>(null);
     const [cancelError, setCancelError] = useState(false);
+    const [detailBooking, setDetailBooking] = useState<BookingType | null>(null);
+    const [showAddClient, setShowAddClient] = useState(false);
 
-    useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/bookings?session_id=${session.id}`)
+    const fetchClients = () => {
+        fetch(`${BASE}/api/bookings?session_id=${session.id}`)
             .then(r => r.json())
             .then(j => setClients(j.results ?? []))
             .catch(() => {});
-    }, [session.id]);
+    };
+
+    useEffect(() => { fetchClients(); }, [session.id]);
 
     return (
-        <div className="fixed inset-x-5 inset-y-20 md:inset-auto md:relative md:block  flex flex-col md:h-full bg-wood-light rounded-xl shadow-md overflow-hidden animate-modal-in">
+        <div className="fixed inset-x-5 inset-y-20 md:inset-auto md:relative md:block flex flex-col md:h-full bg-wood-light rounded-xl shadow-md overflow-hidden animate-modal-in">
 
             {/* Title */}
             <div className="px-6 pt-6 pb-4">
@@ -116,19 +118,6 @@ export default function SessionModal({ session: session, onClose, onUpdated, onD
                     onDeleted={() => { setShowCancel(false); onDeleted(); }}
                 />
             )}
-            {cancelBooking && (
-                <CancelBookingModal
-                    bookingId={cancelBooking.id}
-                    clientName={`${cancelBooking.first_name} ${cancelBooking.last_name}`}
-                    onClose={() => setCancelBooking(null)}
-                    onDeleted={() => {
-                        setClients(cs => cs.filter(c => c.id !== cancelBooking.id));
-                        setSpotsRemaining(s => s + 1);
-                        setCancelBooking(null);
-                        onUpdated();
-                    }}
-                />
-            )}
 
             {/* Capacity bar */}
             <div className="px-6 pb-4 flex flex-col gap-2">
@@ -152,35 +141,72 @@ export default function SessionModal({ session: session, onClose, onUpdated, onD
                 {clients.length === 0 && (
                     <p className="font-didot text-xs text-wood-accent/40">No bookings yet.</p>
                 )}
-                {clients.map(c => (
-                    <div key={c.id} className="flex flex-row items-center justify-center py-2.5 border-b border-wood-accent/10 last:border-0 group">
-                        <div className="min-w-0 flex-1">
-                            <p className="font-cormorant text-base text-wood-dark">{c.first_name} {c.last_name}</p>
-                            <p className="font-didot text-xs text-wood-accent/50 truncate">{c.email}{c.phone ? ` · ${c.phone}` : ''}</p>
-                        </div>
+                {clients.map(c => {
+                    const roleStyle = c.role ? (ROLE_STYLES[c.role.toLowerCase()] ?? ROLE_STYLES.member) : '';
+                    return (
                         <button
-                            onClick={() => setCancelBooking(c)}
-                            disabled={isPast}
-                            className="ml-3 shrink-0 bg-red-400 text-white hover:bg-red-600 rounded-xl p-2 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-400"
+                            key={c.id}
+                            onClick={() => setDetailBooking(c)}
+                            className="flex flex-row items-center py-2.5 border-b border-wood-accent/10 last:border-0 group w-full text-left hover:bg-wood-accent/5 -mx-2 px-2 rounded-lg transition-colors duration-150"
                         >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <p className="font-cormorant text-base text-wood-dark">{c.first_name} {c.last_name}</p>
+                                    {c.is_guest
+                                        ? <span className="font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">Guest</span>
+                                        : c.role
+                                            ? <span className={`font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full ${roleStyle}`}>{c.role.charAt(0).toUpperCase() + c.role.slice(1).toLowerCase()}</span>
+                                            : null
+                                    }
+                                </div>
+                                <p className="font-didot text-xs text-wood-accent/50 truncate">
+                                    {c.email ?? '—'}{c.phone ? ` · ${c.phone}` : ''}
+                                </p>
+                            </div>
+                            <svg className="w-3.5 h-3.5 text-wood-accent/20 group-hover:text-wood-accent/50 shrink-0 ml-2 transition-colors duration-150" viewBox="0 0 8 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1 1l6 6-6 6" />
                             </svg>
                         </button>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Add client */}
             <div className="px-6 py-4 border-t border-wood-accent/10">
                 <button
-                    disabled={isPast}
+                    onClick={() => setShowAddClient(true)}
+                    disabled={isPast || spotsRemaining === 0}
                     className="w-full font-didot text-xs tracking-wide bg-wood-accent text-white hover:bg-wood-dark py-2.5 rounded-lg transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-wood-accent"
                 >
                     + Add Client
                 </button>
             </div>
 
+            {detailBooking && (
+                <BookingDetailModal
+                    booking={detailBooking}
+                    isPast={isPast}
+                    onClose={() => setDetailBooking(null)}
+                    onDeleted={() => {
+                        setClients(cs => cs.filter(c => c.id !== detailBooking.id));
+                        setSpotsRemaining(s => s + 1);
+                        setDetailBooking(null);
+                        onUpdated();
+                    }}
+                />
+            )}
+
+            {showAddClient && (
+                <AddClientModal
+                    sessionId={session.id}
+                    onClose={() => setShowAddClient(false)}
+                    onBooked={() => {
+                        fetchClients();
+                        setSpotsRemaining(s => s - 1);
+                        onUpdated();
+                    }}
+                />
+            )}
         </div>
     );
 }

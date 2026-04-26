@@ -1,11 +1,20 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, func
+from sqlalchemy.orm import selectinload
 from app.models.models import Session, Booking
 
 
-async def create_booking(db: AsyncSession, session_id: UUID, first_name: str, last_name: str, email: str, phone: str | None, notes: str | None) -> Booking:
-    # Lock the session row so concurrent requests queue up rather than racing
+async def create_booking(
+    db: AsyncSession,
+    session_id: UUID,
+    notes: str | None = None,
+    user_id: UUID | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+    email: str | None = None,
+    phone: str | None = None,
+) -> Booking:
     session_result = await db.execute(select(Session).where(Session.id == session_id).with_for_update())
     session = session_result.scalar_one_or_none()
     if not session:
@@ -15,31 +24,57 @@ async def create_booking(db: AsyncSession, session_id: UUID, first_name: str, la
     if booked >= session.capacity:
         raise ValueError("fully_booked")
 
-    existing = await db.execute(select(Booking).where(Booking.session_id == session_id, Booking.email == email))
-    if existing.scalar_one_or_none():
-        raise ValueError("already_booked")
+    if user_id:
+        existing = await db.scalar(select(func.count()).where(Booking.session_id == session_id, Booking.user_id == user_id))
+        if existing:
+            raise ValueError("already_booked")
+        booking = Booking(session_id=session_id, user_id=user_id, notes=notes)
+    else:
+        if email:
+            existing = await db.scalar(select(func.count()).where(Booking.session_id == session_id, Booking.email == email))
+            if existing:
+                raise ValueError("already_booked")
+        booking = Booking(
+            session_id=session_id,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            notes=notes,
+        )
 
-    booking = Booking(session_id=session_id, first_name=first_name, last_name=last_name, email=email, phone=phone, notes=notes)
     db.add(booking)
     await db.commit()
-    await db.refresh(booking)
-    return booking
+
+    result = await db.execute(
+        select(Booking).where(Booking.id == booking.id)
+        .options(selectinload(Booking.user), selectinload(Booking.session))
+    )
+    return result.scalar_one()
 
 
-async def list_bookings(db: AsyncSession, session_id: UUID | None = None) -> list[Booking]:
-    q = select(Booking).join(Session, Booking.session_id == Session.id)
+async def list_bookings(db: AsyncSession, session_id: UUID | None = None, user_id: UUID | None = None) -> list[Booking]:
+    q = (
+        select(Booking)
+        .join(Session, Booking.session_id == Session.id)
+        .options(selectinload(Booking.user), selectinload(Booking.session))
+    )
     if session_id:
         q = q.where(Booking.session_id == session_id)
+    if user_id:
+        q = q.where(Booking.user_id == user_id)
     result = await db.execute(q.order_by(Session.start_time))
     return result.scalars().all()
 
 
-async def update_booking(db: AsyncSession, id: UUID, first_name: str | None, last_name: str | None, email: str | None, phone: str | None, notes: str | None) -> Booking | None:
-    values = {k: v for k, v in {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "notes": notes}.items() if v is not None}
-    if values:
-        await db.execute(update(Booking).where(Booking.id == id).values(**values))
+async def update_booking(db: AsyncSession, id: UUID, notes: str | None) -> Booking | None:
+    if notes is not None:
+        await db.execute(update(Booking).where(Booking.id == id).values(notes=notes))
         await db.commit()
-    result = await db.execute(select(Booking).where(Booking.id == id))
+    result = await db.execute(
+        select(Booking).where(Booking.id == id)
+        .options(selectinload(Booking.user), selectinload(Booking.session))
+    )
     return result.scalar_one_or_none()
 
 

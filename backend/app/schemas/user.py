@@ -22,6 +22,17 @@ class UserUpdate(BaseModel):
     last_name: str | None = None
     email: EmailStr | None = None
     phone: PhoneNumber | None = None
+    role: UserRole | None = None
+
+class UserSelfUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None
+    phone: PhoneNumber | None = None
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
 
 class UserRead(UserBase):
     id: UUID

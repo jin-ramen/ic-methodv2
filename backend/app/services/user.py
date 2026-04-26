@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete, or_
+from sqlalchemy import select, update, delete, or_, func
 from sqlalchemy.exc import IntegrityError
 from app.schemas.user import UserCreate, UserLogin
 from app.models.models import User, UserRole
@@ -67,18 +67,26 @@ async def create_user(db: AsyncSession, user_in: UserCreate) -> User:
             detail=detail
         )
 
-async def list_users(db: AsyncSession, id: UUID | None) -> list[User]:
+async def list_users(db: AsyncSession, id: UUID | None = None, search: str | None = None, role: str | None = None) -> list[User]:
     q = select(User)
-    
     if id:
         q = q.where(User.id == id)
+    elif search:
+        term = f"%{search.lower()}%"
+        q = q.where(or_(
+            func.lower(User.first_name).like(term),
+            func.lower(User.last_name).like(term),
+            func.lower(User.email).like(term),
+            func.lower(func.concat(User.first_name, ' ', User.last_name)).like(term),
+        )).order_by(User.last_name)
     else:
         q = q.order_by(User.last_name)
-    
+    if role and not id:
+        q = q.where(User.role == role.upper())
     result = await db.scalars(q)
     return result.all()
 
-async def update_user(db: AsyncSession, id: UUID, first_name: str | None, last_name: str | None, email: str | None, phone: str | None) -> User | None:
+async def update_user(db: AsyncSession, id: UUID, first_name: str | None, last_name: str | None, email: str | None, phone: str | None, role: str | None) -> User | None:
     user = await db.get(User, id)
 
     if first_name is not None:
@@ -89,6 +97,8 @@ async def update_user(db: AsyncSession, id: UUID, first_name: str | None, last_n
         user.email = email
     if phone is not None:
         user.phone = phone
+    if role is not None:
+        user.role = role
 
     await db.commit()
     await db.refresh(user)

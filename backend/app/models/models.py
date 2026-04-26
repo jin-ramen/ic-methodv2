@@ -57,6 +57,7 @@ class Session(Base):
     __table_args__ = (
         CheckConstraint("end_time > start_time", name="ck_session_end_after_start"),
         Index("ix_session_start_time", "start_time"),
+        UniqueConstraint("instructor", "start_time", name="uq_session_instructor_start_time"),
     )
 
 class Booking(Base):
@@ -64,14 +65,20 @@ class Booking(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("session.id", ondelete="RESTRICT"))
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"))
-    
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
+
+    # Guest-only fields (null when user_id is set)
+    first_name: Mapped[Optional[str]] = mapped_column(String(255))
+    last_name: Mapped[Optional[str]] = mapped_column(String(255))
+    email: Mapped[Optional[str]] = mapped_column(String(255))
+    phone: Mapped[Optional[str]] = mapped_column(String(20))
+
     notes: Mapped[Optional[str]] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     session: Mapped["Session"] = relationship(lazy="raise")
-    user: Mapped["User"] = relationship(lazy="raise")
+    user: Mapped[Optional["User"]] = relationship(lazy="raise")
 
     __table_args__ = (
         UniqueConstraint("session_id", "user_id", name="uq_booking_session_user"),

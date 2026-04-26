@@ -10,10 +10,15 @@ import Booking from './pages/Booking'
 import BookingForm from './pages/BookingForm'
 import UserLogin from './pages/UserLogin'
 import UserRegistration from './pages/UserRegistration'
+import UserDashboard from './pages/UserDashboard'
 import SSOCallback from './pages/SSOCallback'
 
 import AdminDashBoard from './pages/admin/Dashboard'
 import AdminSchedule from './pages/admin/Schedule'
+import AdminClients from './pages/admin/Clients'
+import AdminMethods from './pages/admin/Methods'
+import AdminStaff from './pages/admin/Staff'
+import Profile from './pages/Profile'
 
 import type { PeopleType } from './types/people'
 import type { StudioType } from './types/studio'
@@ -37,6 +42,7 @@ function App() {
           <Route path="booking/:flowId" element={<BookingForm onBooked={refetchFlows} />} />
           <Route path="login" element={<UserLogin />} />
           <Route path="register" element={<UserRegistration />} />
+          <Route path="account" element={<UserDashboard />} />
           <Route path="sso-callback" element={<SSOCallback />} />
         </Route>
 
@@ -44,6 +50,10 @@ function App() {
         <Route element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashBoard />} />
           <Route path="schedule" element={<AdminSchedule />} />
+          <Route path="clients" element={<AdminClients />} />
+          <Route path="methods" element={<AdminMethods />} />
+          <Route path="staff" element={<AdminStaff />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
       </Routes>

@@ -11,8 +11,11 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool: 
     return pwd_context.verify(plain_password, hashed_password)
 
-def create_access_token(data: dict): 
+def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=settings.access_token_expire_days)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.algorithm)
+
+def verify_access_token(token: str) -> dict:
+    return jwt.decode(token, settings.jwt_secret, algorithms=[settings.algorithm])

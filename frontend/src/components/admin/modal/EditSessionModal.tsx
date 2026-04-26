@@ -10,6 +10,7 @@ import { formatDateShort, formatDay, formatTime24, getDate, getTodayDate } from 
 import { extractError } from '../../../utils/apiUtils';
 
 type Method = { id: string; name: string };
+type StaffMember = { id: string; first_name: string; last_name: string; role: string };
 
 type Props = {
     session: SessionType;
@@ -26,6 +27,7 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
     const dateLabel = formatDateShort(selectedDate);
 
     const [methods, setMethods] = useState<Method[]>([]);
+    const [staffList, setStaffList] = useState<StaffMember[]>([]);
     const [startTime, setStartTime] = useState(formatTime24(f.start_time));
     const [endTime, setEndTime] = useState(formatTime24(f.end_time));
     const [methodId, setMethodId] = useState(f.method_id ?? '');
@@ -36,9 +38,14 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
     const [closing, setClosing] = useState(false);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/methods`)
+        const base = import.meta.env.VITE_API_BASE_URL ?? '';
+        fetch(`${base}/api/methods`)
             .then(r => r.json())
             .then(j => setMethods(j.results ?? []))
+            .catch(() => {});
+        fetch(`${base}/api/users`)
+            .then(r => r.ok ? r.json() : [])
+            .then((users: StaffMember[]) => setStaffList(users.filter(u => ['owner', 'staff'].includes(u.role.toLowerCase()))))
             .catch(() => {});
     }, []);
 
@@ -105,7 +112,13 @@ export default function EditSessionModal({ session: f, onClose, onUpdated }: Pro
                         </select>
                     </Field>
                     <Field label="Instructor">
-                        <input type="text" value={instructor} onChange={e => setInstructor(e.target.value)} placeholder="Optional" className={inputCls} />
+                        <select value={instructor} onChange={e => setInstructor(e.target.value)} className={inputCls}>
+                            <option value="">— None —</option>
+                            {staffList.map(s => {
+                                const name = `${s.first_name} ${s.last_name}`;
+                                return <option key={s.id} value={name}>{name}</option>;
+                            })}
+                        </select>
                     </Field>
                     <Field label="Capacity">
                         <input type="number" min={1} value={capacity} onChange={e => setCapacity(Number(e.target.value))} required className={inputCls} />
