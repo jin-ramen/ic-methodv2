@@ -92,6 +92,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                 >
                                 <button
                                     onClick={() => onSelect(flow)}
+                                    disabled={fullyBooked}
                                     className={`flow w-full text-left p-3 border py-6 transition-all duration-200 ${fullyBooked ? t.cardFull : t.cardOk}`}
                                 >
                                     <div className="flex items-start justify-between gap-2">

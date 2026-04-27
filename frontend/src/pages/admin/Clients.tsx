@@ -87,7 +87,7 @@ export default function Clients() {
 
     return (
         <>
-            <div className="flex flex-col flex-1 min-h-0 bg-wood-dark/5">
+            <div className="flex flex-col flex-1 min-h-screen bg-wood-dark/5">
                 {/* Toolbar */}
                 <div className="flex items-center gap-3 px-6 py-4 border-b border-wood-accent/10 bg-wood-light shrink-0">
                     <div className="relative flex-1 max-w-sm">

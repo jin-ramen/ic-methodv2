@@ -85,7 +85,7 @@ export default function Methods() {
 
     return (
         <>
-            <div className="flex flex-col flex-1 min-h-0 bg-wood-dark/5">
+            <div className="flex flex-col flex-1 min-h-screen bg-wood-dark/5">
                 {/* Toolbar */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-wood-accent/10 bg-wood-light shrink-0">
                     <p className="font-didot text-xs text-wood-accent/40 tracking-widest">
