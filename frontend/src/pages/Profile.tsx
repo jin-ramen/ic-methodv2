@@ -23,6 +23,45 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const inputCls = 'w-full bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm py-2 tracking-wide transition-colors duration-200 placeholder:text-wood-text/25';
 
+const DIAL_CODES = [
+    { code: '+61', label: 'AU +61' },
+    { code: '+64', label: 'NZ +64' },
+    { code: '+1',  label: 'US/CA +1' },
+    { code: '+44', label: 'GB +44' },
+    { code: '+65', label: 'SG +65' },
+    { code: '+852', label: 'HK +852' },
+    { code: '+86', label: 'CN +86' },
+    { code: '+81', label: 'JP +81' },
+    { code: '+82', label: 'KR +82' },
+    { code: '+91', label: 'IN +91' },
+    { code: '+60', label: 'MY +60' },
+    { code: '+66', label: 'TH +66' },
+    { code: '+62', label: 'ID +62' },
+    { code: '+63', label: 'PH +63' },
+    { code: '+84', label: 'VN +84' },
+    { code: '+33', label: 'FR +33' },
+    { code: '+49', label: 'DE +49' },
+    { code: '+39', label: 'IT +39' },
+    { code: '+34', label: 'ES +34' },
+    { code: '+31', label: 'NL +31' },
+    { code: '+41', label: 'CH +41' },
+    { code: '+46', label: 'SE +46' },
+    { code: '+47', label: 'NO +47' },
+    { code: '+45', label: 'DK +45' },
+    { code: '+353', label: 'IE +353' },
+    { code: '+971', label: 'UAE +971' },
+    { code: '+27', label: 'ZA +27' },
+    { code: '+55', label: 'BR +55' },
+    { code: '+52', label: 'MX +52' },
+];
+
+function parsePhone(stored: string | null): { dialCode: string; local: string } {
+    if (!stored) return { dialCode: '+61', local: '' };
+    if (!stored.startsWith('+')) return { dialCode: '+61', local: stored };
+    const match = [...DIAL_CODES].sort((a, b) => b.code.length - a.code.length).find(c => stored.startsWith(c.code));
+    return match ? { dialCode: match.code, local: stored.slice(match.code.length) } : { dialCode: '+61', local: stored };
+}
+
 export default function Profile() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
@@ -33,10 +72,19 @@ export default function Profile() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
+    const [dialCode, setDialCode] = useState('+61');
+    const [localPhone, setLocalPhone] = useState('');
     const [profileSaving, setProfileSaving] = useState(false);
     const [profileError, setProfileError] = useState('');
     const [profileSuccess, setProfileSuccess] = useState(false);
+
+    const combinedPhone = localPhone ? `${dialCode}${localPhone}` : '';
+    const isDirty = profile !== null && (
+        firstName !== profile.first_name ||
+        lastName !== profile.last_name ||
+        email !== profile.email ||
+        combinedPhone !== (profile.phone ?? '')
+    );
 
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -53,7 +101,9 @@ export default function Profile() {
                 setFirstName(u.first_name);
                 setLastName(u.last_name);
                 setEmail(u.email);
-                setPhone(u.phone ?? '');
+                const parsed = parsePhone(u.phone);
+                setDialCode(parsed.dialCode);
+                setLocalPhone(parsed.local);
             })
             .catch(() => {})
             .finally(() => setLoading(false));
@@ -72,7 +122,7 @@ export default function Profile() {
                     first_name: firstName || null,
                     last_name: lastName || null,
                     email: email || null,
-                    phone: phone || null,
+                    phone: combinedPhone || null,
                 }),
             });
             if (!res.ok) {
@@ -117,6 +167,18 @@ export default function Profile() {
         }
     };
 
+    const handleDiscard = () => {
+        if (!profile) return;
+        setFirstName(profile.first_name);
+        setLastName(profile.last_name);
+        setEmail(profile.email);
+        const parsed = parsePhone(profile.phone);
+        setDialCode(parsed.dialCode);
+        setLocalPhone(parsed.local);
+        setProfileError('');
+        setProfileSuccess(false);
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('access_token');
         navigate('/login');
@@ -134,7 +196,7 @@ export default function Profile() {
     const roleLabel = profile.role.charAt(0).toUpperCase() + profile.role.slice(1).toLowerCase();
 
     return (
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto relative">
             <div className="max-w-lg mx-auto px-6 flex flex-col gap-4">
 
                 {pathname === '/account/profile' && (
@@ -162,7 +224,7 @@ export default function Profile() {
 
                 {/* Profile form */}
                 <div className="bg-wood-accent border border-wood-text/20 rounded-xl px-5 py-5">
-                    <form onSubmit={handleProfileSave} className="flex flex-col gap-5">
+                    <form id="profile-form" onSubmit={handleProfileSave} className="flex flex-col gap-5">
                         <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/40">Profile</p>
                         <div className="flex gap-4">
                             <Field label="First Name">
@@ -176,17 +238,27 @@ export default function Profile() {
                             <input type="email" className={inputCls} value={email} onChange={e => { setEmail(e.target.value); setProfileSuccess(false); }} required />
                         </Field>
                         <Field label="Phone">
-                            <input type="tel" className={inputCls} value={phone} onChange={e => { setPhone(e.target.value); setProfileSuccess(false); }} placeholder="Optional" />
+                            <div className="flex items-end gap-0">
+                                <select
+                                    value={dialCode}
+                                    onChange={e => { setDialCode(e.target.value); setProfileSuccess(false); }}
+                                    className="shrink-0 bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm py-2 pr-2 tracking-wide transition-colors duration-200 appearance-none cursor-pointer"
+                                >
+                                    {DIAL_CODES.map(c => (
+                                        <option key={c.code} value={c.code} className="bg-wood-primary text-wood-text">{c.label}</option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="tel"
+                                    className={inputCls}
+                                    value={localPhone}
+                                    onChange={e => { setLocalPhone(e.target.value); setProfileSuccess(false); }}
+                                    placeholder="Optional"
+                                />
+                            </div>
                         </Field>
                         {profileError && <p className="font-didot text-xs text-red-400">{profileError}</p>}
                         {profileSuccess && <p className="font-didot text-xs text-green-400">Profile updated.</p>}
-                        <button
-                            type="submit"
-                            disabled={profileSaving}
-                            className="self-end font-didot text-xs tracking-widest uppercase border border-wood-accent/40 text-wood-accent hover:bg-wood-text hover:text-wood-dark py-2 px-5 rounded-lg transition-all duration-200 disabled:opacity-40"
-                        >
-                            {profileSaving ? 'Saving…' : 'Save Changes'}
-                        </button>
                     </form>
                 </div>
 
@@ -226,6 +298,29 @@ export default function Profile() {
                 </div>
 
             </div>
+
+            {isDirty && (
+                <div className="sticky bottom-0 left-0 right-0 px-6 py-4 bg-wood-bg/90 backdrop-blur border-t border-wood-accent/20 flex items-center justify-between gap-4 animate-modal-in">
+                    <p className="font-didot text-xs text-wood-accent/50 tracking-wide">Unsaved changes</p>
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={handleDiscard}
+                            className="font-didot text-xs tracking-widest uppercase text-wood-accent/50 hover:text-wood-accent transition-colors duration-200"
+                        >
+                            Discard
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => document.querySelector<HTMLFormElement>('#profile-form')?.requestSubmit()}
+                            disabled={profileSaving}
+                            className="font-didot text-xs tracking-widest uppercase bg-wood-accent text-wood-text hover:bg-wood-dark py-2 px-5 rounded-lg transition-colors duration-200 disabled:opacity-40"
+                        >
+                            {profileSaving ? 'Saving…' : 'Save Changes'}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

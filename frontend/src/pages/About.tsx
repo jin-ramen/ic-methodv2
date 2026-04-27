@@ -18,17 +18,13 @@ export default function About() {
           In a vast ocean where dreams roar louder than cannon fire, One Piece follows Monkey D. Luffy, a rubber-bodied boy chasing the legendary treasure of Gol D. Roger. With his crew by his side, each island becomes a tale of laughter, loss, and unbreakable bonds, as Luffy sails not just to become Pirate King, but to live freely in a world without limits.
         </p>
         <Link
-          to={isLoggedIn ? '/account' : '/booking'}
+          to="/booking"
           className=" opacity-0 animate-text-in [animation-delay:200ms] inline-flex items-center gap-3 font-didot text-xs tracking-[0.2em] uppercase bg-wood-accent text-wood-text hover:bg-wood-dark transition-colors duration-300 py-3 px-8 rounded-md group"
         >
-          {isLoggedIn ? (
-            <span>Dashboard</span>
-          ) : (
-            <>
-              <span className="hidden md:flex">Book Now</span>
-              <span className="md:hidden flex">Book</span>
-            </>
-          )}
+          <>
+            <span className="hidden md:flex">Book Now</span>
+            <span className="md:hidden flex">Book</span>
+          </>
           <span className="text-wood-text/40 text-[10px] transition-transform duration-300 group-hover:translate-x-1">→</span>
         </Link>
       </div>

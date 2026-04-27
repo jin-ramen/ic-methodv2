@@ -43,14 +43,13 @@ export default function Dashboard() {
         <>
         <div className="relative flex flex-col md:flex-row gap-6 p-6 min-h-screen md:min-h-0 md:h-full md:overflow-hidden bg-wood-dark/5" onClick={() => setSelectedSession(null)}>
 
-            {/* Left — Today's Flows */}
+            {/* Left — Today's Sessions */}
             <section className="w-full md:w-5/12 shrink-0 flex flex-col md:min-h-0">
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col items-start gap-2">
-                        <h2 className="font-cormorant text-2xl text-wood-dark">Today's Flows</h2>
-                        <div className="flex items-center gap-2">
-                            <p className="font-didot text-xs text-wood-accent/60 tracking-wide">{formatDate(selectedDate)}</p>
-                        </div>
+                        <h2 className="font-cormorant text-2xl text-wood-dark">
+                            {offset === 0 ? "Today's Sessions" : offset === 1 ? "Tomorrow's Sessions" : `${formatDate(selectedDate)}'s Sessions`}
+                        </h2>
                     </div>
                     <div className='flex flex-row gap-2'>
                         <button

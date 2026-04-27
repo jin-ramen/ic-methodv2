@@ -6,7 +6,7 @@ from typing import Optional
 
 from sqlalchemy import (
     String, Numeric, ForeignKey, Integer, CheckConstraint,
-    UniqueConstraint, Index, DateTime, Enum
+    UniqueConstraint, Index, DateTime, Enum, text
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
@@ -88,7 +88,13 @@ class Booking(Base):
     user: Mapped[Optional["User"]] = relationship(lazy="raise")
 
     __table_args__ = (
-        UniqueConstraint("session_id", "user_id", name="uq_booking_session_user"),
+        Index(
+            "uq_booking_active_session_user",
+            "session_id",
+            "user_id",
+            unique=True,
+            postgresql_where=text("status = 'booked' AND user_id IS NOT NULL"),
+        ),
     )
 
 class NotificationStatus(str, enum.Enum):
@@ -97,9 +103,10 @@ class NotificationStatus(str, enum.Enum):
     FAILED = "failed"
 
 class NotificationType(str, enum.Enum):
-    CONFIRMATION = "confirmation"
-    REMINDER = "reminder"
-    OTHERS = "others"
+    CONFIRMATION = "CONFIRMATION"
+    REMINDER = "REMINDER"
+    CANCELLATION = "CANCELLATION"
+    OTHERS = "OTHERS"
 
 
 class Notification(Base):

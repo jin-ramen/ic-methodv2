@@ -117,8 +117,8 @@ export default function BookingForm({ onBooked }: Props) {
                     <p className="font-didot text-wood-accent text-sm tracking-widest mb-8">
                         See you on {formatDate(session.start_time)}.
                     </p>
-                    <button onClick={() => navigate('/')} className="font-didot text-wood-accent/60 text-xs tracking-widest underline underline-offset-4">
-                        ← Back to home
+                    <button onClick={() => navigate('/account')} className="font-didot text-wood-accent/60 text-xs tracking-widest underline underline-offset-4">
+                        ← Go to Dashboard
                     </button>
                 </div>
             </div>
@@ -193,7 +193,7 @@ export default function BookingForm({ onBooked }: Props) {
                     disabled={status === 'loading' || !guestFirstName || !guestLastName || !guestEmail}
                     className="mt-2 font-didot text-xs md:text-sm tracking-widest uppercase border border-wood-text/40 text-wood-text hover:bg-wood-text hover:text-wood-dark transition-all duration-200 py-3 md:py-4 px-6 disabled:opacity-40"
                 >
-                    {status === 'loading' ? 'Booking...' : 'Confirm Commitment'}
+                    {status === 'loading' ? 'Booking...' : 'Confirm Booking'}
                 </button>
                 <button type="button" onClick={() => setMode('auth')} className="font-didot text-wood-text/30 text-xs tracking-widest">
                     ← Back
@@ -256,7 +256,7 @@ export default function BookingForm({ onBooked }: Props) {
                 disabled={status === 'loading' || userLoading || !user}
                 className="mt-2 font-didot text-xs md:text-sm tracking-widest uppercase border border-wood-text/40 text-wood-text hover:bg-wood-text hover:text-wood-dark transition-all duration-200 py-3 md:py-4 px-6 disabled:opacity-40"
             >
-                {status === 'loading' ? 'Booking...' : 'Confirm Commitment'}
+                {status === 'loading' ? 'Booking...' : 'Confirm Booking'}
             </button>
             <button type="button" onClick={() => navigate(backHref)} className="font-didot text-wood-text/30 text-xs tracking-widest">
                 ← Back to calendar

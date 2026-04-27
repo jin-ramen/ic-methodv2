@@ -36,6 +36,7 @@ async def process_due_reminders(db: AsyncSession) -> None:
 
         to_email = booking.user.email if booking.user else booking.email
         first_name = booking.user.first_name if booking.user else (booking.first_name or "there")
+        user_timezone = getattr(booking.user, "timezone", None) if booking.user else None
 
         if not to_email:
             await mark_notification_failed(db, notification.id, "Missing recipient email")
@@ -48,6 +49,7 @@ async def process_due_reminders(db: AsyncSession) -> None:
                 session_start=booking.session.start_time if booking.session else None,
                 session_end=booking.session.end_time if booking.session else None,
                 method_name=booking.session.method.name if booking.session and booking.session.method else None,
+                user_timezone=user_timezone,
             )
             await mark_notification_sent(db, notification.id)
         except Exception as e:

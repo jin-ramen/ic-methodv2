@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # App
     cors_origins: list[str] = ["http://localhost:5173"]
     cache_ttl_seconds: int = 300
+    app_timezone: str = "UTC"
 
     # Mail
     mail_username: str

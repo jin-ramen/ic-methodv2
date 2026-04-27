@@ -100,7 +100,7 @@ export default function Booking({ data, error, loading, refetch }: Props) {
                             flows={SessionsByDate[toDateKey(getDate(offset))] ?? []}
                             onSelect={handleSelect}
                             index={0}
-                            loading={loading}
+                            loading={loading && data === null}
                             animate={!navigated}
                         />
                     </div>
@@ -153,7 +153,7 @@ export default function Booking({ data, error, loading, refetch }: Props) {
                                         flows={SessionsByDate[toDateKey(date)] ?? []}
                                         onSelect={handleSelect}
                                         index={i}
-                                        loading={loading}
+                                        loading={loading && data === null}
                                         animate={!navigated}
                                     />
                                 </div>

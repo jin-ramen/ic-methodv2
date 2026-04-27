@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { formatDate, formatTime } from '../utils/dateUtils';
+import { formatDate, formatTime, toDateKey, getTodayDate } from '../utils/dateUtils';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -65,8 +65,8 @@ function CancelModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-5 pb-5 sm:pb-0">
-            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-            <div className="relative w-full max-w-sm bg-wood-accent rounded-xl border border-wood-text/20 px-6 py-6 flex flex-col gap-5">
+            <div className="absolute inset-0 bg-black/40 animate-fade-in" onClick={onClose} />
+            <div className="relative w-full max-w-sm bg-wood-accent rounded-xl border border-wood-text/20 px-6 py-6 flex flex-col gap-5 animate-modal-in">
 
                 <div className="flex flex-col gap-1">
                     <p className="font-cormorant text-2xl text-wood-text leading-tight">
@@ -177,13 +177,25 @@ export default function UserDashboard() {
         .filter(b => b.status === 'booked' && b.session_start && new Date(b.session_start) > now)
         .sort((a, b) => new Date(a.session_start!).getTime() - new Date(b.session_start!).getTime());
 
+    const today = getTodayDate();
+    const groupedUpcoming = upcoming.reduce<{ key: string; label: string; bookings: UserBooking[] }[]>((acc, b) => {
+        const date = new Date(b.session_start!);
+        const key = toDateKey(date);
+        const existing = acc.find(g => g.key === key);
+        if (existing) { existing.bookings.push(b); return acc; }
+        const diff = Math.round((new Date(key).getTime() - today.getTime()) / 86_400_000);
+        const label = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : formatDate(date);
+        acc.push({ key, label, bookings: [b] });
+        return acc;
+    }, []);
+
 
     const initials = `${profile.first_name[0] ?? ''}${profile.last_name[0] ?? ''}`.toUpperCase();
     const roleLabel = profile.role.charAt(0).toUpperCase() + profile.role.slice(1).toLowerCase();
 
     return (
         <>
-            <div className="flex-1 overflow-y-auto px-5 py-5">
+            <div className="flex-1 overflow-y-auto px-5 py-5 animate-fade-in">
                 <div className="max-w-lg mx-auto flex flex-col gap-4">
 
                     {/* Profile section */}
@@ -233,34 +245,37 @@ export default function UserDashboard() {
                             </div>
                         ) : (
                             <>
-                                <div className="flex flex-col gap-2">
-                                    {upcoming.map(b => (
-                                        <div
-                                            key={b.id}
-                                            className="bg-wood-accent border border-wood-text/20 rounded-xl px-5 py-4 flex flex-col gap-1"
-                                        >
-                                            <div className="flex items-start justify-between gap-2">
-                                                <p className="font-cormorant text-xl text-wood-text leading-tight">
-                                                    {b.session_method_name ?? 'Class'}
-                                                </p>
-                                                <button
-                                                    onClick={() => setCancelTarget(b)}
-                                                    className="font-didot text-[10px] tracking-widest uppercase text-wood-text/30 hover:text-red-400 transition-colors duration-200 shrink-0 pt-1"
+                                <div className="flex flex-col gap-5">
+                                    {groupedUpcoming.map(group => (
+                                        <div key={group.key} className="flex flex-col gap-2">
+                                            <p className="font-didot text-[10px] tracking-widest uppercase text-wood-accent/40">{group.label}</p>
+                                            {group.bookings.map(b => (
+                                                <div
+                                                    key={b.id}
+                                                    className="bg-wood-accent border border-wood-text/20 rounded-xl px-5 py-4 flex flex-col gap-1"
                                                 >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                            <p className="font-didot text-xs text-wood-text/70 mt-0.5">
-                                                {formatDate(new Date(b.session_start!))}
-                                                {' · '}
-                                                {formatTime(new Date(b.session_start!))}
-                                                {b.session_end ? `–${formatTime(new Date(b.session_end))}` : ''}
-                                            </p>
-                                            {b.session_instructor && (
-                                                <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/40 mt-0.5">
-                                                    {b.session_instructor}
-                                                </p>
-                                            )}
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <p className="font-cormorant text-xl text-wood-text leading-tight">
+                                                            {b.session_method_name ?? 'Class'}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => setCancelTarget(b)}
+                                                            className="font-didot text-[10px] tracking-widest uppercase text-wood-text/30 hover:text-red-400 transition-colors duration-200 shrink-0 pt-1"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                    <p className="font-didot text-xs text-wood-text/70 mt-0.5">
+                                                        {formatTime(new Date(b.session_start!))}
+                                                        {b.session_end ? ` – ${formatTime(new Date(b.session_end))}` : ''}
+                                                    </p>
+                                                    {b.session_instructor && (
+                                                        <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/40 mt-0.5">
+                                                            {b.session_instructor}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
                                     ))}
                                 </div>

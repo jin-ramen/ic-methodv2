@@ -25,6 +25,7 @@ type Props = {
 
 export default function SessionModal({ session, onClose, onUpdated, onDeleted }: Props) {
     const [clients, setClients] = useState<BookingType[]>([]);
+    const [clientsLoading, setClientsLoading] = useState(true);
     const [spotsRemaining, setSpotsRemaining] = useState(session.spots_remaining);
 
     const isPast = new Date(session.end_time) < new Date();
@@ -38,6 +39,7 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
     const [showAddClient, setShowAddClient] = useState(false);
 
     const fetchClients = () => {
+        setClientsLoading(true);
         fetch(`${BASE}/api/bookings?session_id=${session.id}`)
             .then(r => r.json())
             .then(j => {
@@ -45,7 +47,8 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                 results.sort((a, b) => (a.status === 'cancelled' ? 1 : 0) - (b.status === 'cancelled' ? 1 : 0));
                 setClients(results);
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => setClientsLoading(false));
     };
 
     useEffect(() => { fetchClients(); }, [session.id]);
@@ -91,20 +94,20 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     disabled={isPast}
                     className="flex-1 font-didot text-xs tracking-wide bg-wood-accent text-white hover:bg-wood-dark py-2 rounded-lg transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-wood-accent"
                 >
-                    Edit Flow
+                    Edit Session
                 </button>
                 <button
                     onClick={() => { if (clients.some(c => c.status === 'booked')) { setCancelError(true); } else { setCancelError(false); setShowCancel(true); } }}
                     disabled={isPast}
                     className="flex-1 font-didot text-xs tracking-wide bg-red-400 text-white hover:bg-red-600 py-2 rounded-lg transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-400"
                 >
-                    Cancel Flow
+                    Cancel Session
                 </button>
             </div>
 
             {cancelError && (
                 <div className="mx-6 mb-2 font-didot text-xs text-red-400">
-                    Remove all clients before cancelling this flow.
+                    Remove all clients before cancelling this Session.
                 </div>
             )}
 
@@ -142,10 +145,15 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
 
             {/* Client list */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-4 flex flex-col gap-2">
-                {clients.length === 0 && (
+                {clientsLoading ? (
+                    <div className="flex flex-col gap-2">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="h-10 rounded-lg bg-wood-accent/10 animate-pulse" />
+                        ))}
+                    </div>
+                ) : clients.length === 0 ? (
                     <p className="font-didot text-xs text-wood-accent/40">No bookings yet.</p>
-                )}
-                {clients.map(c => {
+                ) : clients.map(c => {
                     const isCancelled = c.status === 'cancelled';
                     const roleStyle = c.role ? (ROLE_STYLES[c.role.toLowerCase()] ?? ROLE_STYLES.member) : '';
                     return (

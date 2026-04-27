@@ -2,10 +2,11 @@ from uuid import UUID
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from app.models.models import Session, Booking, BookingStatus, NotificationType
 from app.services.notification import create_notification, mark_notification_sent, mark_notification_failed
-from app.core.email import send_booking_confirmation_email
+from app.core.email import send_booking_confirmation_email, send_booking_cancellation_email
 
 async def _send_confirmation_after_booking(db: AsyncSession, booking: Booking) -> None:
     notification = None
@@ -19,6 +20,7 @@ async def _send_confirmation_after_booking(db: AsyncSession, booking: Booking) -
 
         to_email = booking.user.email if booking.user else booking.email
         first_name = booking.user.first_name if booking.user else (booking.first_name or "there")
+        user_timezone = getattr(booking.user, "timezone", None) if booking.user else None
 
         if not to_email:
             await mark_notification_failed(db, notification.id, "Missing recipient email")
@@ -30,12 +32,50 @@ async def _send_confirmation_after_booking(db: AsyncSession, booking: Booking) -
             session_start=booking.session.start_time if booking.session else None,
             session_end=booking.session.end_time if booking.session else None,
             method_name=booking.session.method.name if booking.session and booking.session.method else None,
+            user_timezone=user_timezone,
         )
         await mark_notification_sent(db, notification.id)
     except Exception as e:
         if notification is not None:
             await mark_notification_failed(db, notification.id, str(e))
 
+
+
+async def _send_cancellation_email(db: AsyncSession, booking: Booking) -> None:
+    notification = None
+    try:
+        notification = await create_notification(
+            db,
+            booking_id=booking.id,
+            notification_type=NotificationType.CANCELLATION,
+            send_at=datetime.now(timezone.utc),
+        )
+
+        to_email = booking.user.email if booking.user else booking.email
+        first_name = booking.user.first_name if booking.user else (booking.first_name or "there")
+        user_timezone = getattr(booking.user, "timezone", None) if booking.user else None
+
+        if not to_email:
+            await mark_notification_failed(db, notification.id, "Missing recipient email")
+            return
+
+        await send_booking_cancellation_email(
+            to_email=to_email,
+            first_name=first_name,
+            session_start=booking.session.start_time if booking.session else None,
+            session_end=booking.session.end_time if booking.session else None,
+            method_name=booking.session.method.name if booking.session and booking.session.method else None,
+            cancellation_type=booking.cancellation_type,
+            user_timezone=user_timezone,
+        )
+        await mark_notification_sent(db, notification.id)
+    except Exception as e:
+        await db.rollback()
+        if notification is not None:
+            try:
+                await mark_notification_failed(db, notification.id, str(e))
+            except Exception:
+                pass
 
 
 async def create_booking(
@@ -77,7 +117,13 @@ async def create_booking(
         )
 
     db.add(booking)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        if "uq_booking_active_session_user" in str(exc) or "uq_booking_session_user" in str(exc):
+            raise ValueError("already_booked") from exc
+        raise
     await db.refresh(booking)
 
     result = await db.execute(
@@ -136,7 +182,6 @@ async def update_booking(db: AsyncSession, id: UUID, notes: str | None) -> Booki
 async def cancel_booking(db: AsyncSession, booking_id: UUID, user_id: UUID, cancellation_type: str) -> Booking | None:
     result = await db.execute(
         select(Booking).where(Booking.id == booking_id, Booking.user_id == user_id, Booking.status == BookingStatus.BOOKED)
-        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method))
     )
     booking = result.scalar_one_or_none()
     if not booking:
@@ -145,7 +190,18 @@ async def cancel_booking(db: AsyncSession, booking_id: UUID, user_id: UUID, canc
     booking.cancelled_at = datetime.now(timezone.utc)
     booking.cancellation_type = cancellation_type
     await db.commit()
-    await db.refresh(booking)
+
+    result = await db.execute(
+        select(Booking).where(Booking.id == booking_id)
+        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method))
+    )
+    booking = result.scalar_one()
+
+    try:
+        await _send_cancellation_email(db, booking)
+    except Exception:
+        pass
+
     return booking
 
 
