@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../utils/useAuth'
 
 export default function About() {
-  const { isLoggedIn } = useAuth();
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
