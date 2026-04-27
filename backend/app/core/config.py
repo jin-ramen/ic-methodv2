@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
+from pydantic import Field
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
     # App
     cors_origins: list[str] = ["http://localhost:5173"]
     cache_ttl_seconds: int = 300
-    app_timezone: str = "UTC"
+    app_timezone: str = Field(default="Australia/Melbourne", validation_alias="TZ")
 
     # Mail
     mail_username: str
