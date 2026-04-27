@@ -1,10 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { formatDate, formatTime } from '../../utils/dateUtils';
 
-function toLocalDateString(date: Date) {
-    return date.toISOString().slice(0, 10);
-}
-
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
 type Booking = {
