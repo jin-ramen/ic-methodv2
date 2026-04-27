@@ -45,6 +45,11 @@ export default function BookingForm({ onBooked }: Props) {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [errorMsg, setErrorMsg] = useState('');
     const [leaving, setLeaving] = useState(false);
+    const [mode, setMode] = useState<'auth' | 'guest'>('auth');
+    const [guestFirstName, setGuestFirstName] = useState('');
+    const [guestLastName, setGuestLastName] = useState('');
+    const [guestEmail, setGuestEmail] = useState('');
+    const [guestPhone, setGuestPhone] = useState('');
 
     useEffect(() => {
         if (!isLoggedIn || !token) return;
@@ -74,15 +79,15 @@ export default function BookingForm({ onBooked }: Props) {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setStatus('loading');
+        const isGuest = !isLoggedIn && mode === 'guest';
+        const url = `${import.meta.env.VITE_API_BASE_URL ?? ''}/api/bookings${isGuest ? '/guest' : ''}`;
+        const body = isGuest
+            ? { session_id: session.id, first_name: guestFirstName, last_name: guestLastName, email: guestEmail, phone: guestPhone || undefined, notes: notes || undefined }
+            : { session_id: session.id, notes: notes || undefined };
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (!isGuest && token) headers['Authorization'] = `Bearer ${token}`;
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/bookings`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                body: JSON.stringify({ session_id: session.id, notes: notes || undefined }),
-            });
+            const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
             if (res.status === 429) {
                 setErrorMsg('Too many attempts. Please wait a moment and try again.');
                 setStatus('error');
@@ -121,28 +126,95 @@ export default function BookingForm({ onBooked }: Props) {
     }
 
     if (!isLoggedIn) {
+        if (mode === 'auth') {
+            return (
+                <div className="flex-1 flex items-center justify-center px-5">
+                    <div className="rounded-xl bg-wood-accent/95 w-full max-w-sm px-8 py-10 text-center opacity-0 animate-fade-in" style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
+                        <SessionInfo session={session} />
+                        <div className="mt-8 flex flex-col gap-4">
+                            <p className="font-didot text-wood-text/60 text-xs tracking-widest">Sign in to book this session.</p>
+                            <Link
+                                to="/login"
+                                state={{ next: `/booking/${session.id}`, session, back: state?.back }}
+                                className="font-didot text-xs tracking-widest uppercase border border-wood-text/40 text-wood-text hover:bg-wood-text hover:text-wood-dark transition-all duration-200 py-3 px-6"
+                            >
+                                Sign in
+                            </Link>
+                            <Link
+                                to="/register"
+                                className="font-didot text-wood-text/40 text-xs tracking-widest underline underline-offset-4"
+                            >
+                                No account? Register
+                            </Link>
+                            <button type="button" onClick={() => setMode('guest')} className="font-didot text-wood-text/30 text-xs tracking-widest underline underline-offset-4">
+                                Continue as guest
+                            </button>
+                            <button type="button" onClick={() => navigate(backHref)} className="font-didot text-wood-text/20 text-xs tracking-widest mt-2">
+                                ← Back to calendar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const GuestForm = (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6 md:gap-8">
+                <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1">
+                            <label className={labelClass}>First name</label>
+                            <input required className={inputClass} placeholder="Jane" value={guestFirstName} onChange={e => setGuestFirstName(e.target.value)} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className={labelClass}>Last name</label>
+                            <input required className={inputClass} placeholder="Smith" value={guestLastName} onChange={e => setGuestLastName(e.target.value)} />
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className={labelClass}>Email</label>
+                        <input required type="email" className={inputClass} placeholder="jane@example.com" value={guestEmail} onChange={e => setGuestEmail(e.target.value)} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className={labelClass}>Phone <span className="opacity-40 normal-case">(optional)</span></label>
+                        <input type="tel" className={inputClass} placeholder="+61 400 000 000" value={guestPhone} onChange={e => setGuestPhone(e.target.value)} />
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                    <label className={labelClass}>Notes <span className="opacity-40 normal-case">(optional)</span></label>
+                    <input className={inputClass} placeholder="Injuries or anything your instructor should know" value={notes} onChange={e => setNotes(e.target.value)} />
+                </div>
+
+                {status === 'error' && <p className="font-didot text-red-400 text-xs tracking-widest">{errorMsg}</p>}
+
+                <button
+                    type="submit"
+                    disabled={status === 'loading' || !guestFirstName || !guestLastName || !guestEmail}
+                    className="mt-2 font-didot text-xs md:text-sm tracking-widest uppercase border border-wood-text/40 text-wood-text hover:bg-wood-text hover:text-wood-dark transition-all duration-200 py-3 md:py-4 px-6 disabled:opacity-40"
+                >
+                    {status === 'loading' ? 'Booking...' : 'Confirm Commitment'}
+                </button>
+                <button type="button" onClick={() => setMode('auth')} className="font-didot text-wood-text/30 text-xs tracking-widest">
+                    ← Back
+                </button>
+            </form>
+        );
+
         return (
-            <div className="flex-1 flex items-center justify-center px-5">
-                <div className={`rounded-xl bg-wood-accent/95 w-full max-w-sm px-8 py-10 text-center opacity-0 animate-fade-in`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
-                    <SessionInfo session={session} />
-                    <div className="mt-8 flex flex-col gap-4">
-                        <p className="font-didot text-wood-text/60 text-xs tracking-widest">Sign in to book this session.</p>
-                        <Link
-                            to="/login"
-                            state={{ next: `/booking/${session.id}`, session, back: state?.back }}
-                            className="font-didot text-xs tracking-widest uppercase border border-wood-text/40 text-wood-text hover:bg-wood-text hover:text-wood-dark transition-all duration-200 py-3 px-6"
-                        >
-                            Sign in
-                        </Link>
-                        <Link
-                            to="/register"
-                            className="font-didot text-wood-text/40 text-xs tracking-widest underline underline-offset-4"
-                        >
-                            No account? Register
-                        </Link>
-                        <button type="button" onClick={() => navigate(backHref)} className="font-didot text-wood-text/30 text-xs tracking-widest mt-2">
-                            ← Back to calendar
+            <div className="flex-1 flex flex-col items-center justify-center px-5">
+                <div className={`rounded-xl bg-wood-accent/95 w-full md:max-w-5xl px-6 py-8 md:px-10 md:py-12 opacity-0 animate-fade-in ${leaving ? 'animate-fade-out' : ''}`} style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
+                    <div className="md:hidden flex flex-col gap-10">
+                        <button type="button" onClick={() => setMode('auth')} className="font-didot text-wood-text/40 text-xs tracking-widest text-left">
+                            ← Back
                         </button>
+                        <SessionInfo session={session} />
+                        {GuestForm}
+                    </div>
+                    <div className="hidden md:grid md:grid-cols-3 gap-16">
+                        <div />
+                        {GuestForm}
+                        <SessionInfo session={session} />
                     </div>
                 </div>
             </div>

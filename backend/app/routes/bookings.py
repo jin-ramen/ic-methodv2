@@ -8,7 +8,7 @@ from app.core.security import verify_access_token
 from app.db.session import get_db
 from app.models.models import Booking, User, UserRole
 from app.services.booking import create_booking, list_bookings, update_booking, delete_booking, cancel_booking
-from app.schemas.booking import BookingCreate, AdminBookingCreate, BookingUpdate, BookingCancelRequest, BookingResponse
+from app.schemas.booking import BookingCreate, GuestBookingCreate, AdminBookingCreate, BookingUpdate, BookingCancelRequest, BookingResponse
 
 router = APIRouter(prefix="/api", tags=["booking"])
 
@@ -91,6 +91,30 @@ async def post_booking(
 ):
     try:
         booking = await create_booking(db, session_id=data.session_id, user_id=user_id, notes=data.notes)
+        return _serialize(booking)
+    except ValueError as e:
+        if (err := BOOKING_ERRORS.get(str(e))) is None:
+            raise
+        raise HTTPException(status_code=err[0], detail=err[1])
+
+
+@router.post("/bookings/guest", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("3/minute")
+async def post_guest_booking(
+    request: Request,
+    data: GuestBookingCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        booking = await create_booking(
+            db,
+            session_id=data.session_id,
+            notes=data.notes,
+            first_name=data.first_name,
+            last_name=data.last_name,
+            email=data.email,
+            phone=data.phone,
+        )
         return _serialize(booking)
     except ValueError as e:
         if (err := BOOKING_ERRORS.get(str(e))) is None:

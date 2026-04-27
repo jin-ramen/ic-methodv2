@@ -8,6 +8,15 @@ class BookingCreate(BaseModel):
     notes: str | None = None
 
 
+class GuestBookingCreate(BaseModel):
+    session_id: UUID
+    notes: str | None = None
+    first_name: str
+    last_name: str
+    email: str
+    phone: str | None = None
+
+
 class AdminBookingCreate(BaseModel):
     session_id: UUID
     notes: str | None = None

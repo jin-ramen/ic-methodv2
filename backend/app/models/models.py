@@ -90,3 +90,36 @@ class Booking(Base):
     __table_args__ = (
         UniqueConstraint("session_id", "user_id", name="uq_booking_session_user"),
     )
+
+class NotificationStatus(str, enum.Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
+
+class NotificationType(str, enum.Enum):
+    CONFIRMATION = "confirmation"
+    REMINDER = "reminder"
+    OTHERS = "others"
+
+
+class Notification(Base):
+    __tablename__ = "notification"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    booking_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("booking.id", ondelete="CASCADE"), nullable=False)
+
+    status: Mapped[NotificationStatus] = mapped_column(
+        Enum(NotificationStatus, name="notification_status"),
+        default=NotificationStatus.PENDING,
+        nullable=False,
+    )
+    type: Mapped[NotificationType] = mapped_column(
+        Enum(NotificationType, name="notification_type"),
+        nullable=False,
+    )
+
+    send_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+    booking: Mapped["Booking"] = relationship("Booking")

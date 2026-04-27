@@ -1,9 +1,41 @@
 from uuid import UUID
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, func
 from sqlalchemy.orm import selectinload
-from app.models.models import Session, Booking, BookingStatus
+from app.models.models import Session, Booking, BookingStatus, NotificationType
+from app.services.notification import create_notification, mark_notification_sent, mark_notification_failed
+from app.core.email import send_booking_confirmation_email
+
+async def _send_confirmation_after_booking(db: AsyncSession, booking: Booking) -> None:
+    notification = None
+    try:
+        notification = await create_notification(
+            db,
+            booking_id=booking.id,
+            notification_type=NotificationType.CONFIRMATION,
+            send_at=datetime.now(timezone.utc),
+        )
+
+        to_email = booking.user.email if booking.user else booking.email
+        first_name = booking.user.first_name if booking.user else (booking.first_name or "there")
+
+        if not to_email:
+            await mark_notification_failed(db, notification.id, "Missing recipient email")
+            return
+
+        await send_booking_confirmation_email(
+            to_email=to_email,
+            first_name=first_name,
+            session_start=booking.session.start_time if booking.session else None,
+            session_end=booking.session.end_time if booking.session else None,
+            method_name=booking.session.method.name if booking.session and booking.session.method else None,
+        )
+        await mark_notification_sent(db, notification.id)
+    except Exception as e:
+        if notification is not None:
+            await mark_notification_failed(db, notification.id, str(e))
+
 
 
 async def create_booking(
@@ -46,12 +78,33 @@ async def create_booking(
 
     db.add(booking)
     await db.commit()
+    await db.refresh(booking)
 
     result = await db.execute(
         select(Booking).where(Booking.id == booking.id)
         .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method))
     )
-    return result.scalar_one()
+    booking_obj = result.scalar_one()
+
+    try:
+        await _send_confirmation_after_booking(db, booking_obj)
+    except Exception:
+        pass
+
+    try:
+        if booking_obj.session:
+            reminder_at = booking_obj.session.start_time - timedelta(hours=24)
+            if reminder_at > datetime.now(timezone.utc):
+                await create_notification(
+                    db,
+                    booking_id=booking_obj.id,
+                    notification_type=NotificationType.REMINDER,
+                    send_at=reminder_at,
+                )
+    except Exception:
+        pass
+
+    return booking_obj
 
 
 async def list_bookings(db: AsyncSession, session_id: UUID | None = None, user_id: UUID | None = None) -> list[Booking]:

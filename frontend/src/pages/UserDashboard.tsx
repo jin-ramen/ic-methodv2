@@ -4,7 +4,7 @@ import { formatDate, formatTime } from '../utils/dateUtils';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
-const LATE_CANCEL_HOURS = 24;
+const LATE_CANCEL_HOURS = 12;
 
 type UserProfile = {
     id: string;

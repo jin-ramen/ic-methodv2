@@ -1,3 +1,5 @@
+import asyncio
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -9,9 +11,35 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.limiter import limiter
-from app.routes import notion_cms, methods, bookings, sessions, users
+from app.db.session import AsyncSessionLocal
+from app.routes import notion_cms, methods, bookings, sessions, users, notifications
+from app.services.reminder import process_due_reminders
 
-app = FastAPI()
+_REMINDER_POLL_INTERVAL = 300  # 5 minutes
+
+
+async def _reminder_loop() -> None:
+    while True:
+        await asyncio.sleep(_REMINDER_POLL_INTERVAL)
+        try:
+            async with AsyncSessionLocal() as db:
+                await process_due_reminders(db)
+        except Exception:
+            pass
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    task = asyncio.create_task(_reminder_loop())
+    yield
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+
+app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -28,6 +56,7 @@ app.include_router(notion_cms.router)
 app.include_router(methods.router)
 app.include_router(sessions.router)
 app.include_router(bookings.router)
+app.include_router(notifications.router)
 
 DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 if (DIST / "assets").exists():
