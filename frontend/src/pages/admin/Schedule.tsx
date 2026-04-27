@@ -1,13 +1,13 @@
 import { useState, useMemo, useEffect } from 'react'
 
-import { useFetch } from '../../utils/useFetch'
+import { useFetch } from '../../hooks/useFetch'
 import { useAdminContext } from '../../layouts/AdminLayout'
 import { toDateKey, getDate, getDayLabel, formatTime, formatDay } from '../../utils/dateUtils'
 
-import type { SessionType } from '../../types/SessionType'
+import type { SessionType } from '../../types/session'
 
-import SessionModal from '../../components/admin/modal/SessionModal'
-import AddSessionModal from '../../components/admin/modal/AddSessionModal'
+import SessionModal from '../../components/admin/modals/SessionModal'
+import AddSessionModal from '../../components/admin/modals/AddSessionModal'
 
 const MAX_DAYS = 90;
 const START_HOUR = 8;

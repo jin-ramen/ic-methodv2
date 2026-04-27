@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useSignUp } from '@clerk/clerk-react'
 import { isClerkAPIResponseError } from '@clerk/clerk-react/errors'
-import PhoneInput from '../components/PhoneInput'
-import { usePost } from '../utils/usePost'
+import PhoneInput from '../../components/PhoneInput'
+import { usePost } from '../../hooks/usePost'
 
 const inputClass = "w-full bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm md:text-base py-2 md:py-3 tracking-wide transition-colors duration-200 placeholder:text-wood-text/30";
 const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-widest uppercase";

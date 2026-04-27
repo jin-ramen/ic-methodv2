@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import PromoteMemberModal from '../../components/admin/modal/PromoteMemberModal';
+import PromoteMemberModal from '../../components/admin/modals/PromoteMemberModal';
 import { useAdminContext } from '../../layouts/AdminLayout';
+import Initials from '../../components/admin/Initials';
+import { getRoleStyle, toRoleLabel } from '../../utils/roleUtils';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -13,28 +15,13 @@ type StaffUser = {
     role: string;
 };
 
-const ROLE_STYLES: Record<string, string> = {
-    owner: 'bg-amber-100 text-amber-700',
-    staff: 'bg-blue-100 text-blue-700',
-};
-
-function Initials({ name }: { name: string }) {
-    const parts = name.trim().split(' ');
-    const letters = parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : parts[0].slice(0, 2);
-    return (
-        <div className="w-11 h-11 rounded-full bg-wood-accent/20 flex items-center justify-center shrink-0">
-            <span className="font-cormorant text-lg text-wood-dark uppercase">{letters}</span>
-        </div>
-    );
-}
-
 function MemberCard({ user, onDemoted, isOwner, isSelf }: { user: StaffUser; onDemoted: () => void; isOwner: boolean; isSelf: boolean }) {
     const [demoting, setDemoting] = useState(false);
     const [confirming, setConfirming] = useState(false);
     const token = localStorage.getItem('access_token') ?? '';
     const fullName = `${user.first_name} ${user.last_name}`;
-    const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase();
-    const roleStyle = ROLE_STYLES[user.role.toLowerCase()] ?? ROLE_STYLES.staff;
+    const roleLabel = toRoleLabel(user.role);
+    const roleStyle = getRoleStyle(user.role);
     const nextRole = user.role.toLowerCase() === 'owner' ? 'staff' : 'member';
 
     const handleDemote = async () => {
@@ -55,7 +42,7 @@ function MemberCard({ user, onDemoted, isOwner, isSelf }: { user: StaffUser; onD
     return (
         <div className="bg-wood-light border border-wood-accent/10 rounded-xl px-5 py-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-                <Initials name={fullName} />
+                <Initials name={fullName} size="md" />
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-cormorant text-lg text-wood-dark leading-tight">{fullName}</p>

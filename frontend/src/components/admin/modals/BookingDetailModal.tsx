@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CancelBookingModal from './CancelBookingModal';
+import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
 
 export type BookingType = {
     id: string;
@@ -16,11 +17,6 @@ export type BookingType = {
     cancellation_type: string | null;
 };
 
-const ROLE_STYLES: Record<string, string> = {
-    owner: 'bg-amber-100 text-amber-700',
-    staff: 'bg-blue-100 text-blue-700',
-    member: 'bg-wood-accent/10 text-wood-accent/60',
-};
 
 type Props = {
     booking: BookingType;
@@ -40,8 +36,8 @@ export default function BookingDetailModal({ booking, isPast, onClose, onDeleted
     const badge = booking.is_guest
         ? <span className="font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">Guest</span>
         : booking.role
-            ? <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${ROLE_STYLES[booking.role.toLowerCase()] ?? ROLE_STYLES.member}`}>
-                {booking.role.charAt(0).toUpperCase() + booking.role.slice(1).toLowerCase()}
+            ? <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${getRoleStyle(booking.role)}`}>
+                {toRoleLabel(booking.role)}
               </span>
             : null;
 

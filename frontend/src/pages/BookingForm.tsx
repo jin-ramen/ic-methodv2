@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 
-import type { SessionType } from '../types/SessionType'
+import type { SessionType } from '../types/session'
 import { formatTime, formatDate } from '../utils/dateUtils'
-import { useAuth } from '../utils/useAuth'
+import { useAuth } from '../hooks/useAuth'
 
 const inputClass = "w-full bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm md:text-base py-2 md:py-3 tracking-wide transition-colors duration-200 placeholder:text-wood-text/30";
 const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-widest uppercase";

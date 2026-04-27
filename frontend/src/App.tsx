@@ -1,4 +1,4 @@
-import './App.css'
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import AdminLayout from './layouts/AdminLayout'
@@ -8,10 +8,10 @@ import People from './pages/People'
 import Studio from './pages/Studio'
 import Booking from './pages/Booking'
 import BookingForm from './pages/BookingForm'
-import UserLogin from './pages/UserLogin'
-import UserRegistration from './pages/UserRegistration'
+import UserLogin from './pages/auth/UserLogin'
+import UserRegistration from './pages/auth/UserRegistration'
 import UserDashboard from './pages/UserDashboard'
-import SSOCallback from './pages/SSOCallback'
+import SSOCallback from './pages/auth/SSOCallback'
 
 import AdminDashBoard from './pages/admin/Dashboard'
 import AdminSchedule from './pages/admin/Schedule'
@@ -23,8 +23,8 @@ import Profile from './pages/Profile'
 
 import type { PeopleType } from './types/people'
 import type { StudioType } from './types/studio'
-import type { SessionType } from './types/SessionType'
-import { useFetch } from './utils/useFetch';
+import type { SessionType } from './types/session'
+import { useFetch } from './hooks/useFetch';
 
 function App() {
   const { data: team, error: errorPeople } = useFetch<PeopleType[]>('/api/people');

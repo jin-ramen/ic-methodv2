@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import MethodModal, { type MethodType } from '../../components/admin/modal/MethodModal';
+import MethodModal, { type MethodType } from '../../components/admin/modals/MethodModal';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 

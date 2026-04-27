@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { formatDate, formatTime } from '../../../utils/dateUtils';
 import BookingDetailModal, { type BookingType } from './BookingDetailModal';
+import Initials from '../Initials';
+import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -19,22 +21,6 @@ type ClientBookingType = BookingType & {
     created_at: string;
 };
 
-const ROLE_STYLES: Record<string, string> = {
-    owner: 'bg-amber-100 text-amber-700',
-    staff: 'bg-blue-100 text-blue-700',
-    member: 'bg-wood-accent/10 text-wood-accent/60',
-};
-
-function Initials({ name }: { name: string }) {
-    const parts = name.trim().split(' ');
-    const letters = parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : parts[0].slice(0, 2);
-    return (
-        <div className="w-16 h-16 rounded-full bg-wood-accent/20 flex items-center justify-center shrink-0">
-            <span className="font-cormorant text-2xl text-wood-dark uppercase">{letters}</span>
-        </div>
-    );
-}
-
 type Props = { user: UserType; onClose: () => void };
 
 export default function ClientModal({ user, onClose }: Props) {
@@ -44,8 +30,8 @@ export default function ClientModal({ user, onClose }: Props) {
     const [closing, setClosing] = useState(false);
 
     const fullName = `${user.first_name} ${user.last_name}`;
-    const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase();
-    const roleStyle = ROLE_STYLES[user.role.toLowerCase()] ?? ROLE_STYLES.member;
+    const roleLabel = toRoleLabel(user.role);
+    const roleStyle = getRoleStyle(user.role);
 
     const fetchBookings = useCallback(() => {
         setLoadingBookings(true);
@@ -85,7 +71,7 @@ export default function ClientModal({ user, onClose }: Props) {
                     <div className="px-6 pt-6 pb-4 border-b border-wood-accent/10 shrink-0">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-4">
-                                <Initials name={fullName} />
+                                <Initials name={fullName} size="xl" />
                                 <div>
                                     <p className="font-cormorant text-2xl text-wood-dark leading-tight">{fullName}</p>
                                     <span className={`inline-block mt-1 font-didot text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full ${roleStyle}`}>

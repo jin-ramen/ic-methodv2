@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import type { SessionType } from '../../../types/SessionType';
+import type { SessionType } from '../../../types/session';
 import { formatTime, formatDate } from '../../../utils/dateUtils';
+import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
 
 import EditSessionModal from './EditSessionModal';
 import CancelSessionModal from './CancelSessionModal';
@@ -10,11 +11,6 @@ import AddClientModal from './AddClientModal';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
-const ROLE_STYLES: Record<string, string> = {
-    owner: 'bg-amber-100 text-amber-700',
-    staff: 'bg-blue-100 text-blue-700',
-    member: 'bg-wood-accent/10 text-wood-accent/60',
-};
 
 type Props = {
     session: SessionType;
@@ -155,7 +151,7 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     <p className="font-didot text-xs text-wood-accent/40">No bookings yet.</p>
                 ) : clients.map(c => {
                     const isCancelled = c.status === 'cancelled';
-                    const roleStyle = c.role ? (ROLE_STYLES[c.role.toLowerCase()] ?? ROLE_STYLES.member) : '';
+                    const roleStyle = c.role ? getRoleStyle(c.role) : '';
                     return (
                         <button
                             key={c.id}
@@ -174,7 +170,7 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                                     ) : c.is_guest ? (
                                         <span className="font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">Guest</span>
                                     ) : c.role ? (
-                                        <span className={`font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full ${roleStyle}`}>{c.role.charAt(0).toUpperCase() + c.role.slice(1).toLowerCase()}</span>
+                                        <span className={`font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full ${roleStyle}`}>{toRoleLabel(c.role)}</span>
                                     ) : null}
                                 </div>
                                 <p className="font-didot text-xs text-wood-accent/50 truncate">

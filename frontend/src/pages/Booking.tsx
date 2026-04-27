@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import type { SessionType } from '../types/SessionType'
+import type { SessionType } from '../types/session'
 
 import { toDateKey, getTodayDate, getDate } from '../utils/dateUtils'
 
 import Calendar from '../components/CalendarModal'
-import DayHeader from '../components/DayHeader'
-import DayContent from '../components/DayContent'
+import DayHeader from '../components/booking/DayHeader'
+import DayContent from '../components/booking/DayContent'
 
 type Props = {
     data: SessionType[] | null;

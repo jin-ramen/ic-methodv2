@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import ClientModal from '../../components/admin/modal/ClientModal';
-import CreateClientModal, { type CreatedUser } from '../../components/admin/modal/CreateClientModal';
+import ClientModal from '../../components/admin/modals/ClientModal';
+import CreateClientModal, { type CreatedUser } from '../../components/admin/modals/CreateClientModal';
+import Initials from '../../components/admin/Initials';
+import { getRoleStyle, toRoleLabel } from '../../utils/roleUtils';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -13,26 +15,10 @@ type UserType = {
     role: string;
 };
 
-const ROLE_STYLES: Record<string, string> = {
-    owner: 'bg-amber-100 text-amber-700',
-    staff: 'bg-blue-100 text-blue-700',
-    member: 'bg-wood-accent/10 text-wood-accent/60',
-};
-
-function Initials({ name }: { name: string }) {
-    const parts = name.trim().split(' ');
-    const letters = parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : parts[0].slice(0, 2);
-    return (
-        <div className="w-12 h-12 rounded-full bg-wood-accent/20 flex items-center justify-center shrink-0">
-            <span className="font-cormorant text-xl text-wood-dark uppercase">{letters}</span>
-        </div>
-    );
-}
-
 function UserCard({ user, onClick }: { user: UserType; onClick: () => void }) {
     const fullName = `${user.first_name} ${user.last_name}`;
-    const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase();
-    const roleStyle = ROLE_STYLES[user.role.toLowerCase()] ?? ROLE_STYLES.member;
+    const roleLabel = toRoleLabel(user.role);
+    const roleStyle = getRoleStyle(user.role);
 
     return (
         <button
@@ -127,7 +113,7 @@ export default function Clients() {
                     {!loading && !error && filtered.length === 0 && (
                         <p className="font-didot text-xs text-wood-accent/40 tracking-widest">No clients found.</p>
                     )}
-                    <div className="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 xl:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
                         {filtered.map(u => (
                             <UserCard key={u.id} user={u} onClick={() => setSelected(u)} />
                         ))}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { formatDate, formatTime } from '../../utils/dateUtils';
+import Initials from '../../components/admin/Initials';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -34,16 +35,6 @@ type StatusFilter = 'all' | 'booked' | 'cancelled';
 
 const inputCls = 'font-didot text-xs tracking-wide text-wood-dark bg-wood-dark/5 border border-wood-accent/10 rounded-lg focus:outline-none focus:border-wood-accent/30 placeholder:text-wood-accent/30 transition-colors duration-200';
 
-function Initials({ name }: { name: string }) {
-    const parts = name.trim().split(' ');
-    const letters = parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : parts[0].slice(0, 2);
-    return (
-        <div className="w-10 h-10 rounded-full bg-wood-accent/20 flex items-center justify-center shrink-0">
-            <span className="font-cormorant text-base text-wood-dark uppercase">{letters}</span>
-        </div>
-    );
-}
-
 function BookingRow({ booking, onCancelled }: { booking: Booking; onCancelled: (id: string) => void }) {
     const [cancelling, setCancelling] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -71,7 +62,7 @@ function BookingRow({ booking, onCancelled }: { booking: Booking; onCancelled: (
 
     return (
         <div className="flex items-center gap-4 bg-wood-light border border-wood-accent/10 rounded-xl px-4 py-3 hover:border-wood-accent/20 transition-all duration-200">
-            <Initials name={fullName} />
+            <Initials name={fullName} size="sm" />
 
             {/* Client */}
             <div className="flex-1 min-w-0">
@@ -172,11 +163,10 @@ export default function Bookings() {
         });
     }, [bookings, search, statusFilter, dateFrom, dateTo, instructorFilter]);
 
-    const counts = useMemo(() => ({
-        all: bookings.length,
-        booked: bookings.filter(b => b.status === 'booked').length,
-        cancelled: bookings.filter(b => b.status === 'cancelled').length,
-    }), [bookings]);
+    const counts = useMemo(() => bookings.reduce(
+        (acc, b) => { acc.all++; if (b.status === 'booked') acc.booked++; else if (b.status === 'cancelled') acc.cancelled++; return acc; },
+        { all: 0, booked: 0, cancelled: 0 }
+    ), [bookings]);
 
     const STATUS_TABS: { key: StatusFilter; label: string }[] = [
         { key: 'all', label: `All · ${counts.all}` },

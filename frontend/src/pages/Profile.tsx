@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { toRoleLabel } from '../utils/roleUtils';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -193,7 +194,7 @@ export default function Profile() {
     }
 
     const initials = `${profile.first_name[0] ?? ''}${profile.last_name[0] ?? ''}`.toUpperCase();
-    const roleLabel = profile.role.charAt(0).toUpperCase() + profile.role.slice(1).toLowerCase();
+    const roleLabel = toRoleLabel(profile.role);
 
     return (
         <div className="flex-1 overflow-y-auto relative">

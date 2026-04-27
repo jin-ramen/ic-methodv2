@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAdminContext } from '../../../layouts/AdminLayout';
 
-import type { SessionType } from '../../../types/SessionType';
+import type { SessionType } from '../../../types/session';
 import Calendar from '../../CalendarModal';
 import { Field, inputCls } from '../FormField';
 

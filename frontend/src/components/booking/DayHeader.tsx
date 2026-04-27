@@ -1,4 +1,4 @@
-import { getDayLabel } from '../utils/dateUtils'
+import { getDayLabel } from '../../utils/dateUtils'
 
 type Props = {
     date: Date;
@@ -17,7 +17,7 @@ export default function DayHeader({ date, index = 0, onIconClick, variant = 'dar
     return (
         <div
             className={`pb-3 border-b ${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} flex items-stretch justify-between ${border}`}
-            style={{ animationDelay: `${index * 0.1}s` }}
+            style={{ animationDelay: `${(index * 100 / 1000).toFixed(1)}s` }}
         >
             <div>
                 <p className={`font-didot text-xs tracking-widest uppercase ${label}`}>{getDayLabel(date)}</p>

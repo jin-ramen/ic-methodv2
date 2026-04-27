@@ -1,5 +1,5 @@
-import type { SessionType } from '../types/SessionType'
-import { formatTime } from '../utils/dateUtils'
+import type { SessionType } from '../../types/session'
+import { formatTime } from '../../utils/dateUtils'
 
 type Props = {
     flows: SessionType[];
@@ -68,7 +68,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
             {!hasAny ? (
                 <p
                     className={`font-didot text-xs tracking-widest ${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} ${t.empty}`}
-                    style={{ animationDelay: `${index * 0.04}s` }}
+                    style={{ animationDelay: `${(index * 4 / 100).toFixed(2)}s` }}
                 >
                     No sessions
                 </p>
@@ -76,7 +76,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                 PERIODS.filter(p => grouped[p].length > 0).map(period => (
                     <div key={period}>
                         <p className={`font-didot text-xs tracking-widest uppercase mb-2 ${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} ${t.period}`}
-                            style={{ animationDelay: `${index * 0.04}s` }}
+                            style={{ animationDelay: `${(index * 4 / 100).toFixed(2)}s` }}
                         >
                             {period}
                         </p>
@@ -88,7 +88,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                 <div
                                     key={flow.id}
                                     className={`${variant === 'dark' && animate ? 'opacity-0 animate-text-in' : ''} ${isPast ? '[&>button]:opacity-40' : ''}`}
-                                    style={{ animationDelay: `${(index * 0.04) + (i * 0.03)}s` }}
+                                    style={{ animationDelay: `${((index * 4 + i * 3) / 100).toFixed(2)}s` }}
                                 >
                                 <button
                                     onClick={() => onSelect(flow)}
@@ -104,7 +104,7 @@ export default function DayContent({ flows, onSelect, index = 0, loading = false
                                                 <p className={`font-didot text-xs tracking-widest mt-1 ${t.instructor}`}>{flow.instructor}</p>
                                             )}
                                             <p className={`font-didot text-xs mt-1 ${fullyBooked ? 'text-rose-400/60' : t.spots}`}>
-                                                {fullyBooked ? 'Fuly Commited' : `${flow.spots_remaining} spot${flow.spots_remaining !== 1 ? 's' : ''}`}
+                                                {fullyBooked ? 'Fully Booked' : `${flow.spots_remaining} spot${flow.spots_remaining !== 1 ? 's' : ''}`}
                                             </p>
                                         </div>
                                         <div className="text-right shrink-0">

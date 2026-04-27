@@ -18,8 +18,8 @@ export function formatDateShort(d: Date): string {
     return d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function formatDay(iso: Date): string {
-    return `${iso.getFullYear()}-${String(iso.getMonth() + 1).padStart(2, '0')}-${String(iso.getDate()).padStart(2, '0')}`;
+export function formatDay(d: Date): string {
+    return toDateKey(d);
 }
 
 export function getTodayDate(): Date {

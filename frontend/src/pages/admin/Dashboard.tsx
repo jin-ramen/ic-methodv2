@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useFetch } from '../../utils/useFetch';
+import { useFetch } from '../../hooks/useFetch';
 import { useAdminContext } from '../../layouts/AdminLayout';
-import { formatDate, formatTime } from '../../utils/dateUtils'
+import { formatDate, formatTime, toDateKey } from '../../utils/dateUtils'
 
-import type { SessionType } from '../../types/SessionType';
+import type { SessionType } from '../../types/session';
 
-import AddSessionModal from '../../components/admin/modal/AddSessionModal';
-import SessionModal from '../../components/admin/modal/SessionModal';
+import AddSessionModal from '../../components/admin/modals/AddSessionModal';
+import SessionModal from '../../components/admin/modals/SessionModal';
 
 
 function formatDuration(start: Date, end: Date): string {
@@ -15,10 +15,8 @@ function formatDuration(start: Date, end: Date): string {
 }
 
 function flowsForDate(flows: SessionType[], date: Date) {
-    return flows.filter(f => {
-        const d = new Date(f.start_time);
-        return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate();
-    });
+    const key = toDateKey(date);
+    return flows.filter(f => toDateKey(new Date(f.start_time)) === key);
 }
 
 export default function Dashboard() {

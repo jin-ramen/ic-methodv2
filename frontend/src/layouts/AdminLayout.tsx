@@ -2,10 +2,10 @@ import { createContext, useContext } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
 
 import { getTodayDate } from '../utils/dateUtils'
-import { useAdminAuth } from '../utils/useAdminAuth'
+import { useAdminAuth } from '../hooks/useAdminAuth'
 
-import SideNav from '../components/admin/SideNav';
-import TopNav from '../components/admin/TopNav';
+import SideNav from '../components/admin/layout/SideNav';
+import TopNav from '../components/admin/layout/TopNav';
 import AdminLoginForm from '../components/admin/AdminLoginForm';
 
 type AdminContextValue = {

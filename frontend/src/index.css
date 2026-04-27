@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=GFS+Didot&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+
+@layer ultilities {
+  .card {
+  /* border-radius: 50% 50% 8px 8px / 20% 20% 8px 8px; */
+  border-radius: 24px 24px 24px 24px;
+  /* border-radius: 42% 58% 68% 32% / 45% 35% 65% 55%; */
+  /* clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); */
+  }
+
+  .flow {
+    border-radius: 24px 24px 24px 24px;
+  }
+
+  .modal {
+    border-radius: 24px 24px 24px 24px;
+  }
+
+
+  .cal {
+   /* clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); */
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hamburger-toggle {
+    @apply [&>div]:h-0 [&>div]:bg-white [&>div]:before:translate-y-0 [&>div]:before:rotate-45 [&>div]:after:translate-y-0 [&>div]:after:-rotate-45;
+  }
+
+  .insta-icon {
+    fill: var(--color-wood-accent);
+    transition: fill 0.3s ease;
+  }
+  a:hover .insta-icon {
+    fill: url(#instaGrad);
+  }
+
+  .rednote-icon {
+    fill: var(--color-wood-accent);
+    transition: fill 0.3s ease;
+  }
+  a:hover .rednote-icon {
+    fill: #ff2842;
+  }
+
+  .arc-breathe {
+    animation: breathe 8s ease-in-out infinite, drift 20s ease-in-out infinite;
+  }
+  .arc-breathe-slow {
+    animation: breathe 10s ease-in-out infinite 2s, driftReverse 25s ease-in-out infinite;
+  }
+  .arc-breathe-fast {
+    animation: breathe 6s ease-in-out infinite 4s, drift 18s ease-in-out infinite 3s;
+  }
+}
+
+@theme {
+  --font-didot: "GFS Didot", serif;
+  --font-cormorant: "Cormorant Garamond", serif;
+  --font-playfair: "Playfair Display", serif;
+
+  --color-wood-bg: #1C1210;
+  --color-wood-primary: #4A2E1F;
+  --color-wood-accent: #6B432E;
+  --color-wood-dark: #3A2015;
+  --color-wood-text: #FFEDE8;
+  --color-wood-light: #e3ddcf;
+
+  --animate-shape-in: shapeIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-text-in: textIn 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fadeIn 0.5s ease-in forwards;
+  --animate-fade-out: fadeOut 0.3s ease-out forwards;
+  --animate-modal-in: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-modal-out: modalOut 0.2s ease-in forwards;
+  --animate-slide-in-left: slideInLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+--animate-breathe: breathe 8s ease-in-out infinite;
+  --animate-breatheslow: breathe 10s ease-in-out infinite;
+  --animate-breathefast: breathe 6s ease-in-out infinite;
+}
+
+@keyframes textIn {
+  0%   { opacity: 0; transform: translateY(100px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes shapeIn {
+  0%   { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 0.85; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  0%   { opacity: 0; transform: scale(0.96) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modalOut {
+  0%   { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.96) translateY(8px); }
+}
+
+@keyframes slideInLeft {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes breathe {
+  0%   { opacity: 0.15; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 0.15; }
+}
+
+@keyframes drift {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(8px, -5px); }
+  50%  { transform: translate(-3px, -10px); }
+  75%  { transform: translate(-8px, -3px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+@keyframes driftReverse {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(-6px, 4px); }
+  50%  { transform: translate(5px, 8px); }
+  75%  { transform: translate(7px, -4px); }
+  100% { transform: translate(0px, 0px); }
+}
+
