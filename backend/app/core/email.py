@@ -45,6 +45,72 @@ def _fmt_dt(dt: datetime | None, user_timezone: str | None = None) -> str:
   return f"{day} {local_dt.strftime('%B %Y')} · {time_12h} {local_dt.strftime('%Z')}"
 
 
+async def send_email_verification_email(
+    *,
+    to_email: str,
+    first_name: str,
+    verify_url: str,
+) -> None:
+    name_txt = escape(first_name)
+    safe_url = escape(verify_url)
+
+    body = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=GFS+Didot&display=swap" rel="stylesheet">
+  <title>Verify your email</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {{
+      .email-card {{ background-color: rgba(58,32,21,1) !important; }}
+    }}
+  </style>
+</head>
+<body style="margin:0;padding:0;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e3ddcf;">
+    <tr>
+      <td align="center" style="padding:48px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="email-card" style="max-width:540px;background-color:rgba(107,67,46,0.85);border-radius:16px;overflow:hidden;">
+          <tr>
+            <td style="padding:36px 40px 28px;border-bottom:1px solid rgba(255,237,232,0.25);">
+              <span style="font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-size:24px;font-weight:300;letter-spacing:0.06em;color:#FFEDE8;">IC Method.</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 40px 0;">
+              <p style="margin:0 0 10px;font-family:'GFS Didot',Didot,'Bodoni MT',Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Email Verification</p>
+              <h1 style="margin:0 0 24px;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-size:30px;font-weight:300;line-height:1.25;color:#FFEDE8;">Verify your<br>new email.</h1>
+              <p style="margin:0 0 32px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:13px;line-height:1.75;letter-spacing:0.02em;color:rgba(255,237,232,0.75);">Hello {name_txt}, click the button below to confirm your new email address. This link expires in 24 hours.</p>
+              <a href="{safe_url}" style="display:inline-block;font-family:'GFS Didot',Didot,Georgia,serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FFEDE8;border:1px solid rgba(255,237,232,0.4);padding:12px 28px;text-decoration:none;border-radius:8px;">Verify Email</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 40px;">
+              <p style="margin:0;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,237,232,0.75);">434 Burwood Rd, Hawthorn VIC 3122</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    message = MessageSchema(
+        subject="Verify your new email — IC Method.",
+        recipients=[to_email],
+        body=body,
+        subtype="html",
+    )
+    try:
+        await _mail_client().send_message(message)
+    except Exception as e:
+        raise RuntimeError(f"Failed to send email verification: {e}") from e
+
+
 async def send_booking_confirmation_email(
     *,
     to_email: str,

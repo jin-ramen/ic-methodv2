@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { toRoleLabel } from '../utils/roleUtils';
 import { BASE } from '../utils/apiUtils';
 
@@ -72,25 +72,36 @@ function parsePhone(stored: string | null): { dialCode: string; local: string } 
 export default function Profile() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
     const token = localStorage.getItem('access_token') ?? '';
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
     const [dialCode, setDialCode] = useState('+61');
     const [localPhone, setLocalPhone] = useState('');
     const [profileSaving, setProfileSaving] = useState(false);
     const [profileError, setProfileError] = useState('');
     const [profileSuccess, setProfileSuccess] = useState(false);
 
+    const [newEmail, setNewEmail] = useState('');
+    const [emailSending, setEmailSending] = useState(false);
+    const [emailError, setEmailError] = useState('');
+    const [emailSuccess, setEmailSuccess] = useState('');
+
+    const emailVerified = searchParams.get('email_verified') === '1';
+    const emailErrorParam = searchParams.get('email_error');
+
     const combinedPhone = localPhone ? `${dialCode}${localPhone}` : '';
+    const normalizedProfilePhone = profile ? (() => {
+        const p = parsePhone(profile.phone);
+        return p.local ? `${p.dialCode}${p.local}` : '';
+    })() : '';
     const isDirty = profile !== null && (
         firstName !== profile.first_name ||
         lastName !== profile.last_name ||
-        email !== profile.email ||
-        combinedPhone !== (profile.phone ?? '')
+        combinedPhone !== normalizedProfilePhone
     );
 
     const [currentPassword, setCurrentPassword] = useState('');
@@ -107,7 +118,6 @@ export default function Profile() {
                 setProfile(u);
                 setFirstName(u.first_name);
                 setLastName(u.last_name);
-                setEmail(u.email);
                 const parsed = parsePhone(u.phone);
                 setDialCode(parsed.dialCode);
                 setLocalPhone(parsed.local);
@@ -115,6 +125,43 @@ export default function Profile() {
             .catch(() => {})
             .finally(() => setLoading(false));
     }, [token]);
+
+    useEffect(() => {
+        if (emailVerified || emailErrorParam) {
+            setSearchParams({}, { replace: true });
+            if (emailVerified) {
+                fetch(`${BASE}/api/me`, { headers: { Authorization: `Bearer ${token}` } })
+                    .then(r => r.ok ? r.json() : Promise.reject())
+                    .then((u: UserProfile) => setProfile(u))
+                    .catch(() => {});
+            }
+        }
+    }, []);
+
+    const handleEmailChangeRequest = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setEmailError('');
+        setEmailSuccess('');
+        setEmailSending(true);
+        try {
+            const res = await fetch(`${BASE}/api/me/email/request-change`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ new_email: newEmail }),
+            });
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                const detail = body?.detail;
+                throw new Error(typeof detail === 'string' ? detail : 'Failed to send verification email.');
+            }
+            setEmailSuccess(`Verification link sent to ${newEmail}. Check your inbox.`);
+            setNewEmail('');
+        } catch (err) {
+            setEmailError((err as Error).message);
+        } finally {
+            setEmailSending(false);
+        }
+    };
 
     const handleProfileSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -128,13 +175,18 @@ export default function Profile() {
                 body: JSON.stringify({
                     first_name: firstName || null,
                     last_name: lastName || null,
-                    email: email || null,
                     phone: combinedPhone || null,
                 }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => null);
-                throw new Error(body?.detail ?? 'Failed to save.');
+                const detail = body?.detail;
+                const message = typeof detail === 'string'
+                    ? detail
+                    : Array.isArray(detail)
+                        ? detail.map((e: { msg?: string }) => e.msg ?? 'Invalid value').join(', ')
+                        : 'Failed to save.';
+                throw new Error(message);
             }
             const updated: UserProfile = await res.json();
             setProfile(updated);
@@ -178,7 +230,6 @@ export default function Profile() {
         if (!profile) return;
         setFirstName(profile.first_name);
         setLastName(profile.last_name);
-        setEmail(profile.email);
         const parsed = parsePhone(profile.phone);
         setDialCode(parsed.dialCode);
         setLocalPhone(parsed.local);
@@ -229,26 +280,40 @@ export default function Profile() {
                     </div>
                 </div>
 
+                {(emailVerified || emailErrorParam) && (
+                    <div className={`rounded-xl px-5 py-3 border ${emailVerified ? 'bg-green-900/20 border-green-400/30' : 'bg-red-900/20 border-red-400/30'}`}>
+                        <p className={`font-didot text-xs ${emailVerified ? 'text-green-400' : 'text-red-400'}`}>
+                            {emailVerified
+                                ? 'Email updated successfully.'
+                                : emailErrorParam === 'expired'
+                                    ? 'Verification link has expired. Please request a new one.'
+                                    : emailErrorParam === 'taken'
+                                        ? 'That email is already in use by another account.'
+                                        : 'Invalid verification link.'}
+                        </p>
+                    </div>
+                )}
+
                 {/* Profile form */}
                 <div className="bg-wood-accent/90 border border-wood-text/20 rounded-xl px-5 py-5">
                     <form id="profile-form" onSubmit={handleProfileSave} className="flex flex-col gap-5">
                         <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/40">Profile</p>
                         <div className="flex gap-4">
                             <Field label="First Name">
-                                <input className={inputCls} value={firstName} onChange={e => { setFirstName(e.target.value); setProfileSuccess(false); }} required />
+                                <input className={inputCls} value={firstName} onChange={e => { setFirstName(e.target.value); setProfileSuccess(false); setProfileError(''); }} required />
                             </Field>
                             <Field label="Last Name">
-                                <input className={inputCls} value={lastName} onChange={e => { setLastName(e.target.value); setProfileSuccess(false); }} required />
+                                <input className={inputCls} value={lastName} onChange={e => { setLastName(e.target.value); setProfileSuccess(false); setProfileError(''); }} required />
                             </Field>
                         </div>
                         <Field label="Email">
-                            <input type="email" className={inputCls} value={email} onChange={e => { setEmail(e.target.value); setProfileSuccess(false); }} required />
+                            <p className="font-didot text-wood-text text-sm py-2 tracking-wide border-b border-wood-text/20">{profile.email}</p>
                         </Field>
                         <Field label="Phone">
                             <div className="flex items-end gap-0">
                                 <select
                                     value={dialCode}
-                                    onChange={e => { setDialCode(e.target.value); setProfileSuccess(false); }}
+                                    onChange={e => { setDialCode(e.target.value); setProfileSuccess(false); setProfileError(''); }}
                                     className="shrink-0 bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm py-2 pr-2 tracking-wide transition-colors duration-200 appearance-none cursor-pointer"
                                 >
                                     {DIAL_CODES.map(c => (
@@ -259,13 +324,40 @@ export default function Profile() {
                                     type="tel"
                                     className={inputCls}
                                     value={localPhone}
-                                    onChange={e => { setLocalPhone(e.target.value); setProfileSuccess(false); }}
-                                    placeholder="Optional"
+                                    onChange={e => { setLocalPhone(e.target.value.replace(/\D/g, '')); setProfileSuccess(false); setProfileError(''); }}
+                                    placeholder="e.g. 412 345 678"
+                                    inputMode="numeric"
                                 />
                             </div>
                         </Field>
                         {profileError && <p className="font-didot text-xs text-red-400">{profileError}</p>}
                         {profileSuccess && <p className="font-didot text-xs text-green-400">Profile updated.</p>}
+                    </form>
+                </div>
+
+                {/* Change email */}
+                <div className="bg-wood-accent/90 border border-wood-text/20 rounded-xl px-5 py-5">
+                    <form onSubmit={handleEmailChangeRequest} className="flex flex-col gap-5">
+                        <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/40">Change Email</p>
+                        <Field label="New Email Address">
+                            <input
+                                type="email"
+                                className={inputCls}
+                                value={newEmail}
+                                onChange={e => { setNewEmail(e.target.value); setEmailError(''); setEmailSuccess(''); }}
+                                placeholder={profile.email}
+                                required
+                            />
+                        </Field>
+                        {emailError && <p className="font-didot text-xs text-red-400">{emailError}</p>}
+                        {emailSuccess && <p className="font-didot text-xs text-green-400">{emailSuccess}</p>}
+                        <button
+                            type="submit"
+                            disabled={emailSending}
+                            className="self-end font-didot text-xs tracking-widest uppercase border border-wood-text/40 text-wood-text hover:bg-wood-text hover:text-wood-dark py-2 px-5 rounded-lg transition-all duration-200 disabled:opacity-40"
+                        >
+                            {emailSending ? 'Sending…' : 'Send Verification Email'}
+                        </button>
                     </form>
                 </div>
 
@@ -287,7 +379,7 @@ export default function Profile() {
                         <button
                             type="submit"
                             disabled={passwordSaving}
-                            className="self-end font-didot text-xs tracking-widest uppercase border border-wood-accent/40 text-wood-accent hover:bg-wood-text hover:text-wood-dark py-2 px-5 rounded-lg transition-all duration-200 disabled:opacity-40"
+                            className="self-end font-didot text-xs tracking-widest uppercase border border-wood-text/40 text-wood-text hover:bg-wood-text hover:text-wood-dark py-2 px-5 rounded-lg transition-all duration-200 disabled:opacity-40"
                         >
                             {passwordSaving ? 'Saving…' : 'Update Password'}
                         </button>
@@ -307,13 +399,13 @@ export default function Profile() {
             </div>
 
             {isDirty && (
-                <div className="sticky bottom-0 left-0 right-0 px-6 py-4 bg-wood-bg/90 backdrop-blur border-t border-wood-accent/20 flex items-center justify-between gap-4 animate-modal-in">
-                    <p className="font-didot text-xs text-wood-accent/50 tracking-wide">Unsaved changes</p>
+                <div className="sticky bottom-0 left-0 right-0 px-6 py-4 bg-wood-bg/90 backdrop-blur border-t border-wood-text/10 flex items-center justify-between gap-4 animate-modal-in">
+                    <p className="font-didot text-xs text-wood-text/40 tracking-wide">Unsaved changes</p>
                     <div className="flex gap-3">
                         <button
                             type="button"
                             onClick={handleDiscard}
-                            className="font-didot text-xs tracking-widest uppercase text-wood-accent/50 hover:text-wood-accent transition-colors duration-200"
+                            className="font-didot text-xs tracking-widest uppercase text-wood-text/50 hover:text-wood-text transition-colors duration-200"
                         >
                             Discard
                         </button>
@@ -321,7 +413,7 @@ export default function Profile() {
                             type="button"
                             onClick={() => document.querySelector<HTMLFormElement>('#profile-form')?.requestSubmit()}
                             disabled={profileSaving}
-                            className="font-didot text-xs tracking-widest uppercase bg-wood-accent text-wood-text hover:bg-wood-dark py-2 px-5 rounded-lg transition-colors duration-200 disabled:opacity-40"
+                            className="font-didot text-xs tracking-widest uppercase bg-wood-accent text-wood-text hover:bg-wood-primary py-2 px-5 rounded-lg transition-colors duration-200 disabled:opacity-40"
                         >
                             {profileSaving ? 'Saving…' : 'Save Changes'}
                         </button>

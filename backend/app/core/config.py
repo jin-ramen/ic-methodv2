@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173"]
     cache_ttl_seconds: int = 300
     app_timezone: str = Field(default="Australia/Melbourne", validation_alias="TZ")
+    app_url: str = "http://localhost:8000"
+    frontend_url: str = "http://localhost:5173"
 
     # Mail
     mail_username: str

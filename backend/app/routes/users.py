@@ -1,4 +1,8 @@
+import secrets
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,9 +10,11 @@ from uuid import UUID
 
 from app.db.session import get_db
 from app.models.models import User, UserRole
-from app.schemas.user import UserCreate, UserUpdate, UserSelfUpdate, PasswordChange, UserRead, UserLogin
+from app.schemas.user import UserCreate, UserUpdate, UserSelfUpdate, EmailChangeRequest, PasswordChange, UserRead, UserLogin
 from app.services.user import create_user, list_users, update_user, delete_user, auth_user
 from app.core.security import verify_access_token
+from app.core.config import settings
+from app.core.email import send_email_verification_email
 
 router = APIRouter(prefix="/api", tags=["user"])
 
@@ -62,11 +68,60 @@ async def api_update_me(
         db, id=current_user.id,
         first_name=user_in.first_name,
         last_name=user_in.last_name,
-        email=user_in.email,
+        email=None,
         phone=user_in.phone,
         role=None,
     )
     return updated
+
+
+@router.post("/me/email/request-change", status_code=status.HTTP_204_NO_CONTENT)
+async def api_request_email_change(
+    data: EmailChangeRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(_get_current_user),
+):
+    if data.new_email == current_user.email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="That is already your current email.")
+    existing = await db.execute(select(User).where(User.email == data.new_email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This email is already in use.")
+
+    token = secrets.token_urlsafe(32)
+    current_user.email_pending = data.new_email
+    current_user.email_token = token
+    current_user.email_token_expires = datetime.now(timezone.utc) + timedelta(hours=24)
+    await db.commit()
+
+    verify_url = f"{settings.app_url}/api/me/email/verify?token={token}"
+    await send_email_verification_email(
+        to_email=data.new_email,
+        first_name=current_user.first_name,
+        verify_url=verify_url,
+    )
+
+
+@router.get("/me/email/verify")
+async def api_verify_email(token: str, db: AsyncSession = Depends(get_db)):
+    frontend = settings.frontend_url
+    result = await db.execute(select(User).where(User.email_token == token))
+    user = result.scalar_one_or_none()
+
+    if not user or not user.email_pending:
+        return RedirectResponse(f"{frontend}/account/profile?email_error=invalid")
+    if user.email_token_expires is None or datetime.now(timezone.utc) > user.email_token_expires:
+        return RedirectResponse(f"{frontend}/account/profile?email_error=expired")
+
+    taken = await db.execute(select(User).where(User.email == user.email_pending, User.id != user.id))
+    if taken.scalar_one_or_none():
+        return RedirectResponse(f"{frontend}/account/profile?email_error=taken")
+
+    user.email = user.email_pending
+    user.email_pending = None
+    user.email_token = None
+    user.email_token_expires = None
+    await db.commit()
+    return RedirectResponse(f"{frontend}/account/profile?email_verified=1")
 
 
 @router.post("/me/password", status_code=status.HTTP_204_NO_CONTENT)

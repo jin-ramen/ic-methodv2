@@ -20,7 +20,7 @@ class UserRole(str, enum.Enum):
     STAFF = "staff"
     MEMBER = "member"
 
-class User(Base): 
+class User(Base):
     __tablename__ = "user"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -30,6 +30,9 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.MEMBER)
     phone: Mapped[Optional[str]] = mapped_column(String(20), unique=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    email_pending: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    email_token: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    email_token_expires: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
 class Method(Base):
     __tablename__ = "method"

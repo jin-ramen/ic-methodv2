@@ -61,6 +61,14 @@
   }
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #6B432E inset;
+  -webkit-text-fill-color: #FFEDE8;
+  caret-color: #FFEDE8;
+}
+
 @theme {
   --font-didot: "GFS Didot", serif;
   --font-cormorant: "Cormorant Garamond", serif;

@@ -25,6 +25,7 @@ export function DialSelect({ value, onChange }: DialSelectProps) {
         <select
             value={value}
             onChange={e => onChange(e.target.value)}
+            autoComplete="tel-country-code"
             className="bg-transparent font-didot text-wood-text text-sm py-2 md:py-3 pr-1 outline-none cursor-pointer shrink-0"
             style={{ colorScheme: 'dark' }}
         >
@@ -58,6 +59,8 @@ export default function PhoneInput({ onChange, required, placeholder = '412 345 
                 type="tel"
                 required={required}
                 placeholder={placeholder}
+                autoComplete="tel-national"
+                inputMode="numeric"
                 value={local}
                 onChange={e => { setLocal(e.target.value); emit(dial, e.target.value); }}
                 className="flex-1 bg-transparent font-didot text-wood-text text-sm md:text-base py-2 md:py-3 tracking-wide outline-none placeholder:text-wood-text/30"

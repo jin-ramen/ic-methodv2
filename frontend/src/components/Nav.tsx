@@ -51,8 +51,8 @@ export function Header() {
                                 hover:border-wood-accent/50 hover:text-wood-dark hover:tracking-[0.25em]
                                 hover:shadow-[0_0_12px_rgba(0,0,0,0.03)]"
                     >
-                    <span className="w-1 h-1 rounded-full bg-wood-accent/40 transition-colors duration-500 group-hover:bg-wood-dark/60" />
-                    {isLoggedIn ? 'Dashboard' : 'Log in'}
+                    <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${isLoggedIn ? 'bg-green-400' : 'bg-wood-accent/40'}`} />
+                    Dashboard
                     </Link>
                     <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ml-auto ${isOpen ? 'hamburger-toggle' : ''}`}>
                         <div className="relative w-4 h-0.5 rounded-full bg-wood-accent
@@ -111,19 +111,19 @@ export function Header() {
                         to={isLoggedIn ? '/account' : '/login'}
                         onClick={() => setIsOpen(false)}
                         className={`
+                            flex items-center gap-2
                             font-didot text-md tracking-[0.3em] uppercase
                             transition-all duration-700 ease-[cubic-bezier(0.33,1.3,0.65,1)]
-                            hover:text-wood-light bg-wood-accent/90
-                            border border-wood-accent/20 rounded-md px-6 py-2
-                            hover:border-wood-accent/50
+                            hover:text-wood-light bg-wood-accent/70
+                            rounded-xl px-6 py-2
+                            hover:border-wood-accent/50 text-wood-light
                             ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
-                            ${(isLoggedIn ? pathname === '/account' : pathname === '/login')
-                            ? 'text-wood-primary border-wood-dark/30'
-                            : 'text-wood-light'}
+                            ${(isLoggedIn ? pathname === '/account' : pathname === '/login')}
                         `}
                         style={{ transitionDelay: isOpen ? '700ms' : '0ms' }}
                         >
-                            {isLoggedIn ? 'Dashboard' : 'Log in'}
+                            <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${isLoggedIn ? 'bg-green-400' : 'bg-wood-light/40'}`} />
+                            Dashboard
                         </Link>
                     </div>
             </div>

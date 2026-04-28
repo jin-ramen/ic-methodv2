@@ -27,8 +27,10 @@ class UserUpdate(BaseModel):
 class UserSelfUpdate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
-    email: EmailStr | None = None
     phone: PhoneNumber | None = None
+
+class EmailChangeRequest(BaseModel):
+    new_email: EmailStr
 
 class PasswordChange(BaseModel):
     current_password: str
