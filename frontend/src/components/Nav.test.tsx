@@ -59,7 +59,7 @@ describe('Header', () => {
 
     it('has a mobile menu toggle button', () => {
         renderHeader()
-        expect(screen.getByTestId ? true : true).toBe(true) // just check it renders
+        // expect(screen.getByTestId ? true : true).toBe(true) // just check it renders
         const toggles = document.querySelectorAll('#toggleMenu')
         expect(toggles.length).toBe(1)
     })
