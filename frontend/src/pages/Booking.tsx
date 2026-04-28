@@ -82,8 +82,8 @@ export default function Booking({ data, error, loading, refetch }: Props) {
             style={{ height: calHeight }}
         >
             <div className="flex-1 min-h-0 flex flex-col bg-wood-accent/95 px-6 py-6 md:px-15 md:pt-5 opacity-0 animate-fade-in overflow-hidden rounded-xl" style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>
-                <div className="hidden md:flex items-center justify-between mb-5 shrink-0">
-                    <h1 className="font-cormorant text-wood-text text-3xl md:text-4xl tracking-wide">Create a Commitment</h1>
+                <div className="hidden lg:flex items-center justify-between mb-5 shrink-0">
+                    <h1 className="font-cormorant text-wood-text text-3xl md:text-4xl tracking-wide">Create a Booking</h1>
                     <button onClick={() => setShowPicker(p => !p)} className="focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-9 w-auto text-wood-text/40 hover:text-wood-text/70 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
