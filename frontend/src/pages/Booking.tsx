@@ -78,7 +78,7 @@ export default function Booking({ data, error, loading, refetch }: Props) {
 
     return (
         <div
-            className="cal flex flex-col px-5 md:px-5 overflow-hidden"
+            className="cal flex flex-col px-5 py-5 overflow-hidden"
             style={{ height: calHeight }}
         >
             <div className="flex-1 min-h-0 flex flex-col bg-wood-accent/95 px-6 py-6 md:px-15 md:pt-5 opacity-0 animate-fade-in overflow-hidden rounded-xl" style={{ animationDuration: '0.4s', animationFillMode: 'forwards' }}>

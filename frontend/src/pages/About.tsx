@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import GrandOpening from '../temp/GrandOpening'
 
 export default function About() {
 
@@ -10,10 +11,14 @@ export default function About() {
 
 
   return (
+    <>
     <div className="flex-1 flex items-center justify-center">
-      <div className="w-[45vw] md:w-[30vw] lg:w-[20vw] flex flex-col items-center gap-8">
-        <p className="opacity-0 animate-text-in [animation-delay:0ms] text-[clamp(0.9rem,1.3vw,1.3rem)] text-center font-playfair text-wood-dark">
-          In a vast ocean where dreams roar louder than cannon fire, One Piece follows Monkey D. Luffy, a rubber-bodied boy chasing the legendary treasure of Gol D. Roger. With his crew by his side, each island becomes a tale of laughter, loss, and unbreakable bonds, as Luffy sails not just to become Pirate King, but to live freely in a world without limits.
+      <div className="w-[70vw] md:w-[45vw] lg:w-[30vw] flex flex-col items-center gap-8">
+                      
+        <GrandOpening />
+
+        <p className="opacity-0 animate-text-in [animation-delay:0ms] text-[clamp(0.9rem,1.3vw,1.5rem)] text-center font-playfair text-wood-dark/80">
+          IC Method is a Barre × Pilates atelier born from a lifelong devotion to movement. Here, dance heritage meets precise, aesthetic instruction. Every session unfolds through line, rhythm, and breath—guiding bodies toward control, expression, and mindful connection. It is a quiet, considered space to return to yourself. Hawthorn.
         </p>
         <Link
           to="/booking"
@@ -27,5 +32,6 @@ export default function About() {
         </Link>
       </div>
     </div>
+    </>
   )
 }
