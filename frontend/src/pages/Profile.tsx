@@ -57,9 +57,16 @@ const DIAL_CODES = [
 
 function parsePhone(stored: string | null): { dialCode: string; local: string } {
     if (!stored) return { dialCode: '+61', local: '' };
-    if (!stored.startsWith('+')) return { dialCode: '+61', local: stored };
-    const match = [...DIAL_CODES].sort((a, b) => b.code.length - a.code.length).find(c => stored.startsWith(c.code));
-    return match ? { dialCode: match.code, local: stored.slice(match.code.length) } : { dialCode: '+61', local: stored };
+    const cleaned = stored.replace(/^tel:/i, '').replace(/[^\d+]/g, '');
+
+    if (!cleaned.startsWith('+')) return { dialCode: '+61', local: cleaned };
+    const match = [...DIAL_CODES]
+        .sort((a, b) => b.code.length - a.code.length)
+        .find(c => cleaned.startsWith(c.code));
+
+    return match
+        ? { dialCode: match.code, local: cleaned.slice(match.code.length) }
+        : { dialCode: '+61', local: cleaned };
 }
 
 export default function Profile() {
@@ -223,7 +230,7 @@ export default function Profile() {
                 </div>
 
                 {/* Profile form */}
-                <div className="bg-wood-accent border border-wood-text/20 rounded-xl px-5 py-5">
+                <div className="bg-wood-accent/90 border border-wood-text/20 rounded-xl px-5 py-5">
                     <form id="profile-form" onSubmit={handleProfileSave} className="flex flex-col gap-5">
                         <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/40">Profile</p>
                         <div className="flex gap-4">
@@ -263,7 +270,7 @@ export default function Profile() {
                 </div>
 
                 {/* Password form */}
-                <div className="bg-wood-accent border border-wood-text/20 rounded-xl px-5 py-5">
+                <div className="bg-wood-accent/90 border border-wood-text/20 rounded-xl px-5 py-5">
                     <form onSubmit={handlePasswordChange} className="flex flex-col gap-5">
                         <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/40">Change Password</p>
                         <Field label="Current Password">

@@ -112,7 +112,7 @@ export default function Clients() {
                     {!loading && !error && filtered.length === 0 && (
                         <p className="font-didot text-xs text-wood-accent/40 tracking-widest">No clients found.</p>
                     )}
-                    <div className="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+                    <div className="grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-3">
                         {filtered.map(u => (
                             <UserCard key={u.id} user={u} onClick={() => setSelected(u)} />
                         ))}

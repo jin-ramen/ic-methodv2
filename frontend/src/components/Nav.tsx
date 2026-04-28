@@ -29,7 +29,7 @@ export function Header() {
     return (
         <>
             {/* Desktop */}
-            <header className="relative z-50 px-5 py-5 md:px-10 md:py-10 pb-10">
+            <header className="relative z-50 px-5 py-5 md:px-10 md:py-10 pb-2 md:pb-10">
                 <div className="flex items-center justify-between relative">
                     <Link
                     to="/"
