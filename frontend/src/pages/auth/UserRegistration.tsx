@@ -4,6 +4,7 @@ import { useSignUp } from '@clerk/clerk-react'
 import { isClerkAPIResponseError } from '@clerk/clerk-react/errors'
 import PhoneInput from '../../components/PhoneInput'
 import { usePost } from '../../hooks/usePost'
+import { BASE } from '../../utils/apiUtils'
 
 const inputClass = "w-full bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm md:text-base py-2 md:py-3 tracking-wide transition-colors duration-200 placeholder:text-wood-text/30";
 const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-widest uppercase";
@@ -43,7 +44,7 @@ export default function UserRegistration() {
         try {
             const params = new URLSearchParams({ email: form.email });
             if (form.phone) params.set('phone', form.phone);
-            const checkRes = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/users/check?${params}`);
+            const checkRes = await fetch(`${BASE}/api/users/check?${params}`);
             if (checkRes.ok) {
                 const { email_taken, phone_taken } = await checkRes.json();
                 if (email_taken) {
@@ -95,7 +96,16 @@ export default function UserRegistration() {
             if (signUp.createdSessionId) {
                 await setActive({ session: signUp.createdSessionId });
             }
-            navigate('/');
+            const loginRes = await fetch(`${BASE}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifier: form.email, password: form.password }),
+            });
+            if (loginRes.ok) {
+                const { access_token } = await loginRes.json();
+                localStorage.setItem('access_token', access_token);
+            }
+            navigate('/welcome');
         } catch (err: unknown) {
             setErrorMsg(isClerkAPIResponseError(err)
                 ? (err.errors[0]?.longMessage ?? err.errors[0]?.message ?? 'Invalid verification code.')

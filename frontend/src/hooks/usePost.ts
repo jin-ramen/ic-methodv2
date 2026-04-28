@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { BASE } from '../utils/apiUtils'
 
 type PostResult<T> =
     | { ok: true; data: T }
@@ -20,7 +21,7 @@ export function usePost<T>(path: string): PostState<T> {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}${path}`, {
+            const res = await fetch(`${BASE}${path}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),

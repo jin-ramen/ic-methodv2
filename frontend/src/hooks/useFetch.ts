@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { BASE } from '../utils/apiUtils'
 
 type FetchState<T> = {
     data: T | null;
@@ -21,7 +22,7 @@ export function useFetch<T>(path: string): FetchState<T> {
         const load = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}${path}`, {
+                const res = await fetch(`${BASE}${path}`, {
                     signal: controller.signal,
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -13,6 +13,7 @@ import UserRegistration from './pages/auth/UserRegistration'
 import UserDashboard from './pages/UserDashboard'
 import SSOCallback from './pages/auth/SSOCallback'
 
+import WelcomeIntro from './pages/WelcomeIntro'
 import AdminDashBoard from './pages/admin/Dashboard'
 import AdminSchedule from './pages/admin/Schedule'
 import AdminClients from './pages/admin/Clients'
@@ -42,11 +43,13 @@ function App() {
           <Route path="booking/:flowId" element={<BookingForm onBooked={refetchFlows} />} />
           <Route path="login" element={<UserLogin />} />
           <Route path="register" element={<UserRegistration />} />
-          <Route path="account" element={<UserDashboard />} />
+          <Route path="account" element={<UserDashboard onSessionsChanged={refetchFlows} />} />
           <Route path="account/profile" element={<Profile />} />
           <Route path="sso-callback" element={<SSOCallback />} />
         </Route>
 
+
+        <Route path="welcome" element={<WelcomeIntro />} />
 
         <Route element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashBoard />} />

@@ -3,8 +3,7 @@ import PromoteMemberModal from '../../components/admin/modals/PromoteMemberModal
 import { useAdminContext } from '../../layouts/AdminLayout';
 import Initials from '../../components/admin/Initials';
 import { getRoleStyle, toRoleLabel } from '../../utils/roleUtils';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../../utils/apiUtils';
 
 type StaffUser = {
     id: string;

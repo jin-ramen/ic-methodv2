@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import CancelBookingModal from './CancelBookingModal';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
 
 export type BookingType = {
@@ -106,9 +106,13 @@ export default function BookingDetailModal({ booking, isPast, onClose, onDeleted
             </div>
 
             {showCancel && (
-                <CancelBookingModal
-                    bookingId={booking.id}
-                    clientName={fullName}
+                <ConfirmDeleteModal
+                    title="Cancel Booking"
+                    description={<>Type <span className="text-wood-text/80 italic">{fullName}</span> to confirm removal.</>}
+                    confirmText={fullName}
+                    endpoint={`/api/bookings/${booking.id}`}
+                    deleteLabel="Remove"
+                    deletingLabel="Removing…"
                     onClose={() => setShowCancel(false)}
                     onDeleted={() => { setShowCancel(false); onDeleted(); }}
                 />

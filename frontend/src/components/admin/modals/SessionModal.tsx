@@ -4,12 +4,11 @@ import type { SessionType } from '../../../types/session';
 import { formatTime, formatDate } from '../../../utils/dateUtils';
 import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
 
+import { BASE } from '../../../utils/apiUtils';
 import EditSessionModal from './EditSessionModal';
-import CancelSessionModal from './CancelSessionModal';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 import BookingDetailModal, { type BookingType } from './BookingDetailModal';
 import AddClientModal from './AddClientModal';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
 
 type Props = {
@@ -115,8 +114,13 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                 />
             )}
             {showCancel && (
-                <CancelSessionModal
-                    session={session}
+                <ConfirmDeleteModal
+                    title="Cancel Flow"
+                    description={<>This will permanently cancel the session and remove all bookings. Type <span className="text-wood-text/80 italic">{session.method_name ?? 'this session'}</span> to confirm.</>}
+                    confirmText={session.method_name ?? 'this session'}
+                    endpoint={`/api/sessions/${session.id}`}
+                    deleteLabel="Cancel Flow"
+                    deletingLabel="Cancelling…"
                     onClose={() => setShowCancel(false)}
                     onDeleted={() => { setShowCancel(false); onDeleted(); }}
                 />

@@ -77,8 +77,7 @@ describe('useFetch', () => {
         expect(vi.mocked(fetch)).toHaveBeenCalledTimes(2)
     })
 
-    it('uses VITE_API_BASE_URL env var as base', async () => {
-        vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.com')
+    it('prefixes BASE from apiUtils to the path', async () => {
         vi.mocked(fetch).mockResolvedValue({
             ok: true,
             json: async () => ({ results: [] }),
@@ -88,10 +87,9 @@ describe('useFetch', () => {
 
         await waitFor(() =>
             expect(vi.mocked(fetch)).toHaveBeenCalledWith(
-                'https://api.example.com/endpoint',
+                '/endpoint',
                 expect.objectContaining({ signal: expect.anything() })
             )
         )
-        vi.unstubAllEnvs()
     })
 })

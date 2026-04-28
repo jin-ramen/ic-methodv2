@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
+import { BASE } from '../utils/apiUtils'
 
 const ALLOWED_ROLES = ['owner', 'staff']
-const BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
 type AuthState =
     | { status: 'loading' }

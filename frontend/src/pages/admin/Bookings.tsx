@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { formatDate, formatTime } from '../../utils/dateUtils';
 import Initials from '../../components/admin/Initials';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../../utils/apiUtils';
 
 type Booking = {
     id: string;
@@ -37,14 +36,16 @@ const inputCls = 'font-didot text-xs tracking-wide text-wood-dark bg-wood-dark/5
 
 function BookingRow({ booking, onCancelled }: { booking: Booking; onCancelled: (id: string) => void }) {
     const [cancelling, setCancelling] = useState(false);
+    const [deleted, setDeleted] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fullName = `${booking.first_name} ${booking.last_name}`;
     const isBooked = booking.status === 'booked';
 
     const handleCancel = async () => {
         if (!confirm(`Cancel booking for ${fullName}?`)) return;
-        setCancelling(true);
+        setDeleted(true);
         setError(null);
+        setCancelling(true);
         const token = localStorage.getItem('access_token') ?? '';
         try {
             const res = await fetch(`${BASE}/api/bookings/${booking.id}`, {
@@ -54,11 +55,14 @@ function BookingRow({ booking, onCancelled }: { booking: Booking; onCancelled: (
             if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
             onCancelled(booking.id);
         } catch (e) {
+            setDeleted(false);
             setError((e as Error).message);
         } finally {
             setCancelling(false);
         }
     };
+
+    if (deleted) return null;
 
     return (
         <div className="flex items-center gap-4 bg-wood-light border border-wood-accent/10 rounded-xl px-4 py-3 hover:border-wood-accent/20 transition-all duration-200">

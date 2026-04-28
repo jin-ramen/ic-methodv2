@@ -28,10 +28,15 @@ export function Header() {
 
     return (
         <>
+            {/* Desktop */}
             <header className="relative z-50 px-5 py-5 md:px-10 md:py-10 pb-10">
                 <div className="flex items-center justify-between relative">
-                    <Link to="/" className="font-cormorant text-3xl md:text-4xl text-wood-accent absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
-                        IC Method.
+                    <Link
+                    to="/"
+                    onClick={() => setIsOpen(false)}
+                    className="absolute left-1/2 -translate-x-1/2 md:relative md:left-auto md:translate-x-0 font-cormorant text-3xl md:text-4xl text-wood-accent transition-transform duration-700 ease-out hover:scale-[1.03]"
+                    >
+                    IC Method.
                     </Link>
                     <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 flex-row items-center gap-12">
                             <Link to="/" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>About</Link>
@@ -39,10 +44,15 @@ export function Header() {
                             <Link to="/studio" className={`font-didot text-x relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:bg-wood-dark after:transition-all after:duration-300 hover:after:w-full hover:text-wood-dark transition-colors duration-300 ${pathname === '/studio' ? 'text-wood-dark after:w-full' : 'text-wood-accent after:w-0'}`}>Studio</Link>
                     </div>
                     <Link
-                        to={isLoggedIn ? '/account' : '/login'}
-                        className="hidden md:block font-didot text-xs tracking-widest uppercase text-wood-accent hover:text-wood-dark transition-colors duration-300"
+                    to={isLoggedIn ? '/account' : '/login'}
+                    className="hidden md:flex items-center gap-2 font-didot text-xs tracking-[0.2em] uppercase text-wood-accent
+                                border border-wood-accent/20 rounded-full px-4 py-2
+                                transition-all duration-500 ease-out
+                                hover:border-wood-accent/50 hover:text-wood-dark hover:tracking-[0.25em]
+                                hover:shadow-[0_0_12px_rgba(0,0,0,0.03)]"
                     >
-                        {isLoggedIn ? 'Dashboard' : 'Log in'}
+                    <span className="w-1 h-1 rounded-full bg-wood-accent/40 transition-colors duration-500 group-hover:bg-wood-dark/60" />
+                    {isLoggedIn ? 'Dashboard' : 'Log in'}
                     </Link>
                     <div id="toggleMenu" onClick={handleClick} className={`relative p-4 md:hidden z-50 ml-auto ${isOpen ? 'hamburger-toggle' : ''}`}>
                         <div className="relative w-4 h-0.5 rounded-full bg-wood-accent
@@ -53,15 +63,69 @@ export function Header() {
                         </div>
                     </div>
                 </div>
+            {/* Mobile */}
             </header>
-            <div className={`fixed inset-0 z-40 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="flex flex-col bg-wood-light items-center justify-center h-full gap-5">
-                    <Link to="/" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark md:opacity-100 ${pathname === '/' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>About</Link>
+            <div
+                className={`fixed inset-0 z-40 flex items-center justify-center transition-all duration-700 ${
+                    isOpen
+                    ? 'pointer-events-auto backdrop-blur-sm bg-wood-light/60'
+                    : 'pointer-events-none backdrop-blur-none bg-transparent'
+                }`}
+                >
+                    {/* <Link to="/" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark md:opacity-100 ${pathname === '/' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>About</Link>
                     <Link to="/people" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/people' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>People</Link>
                     <Link to="/studio" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname === '/studio' ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '400ms' : '0ms' }}>Studio</Link>
-                    <Link to="/booking" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname.startsWith('/booking') ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '500ms' : '0ms' }}>Book</Link>
-                    <Link to={isLoggedIn ? '/account' : '/login'} onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${(isLoggedIn ? pathname === '/account' : pathname === '/login') ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '600ms' : '0ms' }}>{isLoggedIn ? 'Dashboard' : 'Log in'}</Link>
-                </div>
+                    <Link to="/booking" onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${pathname.startsWith('/booking') ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '500ms' : '0ms' }}>Book</Link> */}
+                    {/* <Link to={isLoggedIn ? '/account' : '/login'} onClick={() => setIsOpen(false)} className={`font-didot text-xl tracking-widest transition-all duration-500 ease-in-out hover:text-wood-dark ${(isLoggedIn ? pathname === '/account' : pathname === '/login') ? 'text-wood-dark' : 'text-wood-accent'} ${isOpen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: isOpen ? '600ms' : '0ms' }}>{isLoggedIn ? 'Dashboard' : 'Log in'}</Link> */}
+                    <div
+                    className={`
+                        flex flex-col items-center justify-center gap-8 w-full h-full transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]
+                        ${isOpen
+                            ? 'opacity-100 scale-100 blur-0'
+                            : 'opacity-0 scale-[0.98] blur-[2px] translate-y-6'
+                        }
+                    `}
+                    >
+                        {[
+                            { to: '/', label: 'About', delay: 300 },
+                            { to: '/people', label: 'People', delay: 400 },
+                            { to: '/studio', label: 'Studio', delay: 500 },
+                            { to: '/booking', label: 'Book', delay: 600 },
+                        ].map(({ to, label, delay }) => (
+                            <Link
+                                key={to}
+                                to={to}
+                                onClick={() => setIsOpen(false)}
+                                className={`
+                                    font-didot text-md tracking-[0.3em] uppercase
+                                    transition-all duration-700 ease-[cubic-bezier(0.33,1.3,0.65,1)]
+                                    hover:text-wood-dark
+                                    ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+                                    ${pathname === to ? 'text-wood-dark' : 'text-wood-accent'}
+                                `}style={{ transitionDelay: isOpen ? `${delay}ms` : '0ms' }}
+                            >
+                                {label}
+                            </Link>
+                        ))}
+                        <Link
+                        to={isLoggedIn ? '/account' : '/login'}
+                        onClick={() => setIsOpen(false)}
+                        className={`
+                            font-didot text-md tracking-[0.3em] uppercase
+                            transition-all duration-700 ease-[cubic-bezier(0.33,1.3,0.65,1)]
+                            hover:text-wood-light bg-wood-accent/90
+                            border border-wood-accent/20 rounded-md px-6 py-2
+                            hover:border-wood-accent/50
+                            ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+                            ${(isLoggedIn ? pathname === '/account' : pathname === '/login')
+                            ? 'text-wood-primary border-wood-dark/30'
+                            : 'text-wood-light'}
+                        `}
+                        style={{ transitionDelay: isOpen ? '700ms' : '0ms' }}
+                        >
+                            {isLoggedIn ? 'Dashboard' : 'Log in'}
+                        </Link>
+                    </div>
             </div>
         </>
     )

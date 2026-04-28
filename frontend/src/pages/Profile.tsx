@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { toRoleLabel } from '../utils/roleUtils';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../utils/apiUtils';
 
 type UserProfile = {
     id: string;

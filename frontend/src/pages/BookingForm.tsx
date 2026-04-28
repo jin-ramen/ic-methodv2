@@ -4,6 +4,7 @@ import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 import type { SessionType } from '../types/session'
 import { formatTime, formatDate } from '../utils/dateUtils'
 import { useAuth } from '../hooks/useAuth'
+import { BASE } from '../utils/apiUtils'
 
 const inputClass = "w-full bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm md:text-base py-2 md:py-3 tracking-wide transition-colors duration-200 placeholder:text-wood-text/30";
 const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-widest uppercase";
@@ -54,7 +55,7 @@ export default function BookingForm({ onBooked }: Props) {
     useEffect(() => {
         if (!isLoggedIn || !token) return;
         setUserLoading(true);
-        fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/me`, {
+        fetch(`${BASE}/api/me`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(r => r.ok ? r.json() : Promise.reject())
@@ -80,7 +81,7 @@ export default function BookingForm({ onBooked }: Props) {
         e.preventDefault();
         setStatus('loading');
         const isGuest = !isLoggedIn && mode === 'guest';
-        const url = `${import.meta.env.VITE_API_BASE_URL ?? ''}/api/bookings${isGuest ? '/guest' : ''}`;
+        const url = `${BASE}/api/bookings${isGuest ? '/guest' : ''}`;
         const body = isGuest
             ? { session_id: session.id, first_name: guestFirstName, last_name: guestLastName, email: guestEmail, phone: guestPhone || undefined, notes: notes || undefined }
             : { session_id: session.id, notes: notes || undefined };
@@ -140,13 +141,7 @@ export default function BookingForm({ onBooked }: Props) {
                             >
                                 Sign in
                             </Link>
-                            <Link
-                                to="/register"
-                                className="font-didot text-wood-text/40 text-xs tracking-widest underline underline-offset-4"
-                            >
-                                No account? Register
-                            </Link>
-                            <button type="button" onClick={() => setMode('guest')} className="font-didot text-wood-text/30 text-xs tracking-widest underline underline-offset-4">
+                            <button type="button" onClick={() => setMode('guest')} className="font-didot text-wood-text/50 text-xs tracking-widest underline underline-offset-4">
                                 Continue as guest
                             </button>
                             <button type="button" onClick={() => navigate(backHref)} className="font-didot text-wood-text/20 text-xs tracking-widest mt-2">

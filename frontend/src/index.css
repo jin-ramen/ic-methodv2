@@ -83,6 +83,8 @@
 --animate-breathe: breathe 8s ease-in-out infinite;
   --animate-breatheslow: breathe 10s ease-in-out infinite;
   --animate-breathefast: breathe 6s ease-in-out infinite;
+  --animate-toast-in: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-toast-out: toastOut 0.3s ease-in forwards;
 }
 
 @keyframes textIn {
@@ -140,5 +142,41 @@
   50%  { transform: translate(5px, 8px); }
   75%  { transform: translate(7px, -4px); }
   100% { transform: translate(0px, 0px); }
+}
+
+@keyframes introUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes introSlideDown {
+    from { transform: translateY(0); }
+    to   { transform: translateY(100vh); }
+}
+
+@keyframes toastIn {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toastOut {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(12px); }
+}
+
+@keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0px) scale(1.01);
+    filter: blur(0px);
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+  }
 }
 

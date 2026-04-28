@@ -4,7 +4,7 @@ import BookingDetailModal, { type BookingType } from './BookingDetailModal';
 import Initials from '../Initials';
 import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../../../utils/apiUtils';
 
 type UserType = {
     id: string;

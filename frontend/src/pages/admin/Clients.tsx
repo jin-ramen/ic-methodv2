@@ -3,8 +3,7 @@ import ClientModal from '../../components/admin/modals/ClientModal';
 import CreateClientModal, { type CreatedUser } from '../../components/admin/modals/CreateClientModal';
 import Initials from '../../components/admin/Initials';
 import { getRoleStyle, toRoleLabel } from '../../utils/roleUtils';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../../utils/apiUtils';
 
 type UserType = {
     id: string;

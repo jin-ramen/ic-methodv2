@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../../../utils/apiUtils';
 
 type UserResult = {
     id: string;

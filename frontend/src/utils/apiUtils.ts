@@ -1,3 +1,5 @@
+export const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+
 export function extractError(body: unknown): string {
     if (!body || typeof body !== 'object') return 'Something went wrong';
     const detail = (body as Record<string, unknown>).detail;

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import MethodModal, { type MethodType } from '../../components/admin/modals/MethodModal';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../../utils/apiUtils';
 
 function MethodCard({ method, onEdit, onDeleted }: { method: MethodType; onEdit: () => void; onDeleted: () => void }) {
     const [confirming, setConfirming] = useState(false);

@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { formatDate, formatTime, toDateKey, getTodayDate } from '../utils/dateUtils';
 import { toRoleLabel } from '../utils/roleUtils';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { BASE } from '../utils/apiUtils';
 
 const LATE_CANCEL_HOURS = 12;
 
@@ -31,13 +30,15 @@ function CancelModal({
     booking,
     onClose,
     onCancelled,
+    onRestored,
+    onSuccess,
 }: {
     booking: UserBooking;
     onClose: () => void;
     onCancelled: (id: string) => void;
+    onRestored: (booking: UserBooking) => void;
+    onSuccess?: () => void;
 }) {
-    const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const token = localStorage.getItem('access_token') ?? '';
 
     const hoursUntil = booking.session_start
@@ -46,8 +47,8 @@ function CancelModal({
     const isLate = hoursUntil < LATE_CANCEL_HOURS;
 
     const handleCancel = async () => {
-        setSubmitting(true);
-        setError(null);
+        onCancelled(booking.id);
+        onClose();
         try {
             const res = await fetch(`${BASE}/api/bookings/${booking.id}/cancel`, {
                 method: 'POST',
@@ -55,12 +56,10 @@ function CancelModal({
                 body: JSON.stringify({ cancellation_type: isLate ? 'late' : 'early' }),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            onCancelled(booking.id);
-            onClose();
-        } catch (e) {
-            setError((e as Error).message);
-        } finally {
-            setSubmitting(false);
+            onSuccess?.();
+        } catch {
+            // Restore by re-adding the booking — parent refetches to get accurate state
+            onRestored(booking);
         }
     };
 
@@ -100,8 +99,6 @@ function CancelModal({
                     )}
                 </div>
 
-                {error && <p className="font-didot text-xs text-red-400">{error}</p>}
-
                 <div className="flex gap-3">
                     <button
                         onClick={onClose}
@@ -111,10 +108,9 @@ function CancelModal({
                     </button>
                     <button
                         onClick={handleCancel}
-                        disabled={submitting}
-                        className="flex-1 font-didot text-xs tracking-widest uppercase bg-red-500/80 text-white hover:bg-red-600 py-2.5 rounded-lg transition-colors duration-200 disabled:opacity-40"
+                        className="flex-1 font-didot text-xs tracking-widest uppercase bg-red-500/80 text-white hover:bg-red-600 py-2.5 rounded-lg transition-colors duration-200"
                     >
-                        {submitting ? 'Cancelling…' : 'Cancel Booking'}
+                        Cancel Booking
                     </button>
                 </div>
             </div>
@@ -122,7 +118,7 @@ function CancelModal({
     );
 }
 
-export default function UserDashboard() {
+export default function UserDashboard({ onSessionsChanged }: { onSessionsChanged?: () => void } = {}) {
     const navigate = useNavigate();
     const token = localStorage.getItem('access_token') ?? '';
 
@@ -132,6 +128,13 @@ export default function UserDashboard() {
     const [bookings, setBookings] = useState<UserBooking[]>([]);
     const [bookingsLoading, setBookingsLoading] = useState(false);
     const [cancelTarget, setCancelTarget] = useState<UserBooking | null>(null);
+    const [toast, setToast] = useState<{ message: string; leaving: boolean } | null>(null);
+
+    const showToast = (message: string) => {
+        setToast({ message, leaving: false });
+        setTimeout(() => setToast(t => t ? { ...t, leaving: true } : null), 2700);
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => {
         if (!token) { navigate('/login'); return; }
@@ -156,6 +159,8 @@ export default function UserDashboard() {
             .catch(() => {})
             .finally(() => setBookingsLoading(false));
     }, [profile]);
+
+    if (!token) return null;
 
     if (profileLoading) {
         return (
@@ -298,8 +303,25 @@ export default function UserDashboard() {
                 <CancelModal
                     booking={cancelTarget}
                     onClose={() => setCancelTarget(null)}
-                    onCancelled={id => setBookings(prev => prev.filter(b => b.id !== id))}
+                    onCancelled={id => {
+                        const cancelled = bookings.find(b => b.id === id);
+                        setBookings(prev => prev.filter(b => b.id !== id));
+                        showToast(`${cancelled?.session_method_name ?? 'Booking'} cancelled`);
+                    }}
+                    onRestored={b => setBookings(prev => [...prev, b])}
+                    onSuccess={onSessionsChanged}
                 />
+            )}
+
+            {toast && (
+                <div
+                    className={`fixed bottom-8 left-1/2 z-50 flex items-center gap-2.5 bg-wood-dark border border-wood-accent/20 text-wood-text px-5 py-3 rounded-xl shadow-xl ${toast.leaving ? 'animate-toast-out' : 'animate-toast-in'}`}
+                >
+                    <svg className="w-3.5 h-3.5 text-wood-text/60 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <p className="font-didot text-xs tracking-widest">{toast.message}</p>
+                </div>
             )}
         </>
     );

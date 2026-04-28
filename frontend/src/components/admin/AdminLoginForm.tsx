@@ -1,6 +1,5 @@
 import { useState } from 'react'
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+import { BASE } from '../../utils/apiUtils'
 
 const inputClass = "w-full bg-transparent border-b border-wood-accent/30 focus:border-wood-accent outline-none font-didot text-wood-dark text-sm py-2 tracking-wide transition-colors duration-200 placeholder:text-wood-dark/30";
 const labelClass = "font-didot text-wood-dark/50 text-xs tracking-widest uppercase";

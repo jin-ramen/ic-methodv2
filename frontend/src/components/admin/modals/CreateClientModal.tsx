@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { extractError } from '../../../utils/apiUtils';
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+import { extractError, BASE } from '../../../utils/apiUtils';
 
 export type CreatedUser = {
     id: string;

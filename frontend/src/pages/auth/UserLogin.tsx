@@ -28,7 +28,7 @@ export default function UserLogin() {
             return;
         }
         localStorage.setItem('access_token', result.data.access_token);
-        navigate('/');
+        navigate('/welcome');
     };
 
     return (
