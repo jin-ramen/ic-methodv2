@@ -69,9 +69,8 @@ export function PastSessionsCard({ bookings }: { bookings: UserBooking[] }) {
 
             {/* Sessions list */}
             <div className="flex flex-col">
-                {past.map((b, i) => {
+                {past.map((b, _) => {
                     const date = new Date(b.session_start!);
-                    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     const month = date.toLocaleDateString('en-US', { month: 'short' });
                     const day = date.getDate();
                     const method = b.session_method_name;
@@ -88,11 +87,11 @@ export function PastSessionsCard({ bookings }: { bookings: UserBooking[] }) {
                             <TimeGlow date={date} />
                             
                             {/* Date — two‑line stack for elegance */}
-                            <div className="flex flex-col items-center shrink-0 w-9">
+                            <div className="flex flex-col items-center shrink-0 w-9 gap-1">
                                 <span className="font-cormorant text-lg text-wood-accent/70 leading-none">
                                     {day}
                                 </span>
-                                <span className="font-didot text-[8px] tracking-[0.25em] uppercase text-wood-accent/25 leading-none mt-0.5">
+                                <span className="font-didot text-[8px] tracking-[0.25em] uppercase text-wood-accent/65 leading-none mt-0.5">
                                     {month}
                                 </span>
                             </div>
@@ -108,22 +107,17 @@ export function PastSessionsCard({ bookings }: { bookings: UserBooking[] }) {
                                     </span>
                                 )}
                             </div>
-
-                            {/* Subtle re‑book arrow */}
-                            <span className="font-didot text-[10px] text-wood-accent/0 group-hover:text-wood-accent/30 transition-all duration-500 shrink-0 opacity-0 group-hover:opacity-100">
-                                →
-                            </span>
                         </div>
                     );
                 })}
             </div>
 
             {/* Bottom whisper — how many sessions */}
-            <div className="flex items-center justify-between mt-1 pt-3 border-t border-wood-accent/10">
-                <p className="font-didot text-[8px] tracking-[0.3em] uppercase text-wood-accent/20">
+            <div className="flex items-center justify-between mt-1 pt-3 border-t border-wood-accent/40">
+                <p className="font-didot text-[8px] tracking-[0.3em] uppercase text-wood-accent/50">
                     {past.length} session{past.length !== 1 ? 's' : ''}
                 </p>
-                <span className="font-didot text-[8px] tracking-[0.3em] uppercase text-wood-accent/15">
+                <span className="font-didot text-[8px] tracking-[0.3em] uppercase text-wood-accent/45">
                     archive
                 </span>
             </div>

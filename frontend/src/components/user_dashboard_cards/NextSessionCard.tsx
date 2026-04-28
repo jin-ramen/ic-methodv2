@@ -73,7 +73,7 @@ function TimeMoon({ start }: { start: string }) {
                     }}
                 />
             </svg>
-            <span className="font-didot text-[7px] tracking-[0.3em] uppercase text-wood-accent/35 z-10">
+            <span className="font-didot text-[7px] tracking-[0.3em] uppercase text-wood-accent/65 z-10">
                 {descriptor}
             </span>
         </div>

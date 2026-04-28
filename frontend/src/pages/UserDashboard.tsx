@@ -192,7 +192,7 @@ export default function UserDashboard({ onSessionsChanged }: { onSessionsChanged
 
     return (
         <>
-            <div className="flex-1 overflow-y-auto px-5 py-8 animate-fade-in">
+            <div className="flex-1 overflow-y-auto px-5 py-8 animate-fade-in bg-wood-light/95">
                 <div className="max-w-4xl mx-auto flex flex-col gap-5">
 
                     {/* Profile */}
@@ -229,14 +229,14 @@ export default function UserDashboard({ onSessionsChanged }: { onSessionsChanged
                             <UserCreditsCard credits={6} />
 
                         </div>
-                    </div>{/* end grid */}
 
-                    {/* Upcoming */}
-                    <UpcomingSessionsCard
-                        bookings={bookings}
-                        loading={bookingsLoading}
-                        onCancelTarget={setCancelTarget}
-                    />
+                        {/* Upcoming */}
+                        <UpcomingSessionsCard
+                            bookings={bookings}
+                            loading={bookingsLoading}
+                            onCancelTarget={setCancelTarget}
+                        />
+                    </div>{/* end grid */}
 
                     {/* Announcements */}
                     <div className="rounded-2xl bg-wood-accent/10 border border-wood-text/5 px-5 py-6 flex flex-col gap-4">
