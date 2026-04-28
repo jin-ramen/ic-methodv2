@@ -99,9 +99,9 @@ export function NextSessionCard({ booking }: { booking: Booking }) {
             </div>
 
             {/* Main row: information on the left, moon on the right */}
-            <div className="flex items-start justify-between gap-4">
-                {/* Left: all text information */}
-                <div className="flex flex-col gap-1 min-w-0">
+            <div className="flex flex-col gap-3">
+                {/* All text information */}
+                <div className="flex flex-col gap-1">
                     <p className="font-cormorant text-3xl text-wood-accent leading-tight">
                         <WhenLabel start={booking.session_start} />
                         <span className="text-wood-accent/60 mx-2">·</span>
@@ -120,8 +120,10 @@ export function NextSessionCard({ booking }: { booking: Booking }) {
                     )}
                 </div>
 
-                {/* Right: the time moon — aligned to the top of the text */}
-                <TimeMoon start={booking.session_start} />
+                {/* TimeMoon below, aligned to the right */}
+                <div className="flex justify-end">
+                    <TimeMoon start={booking.session_start} />
+                </div>
             </div>
         </div>
     );
