@@ -11,7 +11,7 @@ export default function GrandOpening() {
         if (visible) {
             sessionStorage.setItem('grand_opening_seen', 'true');
             // Auto-dismiss after 8 seconds if user hasn't scrolled past
-            const timer = setTimeout(() => setVisible(false), 30000);
+            const timer = setTimeout(() => setVisible(false), 300000);
             return () => clearTimeout(timer);
         }
     }, [visible]);
