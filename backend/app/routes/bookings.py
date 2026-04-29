@@ -8,6 +8,7 @@ from app.core.security import verify_access_token
 from app.db.session import get_db
 from app.models.models import Booking, User, UserRole
 from app.services.booking import create_booking, list_bookings, update_booking, delete_booking, cancel_booking
+from app.services.payment import payment_expires_at
 from app.schemas.booking import BookingCreate, GuestBookingCreate, AdminBookingCreate, BookingUpdate, BookingCancelRequest, BookingResponse
 
 router = APIRouter(prefix="/api", tags=["booking"])
@@ -59,6 +60,8 @@ def _serialize(booking: Booking) -> dict:
         phone = booking.user.phone
         role = booking.user.role.value if booking.user else None
 
+    payment = getattr(booking, "payment", None)
+    payment_expires = payment_expires_at(payment) if payment else None
     return {
         "id": str(booking.id),
         "session_id": str(booking.session_id),
@@ -78,6 +81,10 @@ def _serialize(booking: Booking) -> dict:
         "session_end": booking.session.end_time.isoformat() if booking.session else None,
         "session_instructor": booking.session.instructor if booking.session else None,
         "session_method_name": booking.session.method.name if booking.session and booking.session.method else None,
+        "payment_status": payment.status if payment else None,
+        "payment_amount": str(payment.amount) if payment else None,
+        "payment_currency": payment.currency if payment else None,
+        "payment_expires_at": payment_expires.isoformat() if payment_expires else None,
     }
 
 

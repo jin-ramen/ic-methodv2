@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { formatDate, formatTime } from '../../utils/dateUtils';
 import Initials from '../../components/admin/Initials';
+import { HoldCountdown, BOOKING_STATUS_STYLES, BOOKING_STATUS_LABELS } from '../../components/admin/HoldCountdown';
 import { BASE } from '../../utils/apiUtils';
 
 type Booking = {
@@ -18,11 +19,20 @@ type Booking = {
     session_end: string | null;
     session_instructor: string | null;
     session_method_name: string | null;
+    payment_status: string | null;
+    payment_amount: string | null;
+    payment_currency: string | null;
+    payment_expires_at: string | null;
 };
 
-const STATUS_STYLES: Record<string, string> = {
-    booked: 'bg-emerald-100 text-emerald-700',
-    cancelled: 'bg-red-100 text-red-600',
+const STATUS_STYLES = BOOKING_STATUS_STYLES;
+const STATUS_LABELS = BOOKING_STATUS_LABELS;
+
+const PAYMENT_STATUS_STYLES: Record<string, string> = {
+    pending: 'bg-amber-50 text-amber-600',
+    succeeded: 'bg-emerald-50 text-emerald-700',
+    failed: 'bg-red-50 text-red-500',
+    cancelled: 'bg-wood-dark/5 text-wood-accent/50',
 };
 
 const CANCEL_TYPE_STYLES: Record<string, string> = {
@@ -30,7 +40,7 @@ const CANCEL_TYPE_STYLES: Record<string, string> = {
     late: 'bg-red-100 text-red-500',
 };
 
-type StatusFilter = 'all' | 'booked' | 'cancelled';
+type StatusFilter = 'all' | 'booked' | 'pending_payment' | 'completed' | 'payment_failed' | 'cancelled';
 
 const inputCls = 'font-didot text-xs tracking-wide text-wood-dark bg-wood-dark/5 border border-wood-accent/10 rounded-lg focus:outline-none focus:border-wood-accent/30 placeholder:text-wood-accent/30 transition-colors duration-200';
 
@@ -40,6 +50,7 @@ function BookingRow({ booking, onCancelled }: { booking: Booking; onCancelled: (
     const [error, setError] = useState<string | null>(null);
     const fullName = `${booking.first_name} ${booking.last_name}`;
     const isBooked = booking.status === 'booked';
+    const isPending = booking.status === 'pending_payment';
 
     const handleCancel = async () => {
         if (!confirm(`Cancel booking for ${fullName}?`)) return;
@@ -97,15 +108,23 @@ function BookingRow({ booking, onCancelled }: { booking: Booking; onCancelled: (
             {/* Status */}
             <div className="flex flex-col items-end gap-1.5 shrink-0">
                 <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${STATUS_STYLES[booking.status] ?? STATUS_STYLES.booked}`}>
-                    {booking.status}
+                    {STATUS_LABELS[booking.status] ?? booking.status}
                 </span>
+                {isPending && booking.payment_expires_at && (
+                    <HoldCountdown expiresAt={booking.payment_expires_at} />
+                )}
+                {booking.payment_status && booking.status !== 'pending_payment' && (
+                    <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${PAYMENT_STATUS_STYLES[booking.payment_status] ?? ''}`}>
+                        paid · {booking.payment_status}
+                    </span>
+                )}
                 {booking.cancellation_type && (
                     <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${CANCEL_TYPE_STYLES[booking.cancellation_type] ?? ''}`}>
                         {booking.cancellation_type}
                     </span>
                 )}
                 {error && <p className="font-didot text-[10px] text-red-500">{error}</p>}
-                {isBooked && (
+                {(isBooked || isPending) && (
                     <button
                         onClick={handleCancel}
                         disabled={cancelling}
@@ -168,13 +187,24 @@ export default function Bookings() {
     }, [bookings, search, statusFilter, dateFrom, dateTo, instructorFilter]);
 
     const counts = useMemo(() => bookings.reduce(
-        (acc, b) => { acc.all++; if (b.status === 'booked') acc.booked++; else if (b.status === 'cancelled') acc.cancelled++; return acc; },
-        { all: 0, booked: 0, cancelled: 0 }
+        (acc, b) => {
+            acc.all++;
+            if (b.status === 'booked') acc.booked++;
+            else if (b.status === 'pending_payment') acc.pending_payment++;
+            else if (b.status === 'completed') acc.completed++;
+            else if (b.status === 'payment_failed') acc.payment_failed++;
+            else if (b.status === 'cancelled') acc.cancelled++;
+            return acc;
+        },
+        { all: 0, booked: 0, pending_payment: 0, completed: 0, payment_failed: 0, cancelled: 0 }
     ), [bookings]);
 
     const STATUS_TABS: { key: StatusFilter; label: string }[] = [
         { key: 'all', label: `All · ${counts.all}` },
         { key: 'booked', label: `Booked · ${counts.booked}` },
+        { key: 'pending_payment', label: `Pending · ${counts.pending_payment}` },
+        { key: 'completed', label: `Completed · ${counts.completed}` },
+        { key: 'payment_failed', label: `Failed · ${counts.payment_failed}` },
         { key: 'cancelled', label: `Cancelled · ${counts.cancelled}` },
     ];
 

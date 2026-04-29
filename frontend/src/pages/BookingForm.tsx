@@ -2,31 +2,13 @@ import { useEffect, useState } from 'react'
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 
 import type { SessionType } from '../types/session'
-import { formatTime, formatDate } from '../utils/dateUtils'
+import { formatDate } from '../utils/dateUtils'
 import { useAuth } from '../hooks/useAuth'
 import { BASE } from '../utils/apiUtils'
+import SessionInfo from '../components/SessionInfo'
 
 const inputClass = "w-full bg-transparent border-b border-wood-text/30 focus:border-wood-text outline-none font-didot text-wood-text text-sm md:text-base py-2 md:py-3 tracking-wide transition-colors duration-200 placeholder:text-wood-text/30";
 const labelClass = "font-didot text-wood-text/60 text-xs md:text-sm tracking-widest uppercase";
-
-function SessionInfo({ session }: { session: SessionType }) {
-    return (
-        <div className="rounded-xl bg-wood-dark/80 px-6 py-6 flex flex-col gap-3">
-            <p className="font-didot text-wood-text/40 text-xs tracking-widest uppercase">Your Session</p>
-            <h2 className="font-cormorant text-wood-text text-4xl leading-tight">
-                {formatTime(session.start_time)}<br />
-                <span className="text-wood-text/60 text-2xl">– {formatTime(session.end_time)}</span>
-            </h2>
-            <p className="font-didot text-wood-text/80 text-sm tracking-widest mt-1">{formatDate(session.start_time)}</p>
-            {session.instructor && (
-                <p className="font-didot text-wood-text/50 text-xs tracking-widest mt-2">with {session.instructor}</p>
-            )}
-            <p className="font-didot text-wood-text/30 text-xs tracking-widest mt-1">
-                {session.capacity} spot{session.capacity !== 1 ? 's' : ''} available
-            </p>
-        </div>
-    );
-}
 
 type UserInfo = { first_name: string; last_name: string; email: string; phone: string | null }
 
@@ -101,9 +83,16 @@ export default function BookingForm({ onBooked }: Props) {
                 return;
             }
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const created = await res.json().catch(() => ({}));
             onBooked();
             setLeaving(true);
-            setTimeout(() => setStatus('success'), 300);
+            if (!isGuest && created?.id) {
+                setTimeout(() => {
+                    navigate(`/checkout/${created.id}`, { state: { session } });
+                }, 300);
+            } else {
+                setTimeout(() => setStatus('success'), 300);
+            }
         } catch (err) {
             setErrorMsg((err as Error).message);
             setStatus('error');

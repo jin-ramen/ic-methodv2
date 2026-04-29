@@ -319,6 +319,123 @@ async def send_booking_cancellation_email(
         raise RuntimeError(f"Failed to send booking cancellation email: {e}") from e
 
 
+async def send_payment_invoice_email(
+    *,
+    to_email: str,
+    first_name: str,
+    invoice_number: str,
+    amount: str,
+    currency: str,
+    method_name: str | None,
+    session_start: datetime | None,
+    paid_at: datetime | None,
+    user_timezone: str | None = None,
+) -> None:
+    method_txt = escape(method_name or "Session")
+    name_txt = escape(first_name)
+    invoice_txt = escape(invoice_number)
+    amount_txt = escape(f"{amount} {currency}")
+    paid_txt = _fmt_dt(paid_at, user_timezone)
+    session_txt = _fmt_dt(session_start, user_timezone)
+
+    body = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=GFS+Didot&display=swap" rel="stylesheet">
+  <title>Payment Invoice</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {{
+      .email-card {{ background-color: rgba(58,32,21,1) !important; }}
+    }}
+  </style>
+</head>
+<body style="margin:0;padding:0;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e3ddcf;">
+    <tr>
+      <td align="center" style="padding:48px 20px;">
+
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="email-card" style="max-width:540px;background-color:rgba(107,67,46,0.85);border-radius:16px;overflow:hidden;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:36px 40px 28px;border-bottom:1px solid rgba(255,237,232,0.25);">
+              <span style="font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-size:24px;font-weight:300;letter-spacing:0.06em;color:#FFEDE8;">IC Method.</span>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 40px 0;">
+              <p style="margin:0 0 10px;font-family:'GFS Didot',Didot,'Bodoni MT',Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Payment Receipt</p>
+              <h1 style="margin:0 0 24px;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-size:30px;font-weight:300;line-height:1.25;color:#FFEDE8;">Thank you for<br>your payment.</h1>
+              <p style="margin:0 0 36px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:13px;line-height:1.75;letter-spacing:0.02em;color:rgba(255,237,232,0.75);">Hello {name_txt}, this is your invoice for the booking below. Please retain this email for your records.</p>
+
+              <!-- Detail rows -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding:18px 0;border-top:1px solid rgba(255,237,232,0.25);">
+                    <p style="margin:0 0 5px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Invoice Number</p>
+                    <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:300;letter-spacing:0.04em;color:#FFEDE8;">{invoice_txt}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:18px 0;border-top:1px solid rgba(255,237,232,0.25);">
+                    <p style="margin:0 0 5px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Method</p>
+                    <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:300;letter-spacing:0.04em;color:#FFEDE8;">{method_txt}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:18px 0;border-top:1px solid rgba(255,237,232,0.25);">
+                    <p style="margin:0 0 5px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Session</p>
+                    <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:300;letter-spacing:0.04em;color:#FFEDE8;">{session_txt}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:18px 0;border-top:1px solid rgba(255,237,232,0.25);">
+                    <p style="margin:0 0 5px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Paid On</p>
+                    <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:300;letter-spacing:0.04em;color:#FFEDE8;">{paid_txt}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:18px 0;border-top:1px solid rgba(255,237,232,0.25);border-bottom:1px solid rgba(255,237,232,0.25);">
+                    <p style="margin:0 0 5px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Amount Paid</p>
+                    <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:300;letter-spacing:0.04em;color:#FFEDE8;">{amount_txt}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px 32px;">
+              <p style="margin:0;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,237,232,0.75);">434 Burwood Rd, Hawthorn VIC 3122</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    message = MessageSchema(
+        subject=f"Invoice {invoice_number} — IC Method.",
+        recipients=[to_email],
+        body=body,
+        subtype="html",
+    )
+    try:
+        await _mail_client().send_message(message)
+    except Exception as e:
+        raise RuntimeError(f"Failed to send payment invoice email: {e}") from e
+
+
 async def send_booking_reminder_email(
     *,
     to_email: str,

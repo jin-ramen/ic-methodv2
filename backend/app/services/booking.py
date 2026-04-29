@@ -93,18 +93,38 @@ async def create_booking(
     if not session:
         raise ValueError("session_not_found")
 
-    booked = await db.scalar(select(func.count()).where(Booking.session_id == session_id, Booking.status == BookingStatus.BOOKED))
+    active_statuses = (BookingStatus.BOOKED, BookingStatus.PENDING_PAYMENT)
+    booked = await db.scalar(
+        select(func.count()).where(Booking.session_id == session_id, Booking.status.in_(active_statuses))
+    )
     if booked >= session.capacity:
         raise ValueError("fully_booked")
 
     if user_id:
-        existing = await db.scalar(select(func.count()).where(Booking.session_id == session_id, Booking.user_id == user_id, Booking.status == BookingStatus.BOOKED))
+        existing = await db.scalar(
+            select(func.count()).where(
+                Booking.session_id == session_id,
+                Booking.user_id == user_id,
+                Booking.status.in_(active_statuses),
+            )
+        )
         if existing:
             raise ValueError("already_booked")
-        booking = Booking(session_id=session_id, user_id=user_id, notes=notes)
+        booking = Booking(
+            session_id=session_id,
+            user_id=user_id,
+            notes=notes,
+            status=BookingStatus.PENDING_PAYMENT,
+        )
     else:
         if email:
-            existing = await db.scalar(select(func.count()).where(Booking.session_id == session_id, Booking.email == email, Booking.status == BookingStatus.BOOKED))
+            existing = await db.scalar(
+                select(func.count()).where(
+                    Booking.session_id == session_id,
+                    Booking.email == email,
+                    Booking.status.in_(active_statuses),
+                )
+            )
             if existing:
                 raise ValueError("already_booked")
         booking = Booking(
@@ -114,6 +134,7 @@ async def create_booking(
             email=email,
             phone=phone,
             notes=notes,
+            status=BookingStatus.PENDING_PAYMENT,
         )
 
     db.add(booking)
@@ -128,36 +149,108 @@ async def create_booking(
 
     result = await db.execute(
         select(Booking).where(Booking.id == booking.id)
-        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method))
+        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method), selectinload(Booking.payment))
     )
     booking_obj = result.scalar_one()
+    return booking_obj
+
+
+async def confirm_booking_after_payment(db: AsyncSession, booking_id: UUID) -> Booking | None:
+    """Flip a PENDING_PAYMENT booking to BOOKED, send confirmation, schedule reminder."""
+    result = await db.execute(
+        select(Booking).where(Booking.id == booking_id)
+        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method), selectinload(Booking.payment))
+    )
+    booking = result.scalar_one_or_none()
+    if not booking:
+        return None
+    if booking.status == BookingStatus.BOOKED:
+        return booking
+    if booking.status != BookingStatus.PENDING_PAYMENT:
+        return booking
+
+    booking.status = BookingStatus.BOOKED
+    await db.commit()
+
+    result = await db.execute(
+        select(Booking).where(Booking.id == booking_id)
+        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method), selectinload(Booking.payment))
+    )
+    booking = result.scalar_one()
 
     try:
-        await _send_confirmation_after_booking(db, booking_obj)
+        await _send_confirmation_after_booking(db, booking)
     except Exception:
         pass
 
     try:
-        if booking_obj.session:
-            reminder_at = booking_obj.session.start_time - timedelta(hours=24)
+        if booking.session:
+            reminder_at = booking.session.start_time - timedelta(hours=24)
             if reminder_at > datetime.now(timezone.utc):
                 await create_notification(
                     db,
-                    booking_id=booking_obj.id,
+                    booking_id=booking.id,
                     notification_type=NotificationType.REMINDER,
                     send_at=reminder_at,
                 )
     except Exception:
         pass
 
-    return booking_obj
+    return booking
+
+
+async def mark_completed_bookings(db: AsyncSession) -> int:
+    """Flip BOOKED bookings to COMPLETED once their session end_time has passed.
+
+    Returns the number of bookings updated.
+    """
+    now = datetime.now(timezone.utc)
+    result = await db.execute(
+        select(Booking)
+        .join(Session, Booking.session_id == Session.id)
+        .where(Booking.status == BookingStatus.BOOKED, Session.end_time <= now)
+    )
+    rows = list(result.scalars().all())
+    for booking in rows:
+        booking.status = BookingStatus.COMPLETED
+    if rows:
+        await db.commit()
+    return len(rows)
+
+
+async def release_unpaid_booking(
+    db: AsyncSession,
+    booking_id: UUID,
+    *,
+    reason: str = "payment_failed",
+) -> Booking | None:
+    """Mark a PENDING_PAYMENT booking as failed/cancelled and free its slot.
+
+    `reason` controls the terminal status:
+      - "payment_failed" → BookingStatus.PAYMENT_FAILED  (intent failed/expired)
+      - "user_cancelled" → BookingStatus.CANCELLED       (user backed out)
+    """
+    result = await db.execute(select(Booking).where(Booking.id == booking_id))
+    booking = result.scalar_one_or_none()
+    if not booking or booking.status != BookingStatus.PENDING_PAYMENT:
+        return booking
+    if reason == "user_cancelled":
+        booking.status = BookingStatus.CANCELLED
+        booking.cancellation_type = "user"
+    else:
+        booking.status = BookingStatus.PAYMENT_FAILED
+        booking.cancellation_type = "payment_failed"
+    booking.cancelled_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(booking)
+    return booking
 
 
 async def list_bookings(db: AsyncSession, session_id: UUID | None = None, user_id: UUID | None = None) -> list[Booking]:
     q = (
         select(Booking)
         .join(Session, Booking.session_id == Session.id)
-        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method))
+        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method), selectinload(Booking.payment))
     )
     if session_id:
         q = q.where(Booking.session_id == session_id)
@@ -174,14 +267,18 @@ async def update_booking(db: AsyncSession, id: UUID, notes: str | None) -> Booki
         await db.commit()
     result = await db.execute(
         select(Booking).where(Booking.id == id)
-        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method))
+        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method), selectinload(Booking.payment))
     )
     return result.scalar_one_or_none()
 
 
 async def cancel_booking(db: AsyncSession, booking_id: UUID, user_id: UUID, cancellation_type: str) -> Booking | None:
     result = await db.execute(
-        select(Booking).where(Booking.id == booking_id, Booking.user_id == user_id, Booking.status == BookingStatus.BOOKED)
+        select(Booking).where(
+            Booking.id == booking_id,
+            Booking.user_id == user_id,
+            Booking.status.in_((BookingStatus.BOOKED, BookingStatus.PENDING_PAYMENT)),
+        )
     )
     booking = result.scalar_one_or_none()
     if not booking:
@@ -193,7 +290,7 @@ async def cancel_booking(db: AsyncSession, booking_id: UUID, user_id: UUID, canc
 
     result = await db.execute(
         select(Booking).where(Booking.id == booking_id)
-        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method))
+        .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method), selectinload(Booking.payment))
     )
     booking = result.scalar_one()
 

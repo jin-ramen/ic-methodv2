@@ -21,6 +21,7 @@ import AdminMethods from './pages/admin/Methods'
 import AdminStaff from './pages/admin/Staff'
 import AdminBookings from './pages/admin/Bookings'
 import Profile from './pages/Profile'
+import Checkout from './pages/Checkout'
 
 import type { PeopleType } from './types/people'
 import type { StudioType } from './types/studio'
@@ -45,6 +46,7 @@ function App() {
           <Route path="register" element={<UserRegistration />} />
           <Route path="account" element={<UserDashboard onSessionsChanged={refetchFlows} />} />
           <Route path="account/profile" element={<Profile />} />
+          <Route path="checkout/:bookingId" element={<Checkout />} />
           <Route path="sso-callback" element={<SSOCallback />} />
         </Route>
 

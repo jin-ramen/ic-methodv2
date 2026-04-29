@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import type { SessionType } from '../../../types/session';
 import { formatTime, formatDate } from '../../../utils/dateUtils';
-import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
+import { HoldCountdown, BOOKING_STATUS_STYLES, BOOKING_STATUS_LABELS } from '../HoldCountdown';
 
 import { BASE } from '../../../utils/apiUtils';
 import EditSessionModal from './EditSessionModal';
@@ -33,13 +33,15 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
     const [detailBooking, setDetailBooking] = useState<BookingType | null>(null);
     const [showAddClient, setShowAddClient] = useState(false);
 
+    const isInactive = (s: string) => s === 'cancelled' || s === 'payment_failed';
+
     const fetchClients = () => {
         setClientsLoading(true);
         fetch(`${BASE}/api/bookings?session_id=${session.id}`)
             .then(r => r.json())
             .then(j => {
                 const results: BookingType[] = j.results ?? [];
-                results.sort((a, b) => (a.status === 'cancelled' ? 1 : 0) - (b.status === 'cancelled' ? 1 : 0));
+                results.sort((a, b) => (isInactive(a.status) ? 1 : 0) - (isInactive(b.status) ? 1 : 0));
                 setClients(results);
             })
             .catch(() => {})
@@ -92,7 +94,7 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     Edit Session
                 </button>
                 <button
-                    onClick={() => { if (clients.some(c => c.status === 'booked')) { setCancelError(true); } else { setCancelError(false); setShowCancel(true); } }}
+                    onClick={() => { if (clients.some(c => c.status === 'booked' || c.status === 'pending_payment')) { setCancelError(true); } else { setCancelError(false); setShowCancel(true); } }}
                     disabled={isPast}
                     className="flex-1 font-didot text-xs tracking-wide bg-red-400 text-white hover:bg-red-600 py-2 rounded-lg transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-400"
                 >
@@ -154,28 +156,29 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                 ) : clients.length === 0 ? (
                     <p className="font-didot text-xs text-wood-accent/40">No bookings yet.</p>
                 ) : clients.map(c => {
-                    const isCancelled = c.status === 'cancelled';
-                    const roleStyle = c.role ? getRoleStyle(c.role) : '';
+                    const inactive = isInactive(c.status);
+                    const statusStyle = BOOKING_STATUS_STYLES[c.status] ?? BOOKING_STATUS_STYLES.booked;
+                    const statusLabel = BOOKING_STATUS_LABELS[c.status] ?? c.status;
                     return (
                         <button
                             key={c.id}
                             onClick={() => setDetailBooking(c)}
-                            className={`flex flex-row items-center py-2.5 border-b border-wood-accent/10 last:border-0 group w-full text-left -mx-2 px-2 rounded-lg transition-colors duration-150 ${isCancelled ? 'opacity-40' : 'hover:bg-wood-accent/5'}`}
+                            className={`flex flex-row items-center py-2.5 border-b border-wood-accent/10 last:border-0 group w-full text-left -mx-2 px-2 rounded-lg transition-colors duration-150 ${inactive ? 'opacity-40' : 'hover:bg-wood-accent/5'}`}
                         >
                             <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                    <p className={`font-cormorant text-base ${isCancelled ? 'text-wood-accent/60 line-through' : 'text-wood-dark'}`}>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <p className={`font-cormorant text-base ${inactive ? 'text-wood-accent/60 line-through' : 'text-wood-dark'}`}>
                                         {c.first_name} {c.last_name}
                                     </p>
-                                    {isCancelled ? (
-                                        <span className="font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-red-100 text-red-400">
-                                            {c.cancellation_type ?? 'cancelled'}
-                                        </span>
-                                    ) : c.is_guest ? (
+                                    {c.is_guest && !inactive && (
                                         <span className="font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">Guest</span>
-                                    ) : c.role ? (
-                                        <span className={`font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full ${roleStyle}`}>{toRoleLabel(c.role)}</span>
-                                    ) : null}
+                                    )}
+                                    <span className={`font-didot text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full ${statusStyle}`}>
+                                        {statusLabel}
+                                    </span>
+                                    {c.status === 'pending_payment' && c.payment_expires_at && (
+                                        <HoldCountdown expiresAt={c.payment_expires_at} />
+                                    )}
                                 </div>
                                 <p className="font-didot text-xs text-wood-accent/50 truncate">
                                     {c.email ?? '—'}{c.phone ? ` · ${c.phone}` : ''}

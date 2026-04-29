@@ -18,6 +18,9 @@ from app.services.booking import (
     update_booking,
     cancel_booking,
     delete_booking,
+    confirm_booking_after_payment,
+    release_unpaid_booking,
+    mark_completed_bookings,
 )
 from app.models.models import User, BookingStatus
 from app.core.security import hash_password
@@ -69,7 +72,7 @@ async def test_create_booking_guest(db):
         )
     assert booking.id is not None
     assert booking.email == "bob@example.com"
-    assert booking.status == BookingStatus.BOOKED
+    assert booking.status == BookingStatus.PENDING_PAYMENT
 
 
 @pytest.mark.asyncio
@@ -193,7 +196,7 @@ async def test_cancel_booking_allows_rebooking_after_cancel(db):
         booking = await create_booking(db, session_id=session.id, user_id=user.id)
         await cancel_booking(db, booking.id, user.id, cancellation_type="user")
         new_booking = await create_booking(db, session_id=session.id, email="new@example.com")
-    assert new_booking.status == BookingStatus.BOOKED
+    assert new_booking.status == BookingStatus.PENDING_PAYMENT
 
 
 @pytest.mark.asyncio
@@ -222,7 +225,7 @@ async def test_cancelled_booking_does_not_count_toward_capacity(db):
 
         # Now there should be 0 active bookings — a second person can book
         new_booking = await create_booking(db, session_id=session.id, email="next@example.com")
-    assert new_booking.status == BookingStatus.BOOKED
+    assert new_booking.status == BookingStatus.PENDING_PAYMENT
 
 
 @pytest.mark.asyncio
@@ -238,7 +241,7 @@ async def test_create_booking_for_past_session(db):
         # Current code does NOT check whether the session is in the past — this should raise ValueError
         booking = await create_booking(db, session_id=past_session.id, email="late@example.com")
     # If we reach here, the service allows booking past sessions (no guard exists)
-    assert booking.status == BookingStatus.BOOKED
+    assert booking.status == BookingStatus.PENDING_PAYMENT
 
 
 @pytest.mark.asyncio
@@ -276,6 +279,178 @@ async def test_create_booking_reminder_not_scheduled_for_past_session(db):
     )
     reminders = result.scalars().all()
     assert len(reminders) == 0
+
+
+@pytest.mark.asyncio
+async def test_create_booking_holds_slot_against_capacity(db):
+    """A PENDING_PAYMENT booking must occupy capacity so concurrent bookers can't take the slot."""
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        await create_booking(db, session_id=session.id, user_id=user.id)
+        with pytest.raises(ValueError, match="fully_booked"):
+            await create_booking(db, session_id=session.id, email="other@example.com")
+
+
+@pytest.mark.asyncio
+async def test_create_booking_blocks_duplicate_user_while_pending_payment(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=5)
+        user = await _make_user(db)
+        await create_booking(db, session_id=session.id, user_id=user.id)
+        with pytest.raises(ValueError, match="already_booked"):
+            await create_booking(db, session_id=session.id, user_id=user.id)
+
+
+@pytest.mark.asyncio
+async def test_confirm_booking_after_payment_flips_to_booked(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        confirmed = await confirm_booking_after_payment(db, booking.id)
+    assert confirmed.status == BookingStatus.BOOKED
+
+
+@pytest.mark.asyncio
+async def test_confirm_booking_idempotent(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        await confirm_booking_after_payment(db, booking.id)
+        again = await confirm_booking_after_payment(db, booking.id)
+    assert again.status == BookingStatus.BOOKED
+
+
+@pytest.mark.asyncio
+async def test_confirm_booking_sends_confirmation_email_only_after_payment(db):
+    """The confirmation email fires from confirm, not from create."""
+    confirm_email_mock = AsyncMock()
+    cancel_email_mock = AsyncMock()
+    with patch("app.services.booking.send_booking_confirmation_email", confirm_email_mock), \
+         patch("app.services.booking.send_booking_cancellation_email", cancel_email_mock):
+        session = await _make_session(db)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        # No email yet — booking is pending payment
+        confirm_email_mock.assert_not_awaited()
+        await confirm_booking_after_payment(db, booking.id)
+        confirm_email_mock.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_release_unpaid_booking_marks_payment_failed(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        released = await release_unpaid_booking(db, booking.id)
+    assert released.status == BookingStatus.PAYMENT_FAILED
+    assert released.cancellation_type == "payment_failed"
+
+
+@pytest.mark.asyncio
+async def test_release_unpaid_booking_user_cancelled_marks_cancelled(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        released = await release_unpaid_booking(db, booking.id, reason="user_cancelled")
+    assert released.status == BookingStatus.CANCELLED
+    assert released.cancellation_type == "user"
+
+
+@pytest.mark.asyncio
+async def test_release_unpaid_booking_does_not_touch_confirmed(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        await confirm_booking_after_payment(db, booking.id)
+        result = await release_unpaid_booking(db, booking.id)
+    assert result.status == BookingStatus.BOOKED
+
+
+@pytest.mark.asyncio
+async def test_release_unpaid_booking_frees_capacity_for_new_booker(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        await release_unpaid_booking(db, booking.id)
+        new_booking = await create_booking(db, session_id=session.id, email="next@example.com")
+    assert new_booking.status == BookingStatus.PENDING_PAYMENT
+
+
+@pytest.mark.asyncio
+async def test_cancel_booking_works_on_pending_payment(db):
+    """User backing out of checkout should still be able to cancel."""
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db, capacity=1)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        cancelled = await cancel_booking(db, booking.id, user.id, cancellation_type="user")
+    assert cancelled.status == BookingStatus.CANCELLED
+
+
+@pytest.mark.asyncio
+async def test_mark_completed_bookings_flips_past_booked_to_completed(db):
+    from datetime import datetime, timezone, timedelta
+    from app.services.session import creater_session
+    with _email_patch, _cancel_email_patch:
+        # Create a session that already ended
+        past_start = datetime.now(timezone.utc) - timedelta(hours=2)
+        past_end = datetime.now(timezone.utc) - timedelta(hours=1)
+        past_session = await creater_session(db, method_id=None, start_time=past_start, end_time=past_end, capacity=5, instructor=None)
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=past_session.id, user_id=user.id)
+        await confirm_booking_after_payment(db, booking.id)
+        # The booking is now BOOKED for a past session
+        count = await mark_completed_bookings(db)
+
+    assert count == 1
+    await db.refresh(booking)
+    assert booking.status == BookingStatus.COMPLETED
+
+
+@pytest.mark.asyncio
+async def test_mark_completed_bookings_skips_future_sessions(db):
+    with _email_patch, _cancel_email_patch:
+        session = await _make_session(db)  # future session
+        user = await _make_user(db)
+        booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        await confirm_booking_after_payment(db, booking.id)
+        count = await mark_completed_bookings(db)
+
+    assert count == 0
+    await db.refresh(booking)
+    assert booking.status == BookingStatus.BOOKED
+
+
+@pytest.mark.asyncio
+async def test_mark_completed_bookings_skips_cancelled_and_pending(db):
+    from datetime import datetime, timezone, timedelta
+    from app.services.session import creater_session
+    with _email_patch, _cancel_email_patch:
+        past_start = datetime.now(timezone.utc) - timedelta(hours=2)
+        past_end = datetime.now(timezone.utc) - timedelta(hours=1)
+        past_session = await creater_session(db, method_id=None, start_time=past_start, end_time=past_end, capacity=5, instructor=None)
+        user1 = await _make_user(db, "u1@example.com")
+        user2 = await _make_user(db, "u2@example.com")
+        # pending_payment booking
+        pending = await create_booking(db, session_id=past_session.id, user_id=user1.id)
+        # cancelled booking
+        cancelled = await create_booking(db, session_id=past_session.id, user_id=user2.id)
+        await cancel_booking(db, cancelled.id, user2.id, cancellation_type="user")
+
+        count = await mark_completed_bookings(db)
+
+    assert count == 0
+    await db.refresh(pending)
+    await db.refresh(cancelled)
+    assert pending.status == BookingStatus.PENDING_PAYMENT
+    assert cancelled.status == BookingStatus.CANCELLED
 
 
 @pytest.mark.asyncio

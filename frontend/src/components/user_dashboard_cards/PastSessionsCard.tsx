@@ -48,9 +48,8 @@ function TimeGlow({ date }: { date: Date }) {
 }
 
 export function PastSessionsCard({ bookings }: { bookings: UserBooking[] }) {
-    const now = new Date();
     const past = bookings
-        .filter(b => b.session_start && new Date(b.session_start) <= now && b.status !== 'cancelled')
+        .filter(b => b.status === 'completed' && b.session_start)
         .sort((a, b) => new Date(b.session_start!).getTime() - new Date(a.session_start!).getTime())
         .slice(0, 8);
 

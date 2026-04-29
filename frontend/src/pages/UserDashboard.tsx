@@ -7,6 +7,7 @@ import { NextSessionCard } from '../components/user_dashboard_cards/NextSessionC
 import { PastSessionsCard } from '../components/user_dashboard_cards/PastSessionsCard'
 import { UpcomingSessionsCard } from '../components/user_dashboard_cards/UpcomingSessionsCard'
 import { UserCreditsCard } from '../components/user_dashboard_cards/UserCreditsCard'
+import { RequiredActionCard } from '../components/user_dashboard_cards/RequiredActionCard'
 
 const LATE_CANCEL_HOURS = 12;
 
@@ -28,6 +29,10 @@ type UserBooking = {
     status: string;
     cancelled_at: string | null;
     cancellation_type: string | null;
+    payment_status?: string | null;
+    payment_amount?: string | null;
+    payment_currency?: string | null;
+    payment_expires_at?: string | null;
 };
 
 function CancelModal({
@@ -187,6 +192,14 @@ export default function UserDashboard({ onSessionsChanged }: { onSessionsChanged
         .filter(b => b.status === 'booked' && b.session_start && new Date(b.session_start) > now)
         .sort((a, b) => new Date(a.session_start!).getTime() - new Date(b.session_start!).getTime());
 
+    const pendingPayment = bookings
+        .filter(b => b.status === 'pending_payment')
+        .sort((a, b) => {
+            const ax = a.payment_expires_at ? new Date(a.payment_expires_at).getTime() : Infinity;
+            const bx = b.payment_expires_at ? new Date(b.payment_expires_at).getTime() : Infinity;
+            return ax - bx;
+        });
+
     const initials = `${profile.first_name[0] ?? ''}${profile.last_name[0] ?? ''}`.toUpperCase();
     const roleLabel = toRoleLabel(profile.role);
 
@@ -215,6 +228,9 @@ export default function UserDashboard({ onSessionsChanged }: { onSessionsChanged
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
                         </svg>
                     </Link>
+
+                    {/* Required Action — pending payments */}
+                    <RequiredActionCard bookings={pendingPayment} />
 
                     {/* Next Session */}
                     {upcoming.length > 0 && <NextSessionCard booking={upcoming[0]} />}

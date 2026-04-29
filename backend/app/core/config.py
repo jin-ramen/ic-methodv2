@@ -5,6 +5,12 @@ from pydantic import Field
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    #airwallex
+    airwallex_client_id: Optional[str]
+    airwallex_api_key: Optional[str]
+    base_url: Optional[str]
+    airwallex_webhook_secret: Optional[str] = None
+
     # database 
     notion_token: Optional[str] = None
     people_db_id: Optional[str] = None

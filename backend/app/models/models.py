@@ -11,9 +11,48 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
-# Define base class
+
 class Base(DeclarativeBase):
     pass
+
+
+class PaymentStatus(str, enum.Enum):
+    PENDING = "pending"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class Payment(Base):
+    __tablename__ = "payment"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    booking_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("booking.id", ondelete="CASCADE"), unique=True, index=True)
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("user.id", ondelete="SET NULL"), index=True, nullable=True)
+
+    # Airwallex linkage
+    payment_intent_id: Mapped[Optional[str]] = mapped_column(String(225), unique=True, index=True, nullable=True)
+    client_secret: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    request_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    merchant_order_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+
+    # Financials
+    amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    currency: Mapped[str] = mapped_column(String(3), default="AUD")
+
+    # State
+    status: Mapped[str] = mapped_column(String(20), default=PaymentStatus.PENDING.value, nullable=False)
+    invoice_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    booking: Mapped["Booking"] = relationship(back_populates="payment", lazy="raise")
+    user: Mapped[Optional["User"]] = relationship(lazy="raise")
+
 
 class UserRole(str, enum.Enum):
     OWNER = "owner"
@@ -64,7 +103,10 @@ class Session(Base):
     )
 
 class BookingStatus(str, enum.Enum):
+    PENDING_PAYMENT = "pending_payment"
     BOOKED = "booked"
+    COMPLETED = "completed"
+    PAYMENT_FAILED = "payment_failed"
     CANCELLED = "cancelled"
 
 class Booking(Base):
@@ -89,6 +131,9 @@ class Booking(Base):
     # Relationships
     session: Mapped["Session"] = relationship(lazy="raise")
     user: Mapped[Optional["User"]] = relationship(lazy="raise")
+    payment: Mapped[Optional["Payment"]] = relationship(
+        back_populates="booking", lazy="raise", uselist=False
+    )
 
     __table_args__ = (
         Index(
@@ -96,7 +141,7 @@ class Booking(Base):
             "session_id",
             "user_id",
             unique=True,
-            postgresql_where=text("status = 'booked' AND user_id IS NOT NULL"),
+            postgresql_where=text("status IN ('booked','pending_payment') AND user_id IS NOT NULL"),
         ),
     )
 

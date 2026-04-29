@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
-import { getRoleStyle, toRoleLabel } from '../../../utils/roleUtils';
+import { HoldCountdown, BOOKING_STATUS_STYLES, BOOKING_STATUS_LABELS } from '../HoldCountdown';
+
+const PAYMENT_STATUS_STYLES: Record<string, string> = {
+    pending: 'bg-amber-50 text-amber-600',
+    succeeded: 'bg-emerald-50 text-emerald-700',
+    failed: 'bg-red-50 text-red-500',
+    cancelled: 'bg-wood-dark/5 text-wood-accent/50',
+};
 
 export type BookingType = {
     id: string;
@@ -15,6 +22,10 @@ export type BookingType = {
     role: string | null;
     status: string;
     cancellation_type: string | null;
+    payment_status?: string | null;
+    payment_amount?: string | null;
+    payment_currency?: string | null;
+    payment_expires_at?: string | null;
 };
 
 
@@ -33,13 +44,11 @@ export default function BookingDetailModal({ booking, isPast, onClose, onDeleted
     const handleClose = () => setClosing(true);
     const handleAnimationEnd = () => { if (closing) onClose(); };
 
-    const badge = booking.is_guest
+    const statusStyle = BOOKING_STATUS_STYLES[booking.status] ?? BOOKING_STATUS_STYLES.booked;
+    const statusLabel = BOOKING_STATUS_LABELS[booking.status] ?? booking.status;
+    const guestBadge = booking.is_guest
         ? <span className="font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">Guest</span>
-        : booking.role
-            ? <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${getRoleStyle(booking.role)}`}>
-                {toRoleLabel(booking.role)}
-              </span>
-            : null;
+        : null;
 
     return (
         <>
@@ -55,9 +64,22 @@ export default function BookingDetailModal({ booking, isPast, onClose, onDeleted
                     {/* Header */}
                     <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-wood-accent/10">
                         <div>
-                            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
                                 <p className="font-cormorant text-2xl text-wood-dark leading-tight">{fullName}</p>
-                                {badge}
+                                {guestBadge}
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${statusStyle}`}>
+                                    {statusLabel}
+                                </span>
+                                {booking.status === 'pending_payment' && booking.payment_expires_at && (
+                                    <HoldCountdown expiresAt={booking.payment_expires_at} />
+                                )}
+                                {booking.cancellation_type && (
+                                    <span className="font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-wood-dark/5 text-wood-accent/60">
+                                        {booking.cancellation_type}
+                                    </span>
+                                )}
                             </div>
                         </div>
                         <button onClick={handleClose} className="font-didot text-wood-accent/40 hover:text-wood-dark text-3xl leading-none ml-2 shrink-0 transition-colors">×</button>
@@ -79,6 +101,20 @@ export default function BookingDetailModal({ booking, isPast, onClose, onDeleted
                                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.07 3.4a2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                                 </svg>
                                 <p className="font-didot text-xs text-wood-accent/70">{booking.phone}</p>
+                            </div>
+                        )}
+
+                        {booking.payment_status && (
+                            <div className="flex items-center justify-between gap-2 bg-wood-dark/5 rounded-lg px-4 py-3">
+                                <div className="flex flex-col gap-0.5">
+                                    <p className="font-didot text-[10px] tracking-widest uppercase text-wood-accent/40">Payment</p>
+                                    <p className="font-cormorant text-base text-wood-dark">
+                                        {booking.payment_amount ?? '—'} {booking.payment_currency ?? ''}
+                                    </p>
+                                </div>
+                                <span className={`font-didot text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full ${PAYMENT_STATUS_STYLES[booking.payment_status] ?? ''}`}>
+                                    {booking.payment_status}
+                                </span>
                             </div>
                         )}
 

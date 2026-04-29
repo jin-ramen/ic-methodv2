@@ -59,11 +59,11 @@ export default function GrandOpening() {
             <div className="flex items-center gap-4 select-none animate-fade-in">
                 <div className="h-px w-8 bg-wood-accent/30 origin-right animate-line-draw" />
                 <div className="flex items-center gap-2 animate-gentle-rise">
-                    <span className="block w-1.5 h-1.5 rounded-full bg-wood-accent/70 animate-soft-pulse" />
-                    <p className="font-didot text-[10px] tracking-[0.35em] uppercase text-wood-accent/70">
+                    <span className="text-wood-accent/50 text-[20px] animate-wink">✦</span>
+                    <p className="font-didot text-[10px] tracking-[0.4em] uppercase text-wood-accent/70">
                         Grand Opening
                     </p>
-                    <span className="text-wood-accent/50 text-[8px] animate-wink">✦</span>
+                    <span className="text-wood-accent/50 text-[20px] animate-wink">✦</span>
                 </div>
                 <div className="h-px w-8 bg-wood-accent/30 origin-left animate-line-draw" />
             </div>

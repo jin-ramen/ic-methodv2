@@ -11,7 +11,7 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch
 
 from app.services.session import creater_session
-from app.services.booking import create_booking
+from app.services.booking import create_booking, confirm_booking_after_payment
 from app.services.notification import create_notification, get_notification
 from app.services.reminder import process_due_reminders
 from app.models.models import NotificationType, NotificationStatus
@@ -36,6 +36,7 @@ async def _make_booking(db, email="remind@example.com"):
             db, method_id=None, start_time=_future(2), end_time=_future(3), capacity=5, instructor=None
         )
         booking = await create_booking(db, session_id=session.id, email=email)
+        booking = await confirm_booking_after_payment(db, booking.id)
     return booking
 
 
@@ -112,6 +113,7 @@ async def test_process_due_reminders_skips_cancelled_booking(db):
         await db.commit()
         await db.refresh(user)
         booking = await create_booking(db, session_id=session.id, user_id=user.id)
+        await confirm_booking_after_payment(db, booking.id)
         from app.services.booking import cancel_booking
         await cancel_booking(db, booking.id, user.id, cancellation_type="user")
 
@@ -136,6 +138,7 @@ async def test_process_due_reminders_no_email_marks_failed(db):
         )
         # Guest booking with no email
         booking = await create_booking(db, session_id=session.id, first_name="NoEmail", last_name="Guest")
+        await confirm_booking_after_payment(db, booking.id)
 
     notif = await create_notification(
         db, booking_id=booking.id, notification_type=NotificationType.REMINDER, send_at=_past(1)
