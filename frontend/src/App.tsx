@@ -20,6 +20,8 @@ import AdminClients from './pages/admin/Clients'
 import AdminMethods from './pages/admin/Methods'
 import AdminStaff from './pages/admin/Staff'
 import AdminBookings from './pages/admin/Bookings'
+import AdminTransactions from './pages/admin/Transactions'
+import AdminFinance from './pages/admin/Finance'
 import Profile from './pages/Profile'
 import Checkout from './pages/Checkout'
 
@@ -46,7 +48,7 @@ function App() {
           <Route path="register" element={<UserRegistration />} />
           <Route path="account" element={<UserDashboard onSessionsChanged={refetchFlows} />} />
           <Route path="account/profile" element={<Profile />} />
-          <Route path="checkout/:bookingId" element={<Checkout />} />
+          <Route path="checkout/:bookingId" element={<Checkout onChanged={refetchFlows} />} />
           <Route path="sso-callback" element={<SSOCallback />} />
         </Route>
 
@@ -60,6 +62,8 @@ function App() {
           <Route path="methods" element={<AdminMethods />} />
           <Route path="staff" element={<AdminStaff />} />
           <Route path="bookings" element={<AdminBookings />} />
+          <Route path="transactions" element={<AdminTransactions />} />
+          <Route path="finance" element={<AdminFinance />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 

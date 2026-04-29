@@ -32,7 +32,9 @@ function TotalRow({ total }: { total: string }) {
     )
 }
 
-export default function Checkout() {
+type Props = { onChanged?: () => void }
+
+export default function Checkout({ onChanged }: Props = {}) {
     const { bookingId } = useParams<{ bookingId: string }>()
     const navigate = useNavigate()
     const { state } = useLocation()
@@ -256,6 +258,7 @@ export default function Checkout() {
                 /* noop — sweeper will reclaim the slot */
             }
         }
+        onChanged?.()
         setTimeout(() => navigate('/booking'), 300)
     }
 

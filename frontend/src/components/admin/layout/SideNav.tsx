@@ -1,6 +1,6 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAdminContext } from '../../../layouts/AdminLayout';
-import { HomeIcon, CalendarIcon, PeopleIcon, StaffIcon, MethodIcon, BookingIcon } from '../AdminIcons';
+import { HomeIcon, CalendarIcon, PeopleIcon, StaffIcon, MethodIcon, BookingIcon, TransactionIcon, FinanceIcon } from '../AdminIcons';
 
 export default function SideNav() {
     const { pathname } = useLocation();
@@ -12,6 +12,8 @@ export default function SideNav() {
         { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
         { to: '/schedule', label: 'Schedule', icon: CalendarIcon },
         { to: '/bookings', label: 'Bookings', icon: BookingIcon },
+        { to: '/transactions', label: 'Transactions', icon: TransactionIcon },
+        { to: '/finance', label: 'Finance', icon: FinanceIcon },
         { to: '/clients', label: 'Clients', icon: PeopleIcon },
         { to: '/staff', label: 'Staff', icon: StaffIcon },
         { to: '/methods', label: 'Methods', icon: MethodIcon },

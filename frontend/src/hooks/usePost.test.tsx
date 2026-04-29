@@ -20,7 +20,7 @@ describe('usePost', () => {
 
     it('sets loading=true while submitting', async () => {
         let resolve!: (v: unknown) => void
-        // vi.mocked(fetch).mockReturnValue(new Promise(r => { resolve = r }))
+        vi.mocked(fetch).mockReturnValue(new Promise(r => { resolve = r as (v: unknown) => void }) as Promise<Response>)
 
         const { result } = renderHook(() => usePost('/api/create'))
 

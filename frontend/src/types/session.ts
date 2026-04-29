@@ -7,5 +7,7 @@ export type SessionType = {
     capacity: number;
     spots_remaining: number;
     instructor: string | null;
+    rule_id?: string | null;
+    rule_index?: number | null;
     created_at: string;
 }

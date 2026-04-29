@@ -45,6 +45,11 @@ export default function SessionInfo({ session, children }: Props) {
                 </p>
             )}
 
+            <p className="font-didot text-red-400 text-[11px] leading-relaxed tracking-wide mt-3 pt-3 border-t border-wood-text/10">
+                <span className="text-red-400/60">Note:</span> Cancellations made less than 12 hours before
+                the session are considered late and only receive a partial refund — a 20% fee is retained.
+            </p>
+
             {children}
         </div>
     )

@@ -6,15 +6,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import verify_access_token
 from app.db.session import get_db
+from app.models.models import User, UserRole
 from app.schemas.payment import PaymentCheckoutRequest, PaymentCheckoutResponse, PaymentResponse
 from app.services.airwallex import verify_webhook_signature
 from app.services.payment import (
     apply_webhook_event,
     cancel_payment,
     get_payment_by_booking,
+    get_payment_with_context_by_booking,
+    list_all_payments,
     list_payments_for_user,
     payment_expires_at,
     serialize_payment,
+    serialize_payment_with_context,
     start_checkout,
     sync_payment_status,
 )
@@ -41,6 +45,21 @@ async def get_current_user_id(credentials: HTTPAuthorizationCredentials = Securi
         return UUID(payload["sub"])
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token.")
+
+
+async def get_admin_user(
+    credentials: HTTPAuthorizationCredentials = Security(_bearer),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    try:
+        payload = verify_access_token(credentials.credentials)
+        user_id = UUID(payload["sub"])
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token.")
+    user = await db.get(User, user_id)
+    if not user or user.role not in (UserRole.STAFF, UserRole.OWNER):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required.")
+    return user
 
 
 def _to_checkout_response(payment) -> dict:
@@ -105,6 +124,27 @@ async def list_my_payments(
 ):
     payments = await list_payments_for_user(db, user_id)
     return {"results": [serialize_payment(p) for p in payments]}
+
+
+@router.get("/admin/payments")
+async def admin_list_payments(
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    payments = await list_all_payments(db)
+    return {"results": [serialize_payment_with_context(p) for p in payments]}
+
+
+@router.get("/admin/payments/booking/{booking_id}")
+async def admin_get_booking_payment(
+    booking_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    payment = await get_payment_with_context_by_booking(db, booking_id)
+    if not payment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
+    return serialize_payment_with_context(payment)
 
 
 @router.post("/payments/booking/{booking_id}/cancel", response_model=PaymentResponse)

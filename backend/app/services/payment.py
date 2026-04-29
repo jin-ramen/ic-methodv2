@@ -14,9 +14,12 @@ from app.models.models import Booking, BookingStatus, Method, Payment, PaymentSt
 from app.services.airwallex import (
     cancel_payment_intent,
     create_payment_intent,
+    create_refund,
     map_intent_status,
     retrieve_payment_intent,
 )
+
+LATE_CANCELLATION_RETENTION_PCT = Decimal("0.20")
 from app.services.booking import confirm_booking_after_payment, release_unpaid_booking
 
 
@@ -282,6 +285,54 @@ async def cancel_payment(db: AsyncSession, payment: Payment) -> Payment:
     return payment
 
 
+def _refund_amount_for(payment: Payment, cancellation_type: str) -> Decimal:
+    """How much of `payment` to refund given the cancellation type.
+
+    Late cancellations retain 20% of the original payment as a fee.
+    """
+    full = Decimal(payment.amount)
+    if cancellation_type == "late":
+        kept = (full * LATE_CANCELLATION_RETENTION_PCT).quantize(Decimal("0.01"))
+        return (full - kept).quantize(Decimal("0.01"))
+    return full.quantize(Decimal("0.01"))
+
+
+async def refund_for_cancellation(
+    db: AsyncSession, payment: Payment, *, cancellation_type: str
+) -> Payment:
+    """Issue an Airwallex refund for a cancelled booking.
+
+    No-op when the payment isn't in a refundable state or has already been
+    refunded. Returns the (possibly mutated) Payment row either way so callers
+    can read the final refund_amount/refund_id.
+    """
+    if payment.status != PaymentStatus.SUCCEEDED.value:
+        return payment
+    if payment.refunded_at is not None:
+        return payment
+    if not payment.payment_intent_id:
+        return payment
+
+    amount = _refund_amount_for(payment, cancellation_type)
+    if amount <= 0:
+        return payment
+
+    refund = await create_refund(
+        request_id=uuid.uuid4().hex,
+        payment_intent_id=payment.payment_intent_id,
+        amount=amount,
+        reason=f"booking_{cancellation_type}_cancellation",
+        metadata={"booking_id": str(payment.booking_id), "cancellation_type": cancellation_type},
+    )
+
+    payment.refund_id = refund.get("id")
+    payment.refund_amount = amount
+    payment.refunded_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(payment)
+    return payment
+
+
 async def apply_webhook_event(db: AsyncSession, event: dict[str, Any]) -> Payment | None:
     name = event.get("name") or ""
     if not name.startswith("payment_intent."):
@@ -357,11 +408,64 @@ def serialize_payment(payment: Payment) -> dict[str, Any]:
         "booking_id": str(payment.booking_id),
         "user_id": str(payment.user_id) if payment.user_id else None,
         "payment_intent_id": payment.payment_intent_id,
+        "merchant_order_id": payment.merchant_order_id,
         "amount": str(payment.amount),
         "currency": payment.currency,
         "status": payment.status,
         "expires_at": expires_at.isoformat() if expires_at else None,
         "invoice_sent_at": payment.invoice_sent_at.isoformat() if payment.invoice_sent_at else None,
+        "refund_id": payment.refund_id,
+        "refund_amount": str(payment.refund_amount) if payment.refund_amount is not None else None,
+        "refunded_at": payment.refunded_at.isoformat() if payment.refunded_at else None,
         "created_at": payment.created_at.isoformat() if payment.created_at else None,
         "updated_at": payment.updated_at.isoformat() if payment.updated_at else None,
     }
+
+
+_PAYMENT_CONTEXT_OPTIONS = (
+    selectinload(Payment.user),
+    selectinload(Payment.booking).selectinload(Booking.user),
+    selectinload(Payment.booking).selectinload(Booking.session).selectinload(Session.method),
+)
+
+
+async def list_all_payments(db: AsyncSession) -> list[Payment]:
+    result = await db.execute(
+        select(Payment)
+        .options(*_PAYMENT_CONTEXT_OPTIONS)
+        .order_by(Payment.created_at.desc())
+    )
+    return list(result.scalars().all())
+
+
+async def get_payment_with_context_by_booking(
+    db: AsyncSession, booking_id: UUID
+) -> Payment | None:
+    result = await db.execute(
+        select(Payment)
+        .where(Payment.booking_id == booking_id)
+        .options(*_PAYMENT_CONTEXT_OPTIONS)
+    )
+    return result.scalar_one_or_none()
+
+
+def serialize_payment_with_context(payment: Payment) -> dict[str, Any]:
+    base = serialize_payment(payment)
+    booking = payment.booking
+    user = payment.user or (booking.user if booking else None)
+    first_name = user.first_name if user else (booking.first_name if booking else None)
+    last_name = user.last_name if user else (booking.last_name if booking else None)
+    email = user.email if user else (booking.email if booking else None)
+    method_name = booking.session.method.name if booking and booking.session and booking.session.method else None
+    base.update(
+        {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "method_name": method_name,
+            "session_start": booking.session.start_time.isoformat() if booking and booking.session else None,
+            "session_instructor": booking.session.instructor if booking and booking.session else None,
+            "is_guest": booking.user_id is None if booking else None,
+        }
+    )
+    return base

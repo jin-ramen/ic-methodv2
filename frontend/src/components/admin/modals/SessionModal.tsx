@@ -30,6 +30,8 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
     const [showEdit, setShowEdit] = useState(false);
     const [showCancel, setShowCancel] = useState(false);
     const [cancelError, setCancelError] = useState(false);
+    const [scopeChooser, setScopeChooser] = useState(false);
+    const [deleteScope, setDeleteScope] = useState<'this' | 'following'>('this');
     const [detailBooking, setDetailBooking] = useState<BookingType | null>(null);
     const [showAddClient, setShowAddClient] = useState(false);
 
@@ -94,7 +96,19 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     Edit Session
                 </button>
                 <button
-                    onClick={() => { if (clients.some(c => c.status === 'booked' || c.status === 'pending_payment')) { setCancelError(true); } else { setCancelError(false); setShowCancel(true); } }}
+                    onClick={() => {
+                        if (clients.some(c => c.status === 'booked' || c.status === 'pending_payment')) {
+                            setCancelError(true);
+                            return;
+                        }
+                        setCancelError(false);
+                        if (session.rule_id) {
+                            setScopeChooser(true);
+                        } else {
+                            setDeleteScope('this');
+                            setShowCancel(true);
+                        }
+                    }}
                     disabled={isPast}
                     className="flex-1 font-didot text-xs tracking-wide bg-red-400 text-white hover:bg-red-600 py-2 rounded-lg transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-400"
                 >
@@ -115,13 +129,29 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     onUpdated={() => { setShowEdit(false); onUpdated(); }}
                 />
             )}
+            {scopeChooser && (
+                <ScopeChooser
+                    onClose={() => setScopeChooser(false)}
+                    onPick={scope => {
+                        setDeleteScope(scope);
+                        setScopeChooser(false);
+                        setShowCancel(true);
+                    }}
+                />
+            )}
             {showCancel && (
                 <ConfirmDeleteModal
-                    title="Cancel Flow"
-                    description={<>This will permanently cancel the session and remove all bookings. Type <span className="text-wood-text/80 italic">{session.method_name ?? 'this session'}</span> to confirm.</>}
+                    title={deleteScope === 'following' ? 'Cancel This and Following' : 'Cancel Flow'}
+                    description={
+                        deleteScope === 'following' ? (
+                            <>This will permanently cancel this session <span className="text-wood-text/80 italic">and every later session in the series</span>. Type <span className="text-wood-text/80 italic">{session.method_name ?? 'this session'}</span> to confirm.</>
+                        ) : (
+                            <>This will permanently cancel the session and remove all bookings. Type <span className="text-wood-text/80 italic">{session.method_name ?? 'this session'}</span> to confirm.</>
+                        )
+                    }
                     confirmText={session.method_name ?? 'this session'}
-                    endpoint={`/api/sessions/${session.id}`}
-                    deleteLabel="Cancel Flow"
+                    endpoint={`/api/sessions/${session.id}?scope=${deleteScope}`}
+                    deleteLabel={deleteScope === 'following' ? 'Cancel This + Following' : 'Cancel Flow'}
                     deletingLabel="Cancelling…"
                     onClose={() => setShowCancel(false)}
                     onDeleted={() => { setShowCancel(false); onDeleted(); }}
@@ -228,6 +258,54 @@ export default function SessionModal({ session, onClose, onUpdated, onDeleted }:
                     }}
                 />
             )}
+        </div>
+    );
+}
+
+
+function ScopeChooser({
+    onClose,
+    onPick,
+}: {
+    onClose: () => void;
+    onPick: (scope: 'this' | 'following') => void;
+}) {
+    const [closing, setClosing] = useState(false);
+    const requestClose = () => setClosing(true);
+    const handleAnimationEnd = () => { if (closing) onClose(); };
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-5 pb-5 sm:pb-0">
+            <div
+                className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
+                onClick={requestClose}
+            />
+            <div
+                className={`relative w-full max-w-sm bg-wood-light rounded-xl border border-wood-accent/20 px-5 py-5 flex flex-col gap-2 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                onAnimationEnd={handleAnimationEnd}
+            >
+                <p className="font-cormorant text-lg text-wood-dark mb-1">This is a recurring session</p>
+                <p className="font-didot text-xs text-wood-accent/60 mb-3">What would you like to cancel?</p>
+
+                <button
+                    onClick={() => onPick('this')}
+                    className="w-full text-left font-didot text-sm tracking-wide text-wood-dark hover:bg-wood-accent/10 rounded-lg px-4 py-3 transition-colors"
+                >
+                    This session only
+                </button>
+                <button
+                    onClick={() => onPick('following')}
+                    className="w-full text-left font-didot text-sm tracking-wide text-red-500 hover:bg-red-50 rounded-lg px-4 py-3 transition-colors"
+                >
+                    This and all following
+                </button>
+                <button
+                    onClick={requestClose}
+                    className="w-full text-center font-didot text-xs tracking-widest uppercase text-wood-accent/50 hover:text-wood-dark py-2 mt-1 transition-colors"
+                >
+                    Cancel
+                </button>
+            </div>
         </div>
     );
 }

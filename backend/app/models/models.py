@@ -43,6 +43,9 @@ class Payment(Base):
     # State
     status: Mapped[str] = mapped_column(String(20), default=PaymentStatus.PENDING.value, nullable=False)
     invoice_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    refund_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    refund_amount: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
+    refunded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -81,16 +84,31 @@ class Method(Base):
     price: Mapped[Decimal] = mapped_column(Numeric(6, 2))
     description: Mapped[Optional[str]] = mapped_column(String(1000))
 
+class SessionRule(Base):
+    __tablename__ = "session_rule"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    frequency: Mapped[str] = mapped_column(String(16), nullable=False)  # daily | weekly | monthly | yearly
+    interval: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
 class Session(Base):
     __tablename__ = "session"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     method_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("method.id", ondelete="SET NULL"))
-    
+
     start_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     end_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     capacity: Mapped[int] = mapped_column(Integer, default=1)
     instructor: Mapped[Optional[str]] = mapped_column(String(200))
+    rule_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("session_rule.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    rule_index: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships

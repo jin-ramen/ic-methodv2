@@ -32,11 +32,34 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    type RepeatPreset = 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly' | 'custom';
+    const [repeat, setRepeat] = useState<RepeatPreset>('none');
+    const [customFreq, setCustomFreq] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('weekly');
+    const [customInterval, setCustomInterval] = useState(2);
+    const [count, setCount] = useState(8);
+
+    const recurrencePayload = (): {
+        frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+        interval: number;
+        count: number;
+    } | null => {
+        switch (repeat) {
+            case 'none': return null;
+            case 'daily': return { frequency: 'daily', interval: 1, count };
+            case 'weekly': return { frequency: 'weekly', interval: 1, count };
+            case 'biweekly': return { frequency: 'weekly', interval: 2, count };
+            case 'monthly': return { frequency: 'monthly', interval: 1, count };
+            case 'yearly': return { frequency: 'yearly', interval: 1, count };
+            case 'custom': return { frequency: customFreq, interval: Math.max(1, customInterval), count: Math.max(1, count) };
+        }
+    };
+
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>, handleClose: () => void) => {
         e.preventDefault();
         setError(null);
         setSubmitting(true);
         try {
+            const recurrence = recurrencePayload();
             const res = await fetch(`${BASE}/api/sessions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -46,6 +69,7 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
                     end_time: `${date}T${endTime}`,
                     capacity,
                     instructor: instructor.trim() || null,
+                    ...(recurrence ? { recurrence } : {}),
                 }),
             });
             if (!res.ok) throw new Error(extractError(await res.json().catch(() => null)));
@@ -96,6 +120,62 @@ export default function AddSessionModal({ onClose, onCreated, initialStartTime, 
                             <Field label="Capacity">
                                 <input type="number" min={1} value={capacity} onChange={e => setCapacity(Number(e.target.value))} required className={inputCls} />
                             </Field>
+
+                            <Field label="Repeat">
+                                <select value={repeat} onChange={e => setRepeat(e.target.value as RepeatPreset)} className={inputCls}>
+                                    <option value="none">Never</option>
+                                    <option value="daily">Every Day</option>
+                                    <option value="weekly">Every Week</option>
+                                    <option value="biweekly">Every 2 Weeks</option>
+                                    <option value="monthly">Every Month</option>
+                                    <option value="yearly">Every Year</option>
+                                    <option value="custom">Custom…</option>
+                                </select>
+                            </Field>
+
+                            {repeat === 'custom' && (
+                                <div className="flex gap-3">
+                                    <Field label="Every" className="w-24">
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            value={customInterval}
+                                            onChange={e => setCustomInterval(Number(e.target.value))}
+                                            className={inputCls}
+                                        />
+                                    </Field>
+                                    <Field label="Frequency" className="flex-1">
+                                        <select
+                                            value={customFreq}
+                                            onChange={e => setCustomFreq(e.target.value as typeof customFreq)}
+                                            className={inputCls}
+                                        >
+                                            <option value="daily">Day{customInterval === 1 ? '' : 's'}</option>
+                                            <option value="weekly">Week{customInterval === 1 ? '' : 's'}</option>
+                                            <option value="monthly">Month{customInterval === 1 ? '' : 's'}</option>
+                                            <option value="yearly">Year{customInterval === 1 ? '' : 's'}</option>
+                                        </select>
+                                    </Field>
+                                </div>
+                            )}
+
+                            {repeat !== 'none' && (
+                                <Field label="End after">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            max={365}
+                                            value={count}
+                                            onChange={e => setCount(Number(e.target.value))}
+                                            className={inputCls}
+                                        />
+                                        <span className="font-didot text-wood-text/50 text-xs tracking-wide whitespace-nowrap">
+                                            occurrence{count === 1 ? '' : 's'}
+                                        </span>
+                                    </div>
+                                </Field>
+                            )}
                             {error && <p className="font-didot text-xs text-red-300 leading-relaxed">{error}</p>}
                             <div className="flex gap-3 pt-2">
                                 <button type="button" onClick={handleClose} className="flex-1 font-didot text-sm tracking-wide border border-wood-text/20 text-wood-text/60 hover:text-wood-text hover:border-wood-text/40 py-2.5 rounded-lg transition-colors duration-200">

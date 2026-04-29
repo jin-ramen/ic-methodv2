@@ -225,12 +225,48 @@ async def send_booking_cancellation_email(
     method_name: str | None,
     cancellation_type: str | None,
     user_timezone: str | None = None,
+    refund_amount: str | None = None,
+    original_amount: str | None = None,
+    currency: str | None = None,
 ) -> None:
     start_txt = _fmt_dt(session_start, user_timezone)
     end_txt = _fmt_dt(session_end, user_timezone)
     method_txt = escape(method_name or "Session")
     name_txt = escape(first_name)
     type_label = "Late Cancellation" if cancellation_type == "late" else "Cancellation"
+
+    refund_block = ""
+    if refund_amount is not None:
+        cur = escape(currency or "AUD")
+        refund_txt = escape(f"{refund_amount} {cur}")
+        original_txt = escape(f"{original_amount} {cur}") if original_amount else None
+        retained_label = (
+            "We retained 20% of your payment as a late cancellation fee."
+            if cancellation_type == "late"
+            else "Your booking was cancelled in time, so the full amount has been refunded."
+        )
+        original_row = (
+            f"""
+                <tr>
+                  <td style="padding:18px 0;border-top:1px solid rgba(255,237,232,0.25);">
+                    <p style="margin:0 0 5px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Original Payment</p>
+                    <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:300;letter-spacing:0.04em;color:#FFEDE8;">{original_txt}</p>
+                  </td>
+                </tr>"""
+            if original_txt
+            else ""
+        )
+        refund_block = f"""
+              <p style="margin:28px 0 10px;font-family:'GFS Didot',Didot,'Bodoni MT',Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Refund Invoice</p>
+              <p style="margin:0 0 18px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:13px;line-height:1.75;letter-spacing:0.02em;color:rgba(255,237,232,0.75);">{retained_label}</p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">{original_row}
+                <tr>
+                  <td style="padding:18px 0;border-top:1px solid rgba(255,237,232,0.25);border-bottom:1px solid rgba(255,237,232,0.25);">
+                    <p style="margin:0 0 5px;font-family:'GFS Didot',Didot,Georgia,serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,237,232,0.75);">Amount Refunded</p>
+                    <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:300;letter-spacing:0.04em;color:#FFEDE8;">{refund_txt}</p>
+                  </td>
+                </tr>
+              </table>"""
 
     body = f"""<!DOCTYPE html>
 <html lang="en">
@@ -289,6 +325,7 @@ async def send_booking_cancellation_email(
                   </td>
                 </tr>
               </table>
+              {refund_block}
             </td>
           </tr>
 

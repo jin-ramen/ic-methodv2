@@ -1,8 +1,15 @@
+from typing import Literal
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.services.session import creater_session, list_sessions, update_session, delete_session
+from app.services.session import (
+    creater_session,
+    delete_session,
+    delete_session_and_following,
+    list_sessions,
+    update_session,
+)
 from app.schemas.session import SessionCreate, SessionUpdate, SessionResponse
 
 router = APIRouter(prefix="/api", tags=["session"])
@@ -11,7 +18,15 @@ router = APIRouter(prefix="/api", tags=["session"])
 @router.post("/sessions", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
 async def post_session(data: SessionCreate, db: AsyncSession = Depends(get_db)):
     try:
-        return await creater_session(db, method_id=data.method_id, start_time=data.start_time, end_time=data.end_time, capacity=data.capacity, instructor=data.instructor)
+        return await creater_session(
+            db,
+            method_id=data.method_id,
+            start_time=data.start_time,
+            end_time=data.end_time,
+            capacity=data.capacity,
+            instructor=data.instructor,
+            recurrence=data.recurrence.model_dump() if data.recurrence else None,
+        )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
@@ -39,6 +54,15 @@ async def patch_session(id: UUID, data: SessionUpdate, db: AsyncSession = Depend
 
 
 @router.delete("/sessions/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def del_session(id: UUID, db: AsyncSession = Depends(get_db)):
+async def del_session(
+    id: UUID,
+    scope: Literal["this", "following"] = Query("this"),
+    db: AsyncSession = Depends(get_db),
+):
+    if scope == "following":
+        deleted = await delete_session_and_following(db, id)
+        if deleted == 0:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+        return
     if not await delete_session(db, id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")

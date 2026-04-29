@@ -1,7 +1,24 @@
 from pydantic import BaseModel, ConfigDict, model_validator
 from datetime import datetime, timezone
+from typing import Literal
 from uuid import UUID
 
+
+class RecurrenceCreate(BaseModel):
+    frequency: Literal["daily", "weekly", "monthly", "yearly"]
+    interval: int = 1
+    count: int | None = None
+    until: datetime | None = None
+
+    @model_validator(mode="after")
+    def at_least_one_bound(self):
+        if self.count is None and self.until is None:
+            raise ValueError("count or until is required")
+        if self.interval < 1:
+            raise ValueError("interval must be >= 1")
+        if self.count is not None and self.count < 1:
+            raise ValueError("count must be >= 1")
+        return self
 
 
 class SessionCreate(BaseModel):
@@ -10,6 +27,7 @@ class SessionCreate(BaseModel):
     end_time: datetime
     capacity: int = 1
     instructor: str | None = None
+    recurrence: RecurrenceCreate | None = None
 
     @model_validator(mode="after")
     def validate_times(self):
@@ -48,4 +66,6 @@ class SessionResponse(BaseModel):
     capacity: int
     spots_remaining: int = 0
     instructor: str | None = None
+    rule_id: UUID | None = None
+    rule_index: int | None = None
     created_at: datetime

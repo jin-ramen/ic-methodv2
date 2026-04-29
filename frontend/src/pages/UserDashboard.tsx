@@ -55,7 +55,43 @@ function CancelModal({
         : Infinity;
     const isLate = hoursUntil < LATE_CANCEL_HOURS;
 
+    const paid = booking.payment_status === 'succeeded';
+    const paidAmount = paid && booking.payment_amount ? Number(booking.payment_amount) : null;
+    const currency = booking.payment_currency ?? 'AUD';
+    const retentionPct = isLate ? 0.2 : 0;
+    const retainedAmount = paidAmount != null ? +(paidAmount * retentionPct).toFixed(2) : null;
+    const refundAmount = paidAmount != null ? +(paidAmount - (retainedAmount ?? 0)).toFixed(2) : null;
+
+    const fmtMoney = (n: number) => `${n.toFixed(2)} ${currency}`;
+
+    const countdownText = (() => {
+        if (!booking.session_start) return null;
+        const ms = new Date(booking.session_start).getTime() - Date.now();
+        if (ms <= 0) return 'Already started';
+        const totalMins = Math.round(ms / 60_000);
+        if (totalMins < 60) return `in ${totalMins} min`;
+        const hours = Math.floor(totalMins / 60);
+        const mins = totalMins % 60;
+        if (hours < 24) return mins ? `in ${hours}h ${mins}m` : `in ${hours}h`;
+        const days = Math.floor(hours / 24);
+        const remH = hours % 24;
+        return remH ? `in ${days}d ${remH}h` : `in ${days} day${days === 1 ? '' : 's'}`;
+    })();
+
+    const [submitting, setSubmitting] = useState(false);
+    const [step, setStep] = useState<'review' | 'confirm-late'>('review');
+    const [acknowledged, setAcknowledged] = useState(false);
+    const [closing, setClosing] = useState(false);
+
+    const requestClose = () => {
+        if (submitting || closing) return;
+        setClosing(true);
+    };
+    const handleAnimationEnd = () => { if (closing) onClose(); };
+
     const handleCancel = async () => {
+        if (submitting) return;
+        setSubmitting(true);
         onCancelled(booking.id);
         onClose();
         try {
@@ -72,54 +108,207 @@ function CancelModal({
         }
     };
 
+    const handlePrimary = () => {
+        if (isLate && paid && step === 'review') {
+            setStep('confirm-late');
+            return;
+        }
+        handleCancel();
+    };
+
+    if (step === 'confirm-late') {
+        return (
+            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-5 pb-5 sm:pb-0">
+                <div
+                    className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
+                    onClick={requestClose}
+                />
+                <div
+                    className={`relative w-full max-w-sm bg-wood-accent/90 rounded-xl border border-red-400/30 px-6 py-6 flex flex-col gap-5 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                    onAnimationEnd={handleAnimationEnd}
+                >
+                    <button
+                        onClick={requestClose}
+                        aria-label="Close"
+                        className="absolute top-3 right-3 font-didot text-wood-text/40 hover:text-wood-text text-2xl leading-none transition-colors"
+                    >
+                        ×
+                    </button>
+                    <div className="flex flex-col gap-1">
+                        <p className="font-didot text-[10px] tracking-widest uppercase text-red-400">Confirm Late Cancellation</p>
+                        <p className="font-cormorant text-2xl text-wood-text leading-tight">
+                            Are you sure?
+                        </p>
+                    </div>
+
+                    <div className="rounded-lg bg-red-500/10 border border-red-400/30 px-4 py-3 flex flex-col gap-2">
+                        <p className="font-didot text-xs text-wood-text/80 leading-relaxed">
+                            Because this session starts in less than {LATE_CANCEL_HOURS} hours, only a partial refund is available.
+                        </p>
+                        {paidAmount != null && refundAmount != null && retainedAmount != null && (
+                            <div className="flex flex-col gap-1 pt-1">
+                                <div className="flex items-baseline justify-between">
+                                    <span className="font-didot text-[10px] tracking-widest uppercase text-wood-text/50">Late fee retained</span>
+                                    <span className="font-didot text-xs text-red-300">{fmtMoney(retainedAmount)}</span>
+                                </div>
+                                <div className="flex items-baseline justify-between">
+                                    <span className="font-didot text-[10px] tracking-widest uppercase text-wood-text/60">You'll receive</span>
+                                    <span className="font-cormorant text-lg text-wood-text">{fmtMoney(refundAmount)}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <label className="flex items-start gap-3 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={acknowledged}
+                            onChange={e => setAcknowledged(e.target.checked)}
+                            className="mt-0.5 w-4 h-4 accent-red-500 cursor-pointer shrink-0"
+                        />
+                        <span className="font-didot text-xs text-wood-text/80 leading-relaxed">
+                            I understand that I will only receive a partial refund
+                            {refundAmount != null ? ` of ${fmtMoney(refundAmount)}` : ''}, and that a 20% late
+                            cancellation fee
+                            {retainedAmount != null ? ` (${fmtMoney(retainedAmount)})` : ''} will be retained.
+                        </span>
+                    </label>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => { setStep('review'); setAcknowledged(false); }}
+                            disabled={submitting}
+                            className="flex-1 font-didot text-xs tracking-widest uppercase border border-wood-text/20 text-wood-text/60 hover:text-wood-text hover:border-wood-text/40 py-2.5 rounded-lg transition-colors duration-200 disabled:opacity-50"
+                        >
+                            Back
+                        </button>
+                        <button
+                            onClick={handleCancel}
+                            disabled={!acknowledged || submitting}
+                            className="flex-1 font-didot text-xs tracking-widest uppercase bg-red-500/80 text-white hover:bg-red-600 py-2.5 rounded-lg transition-colors duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                            {submitting ? 'Cancelling…' : 'Confirm Cancel'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-5 pb-5 sm:pb-0">
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
-            <div className="relative w-full max-w-sm bg-wood-accent/75 rounded-xl border border-wood-text/20 px-6 py-6 flex flex-col gap-5 animate-modal-in">
+            <div
+                className={`absolute inset-0 backdrop-blur-sm ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}
+                onClick={requestClose}
+            />
+            <div
+                className={`relative w-full max-w-sm bg-wood-accent/90 rounded-xl border border-wood-text/20 px-6 py-6 flex flex-col gap-5 ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+                onAnimationEnd={handleAnimationEnd}
+            >
+                <button
+                    onClick={requestClose}
+                    aria-label="Close"
+                    className="absolute top-3 right-3 font-didot text-wood-text/40 hover:text-wood-text text-2xl leading-none transition-colors"
+                >
+                    ×
+                </button>
 
                 <div className="flex flex-col gap-1">
+                    <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/50">Cancel Booking</p>
                     <p className="font-cormorant text-2xl text-wood-text leading-tight">
                         {booking.session_method_name ?? 'Class'}
                     </p>
+                </div>
+
+                {/* Session details */}
+                <div className="rounded-lg bg-wood-text/5 border border-wood-text/10 divide-y divide-wood-text/10">
                     {booking.session_start && (
-                        <p className="font-didot text-xs text-wood-text/60">
-                            {formatDate(new Date(booking.session_start))}
-                            {' · '}
-                            {formatTime(new Date(booking.session_start))}
-                        </p>
+                        <div className="px-4 py-2.5 flex items-baseline justify-between gap-3">
+                            <span className="font-didot text-[10px] tracking-widest uppercase text-wood-text/50">When</span>
+                            <span className="font-didot text-xs text-wood-text/80 text-right">
+                                {formatDate(new Date(booking.session_start))} · {formatTime(new Date(booking.session_start))}
+                            </span>
+                        </div>
+                    )}
+                    {countdownText && (
+                        <div className="px-4 py-2.5 flex items-baseline justify-between gap-3">
+                            <span className="font-didot text-[10px] tracking-widest uppercase text-wood-text/50">Starts</span>
+                            <span className={`font-didot text-xs text-right ${isLate ? 'text-red-300' : 'text-wood-text/80'}`}>
+                                {countdownText}
+                            </span>
+                        </div>
+                    )}
+                    {booking.session_instructor && (
+                        <div className="px-4 py-2.5 flex items-baseline justify-between gap-3">
+                            <span className="font-didot text-[10px] tracking-widest uppercase text-wood-text/50">Instructor</span>
+                            <span className="font-didot text-xs text-wood-text/80 text-right">{booking.session_instructor}</span>
+                        </div>
                     )}
                 </div>
 
-                <div className={`rounded-lg px-4 py-3 ${isLate ? 'bg-red-500/15 border border-red-400/30' : 'bg-wood-text/5 border border-wood-text/10'}`}>
+                {/* Cancellation policy banner */}
+                <div className={`rounded-lg px-4 py-3 ${isLate ? 'bg-red-500/15 border border-red-400/30' : 'bg-emerald-500/10 border border-emerald-400/25'}`}>
                     {isLate ? (
                         <>
                             <p className="font-didot text-[10px] tracking-widest uppercase text-red-400 mb-1">Late Cancellation</p>
                             <p className="font-didot text-xs text-wood-text/70 leading-relaxed">
-                                This session is less than {LATE_CANCEL_HOURS} hours away. Late cancellations may incur a fee.
+                                This session starts in less than {LATE_CANCEL_HOURS} hours. A 20% fee will be retained from your payment.
                             </p>
                         </>
                     ) : (
                         <>
-                            <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/50 mb-1">Early Cancellation</p>
+                            <p className="font-didot text-[10px] tracking-widest uppercase text-emerald-300 mb-1">Early Cancellation</p>
                             <p className="font-didot text-xs text-wood-text/70 leading-relaxed">
-                                Your spot will be released and made available to others.
+                                You're cancelling more than {LATE_CANCEL_HOURS} hours ahead — you'll be refunded in full.
                             </p>
                         </>
                     )}
                 </div>
 
+                {/* Refund breakdown */}
+                {paidAmount != null && refundAmount != null && (
+                    <div className="rounded-lg bg-wood-dark/20 border border-wood-text/10 px-4 py-3 flex flex-col gap-2">
+                        <p className="font-didot text-[10px] tracking-widest uppercase text-wood-text/50">Refund</p>
+                        <div className="flex items-baseline justify-between">
+                            <span className="font-didot text-xs text-wood-text/60">Original payment</span>
+                            <span className="font-didot text-xs text-wood-text/80">{fmtMoney(paidAmount)}</span>
+                        </div>
+                        {isLate && retainedAmount != null && retainedAmount > 0 && (
+                            <div className="flex items-baseline justify-between">
+                                <span className="font-didot text-xs text-red-300/80">Late fee (20%)</span>
+                                <span className="font-didot text-xs text-red-300">−{fmtMoney(retainedAmount)}</span>
+                            </div>
+                        )}
+                        <div className="flex items-baseline justify-between pt-2 border-t border-wood-text/10">
+                            <span className="font-didot text-[10px] tracking-widest uppercase text-wood-text/60">You'll receive</span>
+                            <span className="font-cormorant text-lg text-wood-text">{fmtMoney(refundAmount)}</span>
+                        </div>
+                        <p className="font-didot text-[10px] text-wood-text/40 leading-relaxed mt-1">
+                            Refunds are issued to your original payment method and can take 5–10 business days to appear.
+                        </p>
+                    </div>
+                )}
+
+                {!paid && (
+                    <p className="font-didot text-[10px] text-wood-text/50 leading-relaxed">
+                        No payment has been captured for this booking, so nothing will be refunded.
+                    </p>
+                )}
+
                 <div className="flex gap-3">
                     <button
-                        onClick={onClose}
-                        className="flex-1 font-didot text-xs tracking-widest uppercase border border-wood-text/20 text-wood-text/60 hover:text-wood-text hover:border-wood-text/40 py-2.5 rounded-lg transition-colors duration-200"
+                        onClick={requestClose}
+                        disabled={submitting}
+                        className="flex-1 font-didot text-xs tracking-widest uppercase border border-wood-text/20 text-wood-text/60 hover:text-wood-text hover:border-wood-text/40 py-2.5 rounded-lg transition-colors duration-200 disabled:opacity-50"
                     >
                         Keep
                     </button>
                     <button
-                        onClick={handleCancel}
-                        className="flex-1 font-didot text-xs tracking-widest uppercase bg-red-500/80 text-white hover:bg-red-600 py-2.5 rounded-lg transition-colors duration-200"
+                        onClick={handlePrimary}
+                        disabled={submitting}
+                        className="flex-1 font-didot text-xs tracking-widest uppercase bg-red-500/80 text-white hover:bg-red-600 py-2.5 rounded-lg transition-colors duration-200 disabled:opacity-50"
                     >
-                        Cancel Booking
+                        {submitting ? 'Cancelling…' : isLate && paid ? 'Continue' : 'Cancel Booking'}
                     </button>
                 </div>
             </div>

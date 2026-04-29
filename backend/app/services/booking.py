@@ -59,6 +59,11 @@ async def _send_cancellation_email(db: AsyncSession, booking: Booking) -> None:
             await mark_notification_failed(db, notification.id, "Missing recipient email")
             return
 
+        payment = booking.payment
+        refund_amount = str(payment.refund_amount) if payment and payment.refund_amount is not None else None
+        original_amount = str(payment.amount) if payment else None
+        currency = payment.currency if payment else None
+
         await send_booking_cancellation_email(
             to_email=to_email,
             first_name=first_name,
@@ -67,6 +72,9 @@ async def _send_cancellation_email(db: AsyncSession, booking: Booking) -> None:
             method_name=booking.session.method.name if booking.session and booking.session.method else None,
             cancellation_type=booking.cancellation_type,
             user_timezone=user_timezone,
+            refund_amount=refund_amount,
+            original_amount=original_amount,
+            currency=currency,
         )
         await mark_notification_sent(db, notification.id)
     except Exception as e:
@@ -293,6 +301,13 @@ async def cancel_booking(db: AsyncSession, booking_id: UUID, user_id: UUID, canc
         .options(selectinload(Booking.user), selectinload(Booking.session).selectinload(Session.method), selectinload(Booking.payment))
     )
     booking = result.scalar_one()
+
+    if booking.payment is not None:
+        try:
+            from app.services.payment import refund_for_cancellation
+            await refund_for_cancellation(db, booking.payment, cancellation_type=cancellation_type)
+        except Exception:
+            pass
 
     try:
         await _send_cancellation_email(db, booking)

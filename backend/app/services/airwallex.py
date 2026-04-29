@@ -130,6 +130,36 @@ async def cancel_payment_intent(payment_intent_id: str, request_id: str) -> dict
     return json.loads(raw.decode("utf-8"))
 
 
+async def create_refund(
+    *,
+    request_id: str,
+    payment_intent_id: str,
+    amount: Decimal,
+    reason: str | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "request_id": request_id,
+        "payment_intent_id": payment_intent_id,
+        "amount": float(amount),
+    }
+    if reason:
+        payload["reason"] = reason
+    if metadata:
+        payload["metadata"] = metadata
+
+    headers = await _authed_headers()
+    status_code, raw = await _request_async(
+        "POST",
+        "/api/v1/pa/refunds/create",
+        headers,
+        json.dumps(payload).encode("utf-8"),
+    )
+    if status_code >= 400:
+        raise RuntimeError(f"airwallex_refund_create_failed: {status_code} {raw.decode('utf-8', errors='replace')}")
+    return json.loads(raw.decode("utf-8"))
+
+
 def verify_webhook_signature(timestamp: str, raw_body: bytes, signature: str) -> bool:
     secret = settings.airwallex_webhook_secret
     if not secret or not timestamp or not signature:

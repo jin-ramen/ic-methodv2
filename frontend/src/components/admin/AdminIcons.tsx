@@ -36,3 +36,15 @@ export const BookingIcon = (
         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
     </svg>
 );
+
+export const TransactionIcon = (
+    <svg className={cls} {...svgProps}>
+        <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/>
+    </svg>
+);
+
+export const FinanceIcon = (
+    <svg className={cls} {...svgProps}>
+        <path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>
+    </svg>
+);

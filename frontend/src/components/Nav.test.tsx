@@ -33,11 +33,12 @@ describe('Header', () => {
         expect(screen.getAllByText('IC Method.').length).toBeGreaterThan(0)
     })
 
-    it('shows "Log in" link when not logged in', () => {
+    it('points the dashboard link to /login when not logged in', () => {
         renderHeader()
-        const links = screen.getAllByRole('link')
-        const loginLink = links.find(l => l.textContent?.includes('Log in'))
-        expect(loginLink).toBeDefined()
+        const links = screen.getAllByRole('link') as HTMLAnchorElement[]
+        const dashLink = links.find(l => l.textContent?.includes('Dashboard'))
+        expect(dashLink).toBeDefined()
+        expect(dashLink!.getAttribute('href')).toBe('/login')
     })
 
     it('shows "Dashboard" link when logged in', () => {
@@ -66,7 +67,7 @@ describe('Header', () => {
 
     it('mobile menu is hidden off-screen initially', () => {
         const { container } = renderHeader()
-        const mobileMenu = container.querySelector('.translate-x-full')
+        const mobileMenu = container.querySelector('.pointer-events-none')
         expect(mobileMenu).not.toBeNull()
     })
 
@@ -74,7 +75,7 @@ describe('Header', () => {
         const { container } = renderHeader()
         const toggle = container.querySelector('#toggleMenu')!
         fireEvent.click(toggle)
-        expect(container.querySelector('.translate-x-0')).not.toBeNull()
+        expect(container.querySelector('.pointer-events-auto')).not.toBeNull()
     })
 
     it('closes mobile menu after clicking a mobile nav link', () => {
@@ -84,7 +85,7 @@ describe('Header', () => {
 
         const mobileLinks = container.querySelectorAll('.fixed a')
         fireEvent.click(mobileLinks[0]) // click first link
-        expect(container.querySelector('.translate-x-full')).not.toBeNull()
+        expect(container.querySelector('.pointer-events-none')).not.toBeNull()
     })
 
     it('mobile menu contains Book link', () => {
